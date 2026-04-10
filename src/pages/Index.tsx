@@ -1,7 +1,9 @@
 import { useState, useRef, useCallback, useMemo, useEffect } from "react";
-import { Search, Star, Music, Sparkles } from "lucide-react";
+import { Search, Star, Music, Menu } from "lucide-react";
+import { useParams } from "react-router-dom";
 import { pontos } from "@/data/pontos";
 import PontoCard from "@/components/PontoCard";
+import { SidebarTrigger } from "@/components/ui/sidebar";
 
 const FAVORITES_KEY = "pontos-favoritos";
 
@@ -14,7 +16,18 @@ const loadFavorites = (): Set<string> => {
   }
 };
 
+const categoryEmoji: Record<string, string> = {
+  Exu: "🔱",
+  Ogum: "⚔️",
+  Oxóssi: "🏹",
+  Xangô: "⚡",
+  Iemanjá: "🌊",
+  Oxum: "🪞",
+  "Preto-Velho": "🕯️",
+};
+
 const Index = () => {
+  const { categoria } = useParams<{ categoria?: string }>();
   const [search, setSearch] = useState("");
   const [showFavorites, setShowFavorites] = useState(false);
   const [favorites, setFavorites] = useState<Set<string>>(loadFavorites);
@@ -55,6 +68,12 @@ const Index = () => {
   const filtered = useMemo(() => {
     const q = search.toLowerCase().trim();
     let list = pontos;
+
+    // Filter by categoria from URL
+    if (categoria) {
+      list = list.filter((p) => p.categoria === categoria);
+    }
+
     if (showFavorites) {
       list = list.filter((p) => favorites.has(p.id));
     }
@@ -65,25 +84,28 @@ const Index = () => {
         p.categoria.toLowerCase().includes(q) ||
         p.letra.toLowerCase().includes(q)
     );
-  }, [search, showFavorites, favorites]);
+  }, [search, showFavorites, favorites, categoria]);
+
+  const pageTitle = categoria || "Todos os Pontos";
+  const pageEmoji = categoria ? (categoryEmoji[categoria] || "🎵") : "📖";
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col">
       {/* Header */}
       <header className="sticky top-0 z-10 bg-primary shadow-xl">
-        <div className="max-w-lg mx-auto px-5 pt-6 pb-5">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-12 h-12 rounded-2xl bg-accent/20 flex items-center justify-center text-2xl shadow-inner">
-              🪘
-            </div>
-            <div>
-              <h1 className="font-display text-2xl font-bold text-primary-foreground tracking-tight">
-                Caderno do Ogã
-              </h1>
-              <p className="text-xs text-primary-foreground/50 font-medium flex items-center gap-1">
-                <Sparkles size={10} />
-                Pontos Cantados
-              </p>
+        <div className="px-4 pt-4 pb-4">
+          <div className="flex items-center gap-3 mb-3">
+            <SidebarTrigger className="text-primary-foreground hover:bg-primary-foreground/10 rounded-lg p-2 -ml-1" />
+            <div className="flex items-center gap-2.5 flex-1">
+              <span className="text-2xl">{pageEmoji}</span>
+              <div>
+                <h1 className="font-display text-xl font-bold text-primary-foreground tracking-tight">
+                  {pageTitle}
+                </h1>
+                <p className="text-[10px] text-primary-foreground/45 font-medium">
+                  Caderno do Ogã
+                </p>
+              </div>
             </div>
           </div>
           {/* Search */}
@@ -91,7 +113,7 @@ const Index = () => {
             <Search size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-primary-foreground/40" />
             <input
               type="text"
-              placeholder="Buscar ponto, orixá ou trecho da letra..."
+              placeholder="Buscar ponto ou trecho da letra..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="w-full pl-10 pr-4 py-3 rounded-xl bg-primary-foreground/10 text-primary-foreground placeholder:text-primary-foreground/35 text-sm outline-none focus:ring-2 focus:ring-accent/50 backdrop-blur-sm transition-all border border-primary-foreground/10"
@@ -101,7 +123,7 @@ const Index = () => {
       </header>
 
       {/* Content */}
-      <main className="max-w-lg mx-auto px-4 py-5 pb-10">
+      <main className="flex-1 px-4 py-5 pb-10">
         {/* Favorites toggle + count */}
         <div className="flex items-center justify-between mb-5">
           <button
@@ -121,7 +143,7 @@ const Index = () => {
         </div>
 
         {/* Cards */}
-        <div className="space-y-4">
+        <div className="space-y-4 max-w-2xl">
           {filtered.length === 0 ? (
             <div className="text-center py-16 text-muted-foreground">
               <Music size={44} className="mx-auto mb-4 opacity-20" />
