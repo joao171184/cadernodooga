@@ -1,42 +1,40 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Inter:wght@400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
-
 @layer base {
   :root {
-    --background: 30 15% 95%;
-    --foreground: 25 30% 12%;
+    --background: 30 18% 93%;
+    --foreground: 20 25% 15%;
 
-    --card: 35 20% 98%;
-    --card-foreground: 25 30% 12%;
+    --card: 33 30% 97%;
+    --card-foreground: 20 25% 15%;
 
-    --popover: 35 20% 98%;
-    --popover-foreground: 25 30% 12%;
+    --popover: 33 30% 97%;
+    --popover-foreground: 20 25% 15%;
 
-    --primary: 18 55% 28%;
-    --primary-foreground: 40 30% 95%;
+    --primary: 15 50% 22%;
+    --primary-foreground: 38 40% 95%;
 
-    --secondary: 30 20% 88%;
-    --secondary-foreground: 25 30% 12%;
+    --secondary: 30 22% 86%;
+    --secondary-foreground: 20 25% 15%;
 
-    --muted: 30 12% 90%;
-    --muted-foreground: 25 15% 45%;
+    --muted: 30 15% 88%;
+    --muted-foreground: 20 12% 50%;
 
-    --accent: 38 85% 50%;
-    --accent-foreground: 25 40% 12%;
+    --accent: 36 90% 52%;
+    --accent-foreground: 20 40% 12%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 30 15% 82%;
-    --input: 30 15% 82%;
-    --ring: 18 55% 28%;
+    --border: 30 18% 80%;
+    --input: 30 18% 80%;
+    --ring: 15 50% 22%;
 
-    --radius: 0.75rem;
+    --radius: 1rem;
 
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
@@ -47,40 +45,34 @@ All colors MUST be HSL.
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 217.2 91.2% 59.8%;
 
-    --category-exu: 0 60% 35%;
-    --category-ogum: 210 55% 38%;
-    --category-oxossi: 145 50% 30%;
-    --category-xango: 15 70% 42%;
-    --category-iemanja: 200 60% 42%;
-    --category-oxum: 42 80% 45%;
-    --category-preto-velho: 270 25% 32%;
+    --category-exu: 0 55% 38%;
+    --category-ogum: 215 50% 40%;
+    --category-oxossi: 150 45% 32%;
+    --category-xango: 12 65% 45%;
+    --category-iemanja: 200 55% 45%;
+    --category-oxum: 40 80% 48%;
+    --category-preto-velho: 275 22% 35%;
+
+    --glow-warm: 30 60% 85%;
   }
 
   .dark {
     --background: 222.2 84% 4.9%;
     --foreground: 210 40% 98%;
-
     --card: 222.2 84% 4.9%;
     --card-foreground: 210 40% 98%;
-
     --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
-
     --primary: 210 40% 98%;
     --primary-foreground: 222.2 47.4% 11.2%;
-
     --secondary: 217.2 32.6% 17.5%;
     --secondary-foreground: 210 40% 98%;
-
     --muted: 217.2 32.6% 17.5%;
     --muted-foreground: 215 20.2% 65.1%;
-
     --accent: 217.2 32.6% 17.5%;
     --accent-foreground: 210 40% 98%;
-
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
-
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
     --ring: 212.7 26.8% 83.9%;
@@ -102,5 +94,12 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground;
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+}
+
+@layer utilities {
+  .font-display {
+    font-family: 'Playfair Display', serif;
   }
 }
