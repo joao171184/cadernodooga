@@ -70,11 +70,14 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="sticky top-0 z-10 bg-primary text-primary-foreground px-4 py-4 shadow-md">
+      <header className="sticky top-0 z-10 bg-primary text-primary-foreground px-4 py-4 shadow-lg">
         <div className="max-w-lg mx-auto">
-          <div className="flex items-center gap-2 mb-3">
-            <Music size={26} />
-            <h1 className="text-xl font-bold tracking-tight">Pontos Cantados</h1>
+          <div className="flex items-center gap-3 mb-3">
+            <span className="text-2xl">🥁</span>
+            <div>
+              <h1 className="text-xl font-bold tracking-tight">Pontos Cantados</h1>
+              <p className="text-xs text-primary-foreground/60 font-medium">Caderno do Ogã</p>
+            </div>
           </div>
           {/* Search */}
           <div className="relative">

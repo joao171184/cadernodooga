@@ -8,33 +8,33 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    --background: 210 20% 97%;
-    --foreground: 220 20% 10%;
+    --background: 30 15% 95%;
+    --foreground: 25 30% 12%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 220 20% 10%;
+    --card: 35 20% 98%;
+    --card-foreground: 25 30% 12%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 220 20% 10%;
+    --popover: 35 20% 98%;
+    --popover-foreground: 25 30% 12%;
 
-    --primary: 145 60% 32%;
-    --primary-foreground: 0 0% 100%;
+    --primary: 18 55% 28%;
+    --primary-foreground: 40 30% 95%;
 
-    --secondary: 210 15% 92%;
-    --secondary-foreground: 220 20% 10%;
+    --secondary: 30 20% 88%;
+    --secondary-foreground: 25 30% 12%;
 
-    --muted: 210 15% 94%;
-    --muted-foreground: 220 10% 45%;
+    --muted: 30 12% 90%;
+    --muted-foreground: 25 15% 45%;
 
-    --accent: 38 90% 55%;
-    --accent-foreground: 220 20% 10%;
+    --accent: 38 85% 50%;
+    --accent-foreground: 25 40% 12%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 210 15% 88%;
-    --input: 210 15% 88%;
-    --ring: 145 60% 32%;
+    --border: 30 15% 82%;
+    --input: 30 15% 82%;
+    --ring: 18 55% 28%;
 
     --radius: 0.75rem;
 
@@ -47,13 +47,13 @@ All colors MUST be HSL.
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 217.2 91.2% 59.8%;
 
-    --category-exu: 0 70% 45%;
-    --category-ogum: 210 70% 45%;
-    --category-oxossi: 145 60% 35%;
-    --category-xango: 25 85% 50%;
-    --category-iemanja: 200 75% 50%;
-    --category-oxum: 45 90% 50%;
-    --category-preto-velho: 270 30% 35%;
+    --category-exu: 0 60% 35%;
+    --category-ogum: 210 55% 38%;
+    --category-oxossi: 145 50% 30%;
+    --category-xango: 15 70% 42%;
+    --category-iemanja: 200 60% 42%;
+    --category-oxum: 42 80% 45%;
+    --category-preto-velho: 270 25% 32%;
   }
 
   .dark {
