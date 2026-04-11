@@ -1,5 +1,6 @@
 import { Play, Pause, Heart, Pencil, Trash2 } from "lucide-react";
 import type { Ponto } from "@/data/pontos";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface PontoCardProps {
   ponto: Ponto;
@@ -12,6 +13,7 @@ interface PontoCardProps {
 }
 
 const PontoCard = ({ ponto, isPlaying, isFavorite, onTogglePlay, onToggleFavorite, onEdit, onDelete }: PontoCardProps) => {
+  const { isAdmin } = useAuth();
   return (
     <div className={`bg-card rounded-2xl border border-border shadow-sm overflow-hidden transition-all duration-200 ${isPlaying ? "ring-2 ring-accent/40 shadow-lg" : "hover:shadow-md"}`}>
       <div className="p-4 sm:p-5">
@@ -26,7 +28,7 @@ const PontoCard = ({ ponto, isPlaying, isFavorite, onTogglePlay, onToggleFavorit
             </p>
           </div>
           <div className="flex items-center gap-1">
-            {onEdit && (
+            {isAdmin && onEdit && (
               <button
                 onClick={() => onEdit(ponto)}
                 className="p-2 rounded-lg hover:bg-muted transition-all active:scale-90"
@@ -35,7 +37,7 @@ const PontoCard = ({ ponto, isPlaying, isFavorite, onTogglePlay, onToggleFavorit
                 <Pencil size={16} className="text-muted-foreground" />
               </button>
             )}
-            {onDelete && (
+            {isAdmin && onDelete && (
               <button
                 onClick={() => onDelete(ponto.id)}
                 className="p-2 rounded-lg hover:bg-destructive/10 transition-all active:scale-90"
