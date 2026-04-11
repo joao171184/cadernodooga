@@ -1,8 +1,9 @@
 import { useState, useRef, useCallback, useMemo, useEffect } from "react";
-import { Search, Star, Music, Menu } from "lucide-react";
+import { Search, Star, Music, Plus } from "lucide-react";
 import { useParams } from "react-router-dom";
-import { pontos } from "@/data/pontos";
+import { loadPontos, savePontos, type Ponto } from "@/data/pontos";
 import PontoCard from "@/components/PontoCard";
+import { PontoFormDialog } from "@/components/PontoFormDialog";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 
 const FAVORITES_KEY = "pontos-favoritos";
@@ -16,27 +17,24 @@ const loadFavorites = (): Set<string> => {
   }
 };
 
-const categoryEmoji: Record<string, string> = {
-  Exu: "🔱",
-  Ogum: "⚔️",
-  Oxóssi: "🏹",
-  Xangô: "⚡",
-  Iemanjá: "🌊",
-  Oxum: "🪞",
-  "Preto-Velho": "🕯️",
-};
-
 const Index = () => {
-  const { categoria } = useParams<{ categoria?: string }>();
+  const { categoria, subcategoria } = useParams<{ categoria?: string; subcategoria?: string }>();
   const [search, setSearch] = useState("");
   const [showFavorites, setShowFavorites] = useState(false);
   const [favorites, setFavorites] = useState<Set<string>>(loadFavorites);
   const [playingId, setPlayingId] = useState<string | null>(null);
+  const [pontos, setPontos] = useState<Ponto[]>(loadPontos);
+  const [formOpen, setFormOpen] = useState(false);
+  const [editingPonto, setEditingPonto] = useState<Ponto | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
     localStorage.setItem(FAVORITES_KEY, JSON.stringify([...favorites]));
   }, [favorites]);
+
+  useEffect(() => {
+    savePontos(pontos);
+  }, [pontos]);
 
   const toggleFavorite = useCallback((id: string) => {
     setFavorites((prev) => {
@@ -63,14 +61,38 @@ const Index = () => {
     audio.play().catch(() => {});
     audioRef.current = audio;
     setPlayingId(id);
-  }, [playingId]);
+  }, [playingId, pontos]);
+
+  const handleSavePonto = useCallback((data: Omit<Ponto, "id"> & { id?: string }) => {
+    if (data.id) {
+      setPontos((prev) => prev.map((p) => (p.id === data.id ? { ...p, ...data } as Ponto : p)));
+    } else {
+      const newPonto: Ponto = {
+        ...data,
+        id: `ponto-${Date.now()}`,
+      };
+      setPontos((prev) => [...prev, newPonto]);
+    }
+  }, []);
+
+  const handleDeletePonto = useCallback((id: string) => {
+    if (window.confirm("Tem certeza que deseja excluir este ponto?")) {
+      setPontos((prev) => prev.filter((p) => p.id !== id));
+    }
+  }, []);
+
+  const handleEditPonto = useCallback((ponto: Ponto) => {
+    setEditingPonto(ponto);
+    setFormOpen(true);
+  }, []);
 
   const filtered = useMemo(() => {
     const q = search.toLowerCase().trim();
     let list = pontos;
 
-    // Filter by categoria from URL
-    if (categoria) {
+    if (categoria && subcategoria) {
+      list = list.filter((p) => p.categoria === categoria && p.subcategoria === subcategoria);
+    } else if (categoria) {
       list = list.filter((p) => p.categoria === categoria);
     }
 
@@ -84,57 +106,61 @@ const Index = () => {
         p.categoria.toLowerCase().includes(q) ||
         p.letra.toLowerCase().includes(q)
     );
-  }, [search, showFavorites, favorites, categoria]);
+  }, [search, showFavorites, favorites, categoria, subcategoria, pontos]);
 
-  const pageTitle = categoria || "Todos os Pontos";
-  const pageEmoji = categoria ? (categoryEmoji[categoria] || "🎵") : "📖";
+  const pageTitle = subcategoria || categoria || "Todos os Pontos";
+  const pageSubtitle = subcategoria ? categoria : "Caderno do Ogã";
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
       {/* Header */}
       <header className="sticky top-0 z-10 bg-primary shadow-xl">
-        <div className="px-4 pt-4 pb-4">
-          <div className="flex items-center gap-3 mb-3">
+        <div className="px-3 sm:px-4 pt-3 pb-3 sm:pt-4 sm:pb-4">
+          <div className="flex items-center gap-2 sm:gap-3 mb-3">
             <SidebarTrigger className="text-primary-foreground hover:bg-primary-foreground/10 rounded-lg p-2 -ml-1" />
-            <div className="flex items-center gap-2.5 flex-1">
-              <span className="text-2xl">{pageEmoji}</span>
-              <div>
-                <h1 className="font-display text-xl font-bold text-primary-foreground tracking-tight">
-                  {pageTitle}
-                </h1>
-                <p className="text-[10px] text-primary-foreground/45 font-medium">
-                  Caderno do Ogã
-                </p>
-              </div>
+            <div className="flex-1 min-w-0">
+              <h1 className="font-display text-lg sm:text-xl font-bold text-primary-foreground tracking-tight uppercase truncate">
+                {pageTitle}
+              </h1>
+              <p className="text-[10px] text-primary-foreground/45 font-medium uppercase">
+                {pageSubtitle}
+              </p>
             </div>
+            <button
+              onClick={() => { setEditingPonto(null); setFormOpen(true); }}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-accent text-accent-foreground text-xs font-bold transition-all active:scale-95 shadow-sm uppercase"
+            >
+              <Plus size={16} />
+              <span className="hidden sm:inline">Novo</span>
+            </button>
           </div>
           {/* Search */}
           <div className="relative">
             <Search size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-primary-foreground/40" />
             <input
               type="text"
-              placeholder="Buscar ponto ou trecho da letra..."
+              placeholder="BUSCAR PONTO OU TRECHO DA LETRA..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 rounded-xl bg-primary-foreground/10 text-primary-foreground placeholder:text-primary-foreground/35 text-sm outline-none focus:ring-2 focus:ring-accent/50 backdrop-blur-sm transition-all border border-primary-foreground/10"
+              className="w-full pl-10 pr-4 py-3 rounded-xl bg-primary-foreground/10 text-primary-foreground placeholder:text-primary-foreground/35 text-sm outline-none focus:ring-2 focus:ring-accent/50 backdrop-blur-sm transition-all border border-primary-foreground/10 uppercase"
             />
           </div>
         </div>
       </header>
 
       {/* Content */}
-      <main className="flex-1 px-4 py-5 pb-10">
+      <main className="flex-1 px-3 sm:px-4 py-4 sm:py-5 pb-10">
         {/* Favorites toggle + count */}
-        <div className="flex items-center justify-between mb-5">
+        <div className="flex items-center justify-between mb-4">
           <button
             onClick={() => setShowFavorites(!showFavorites)}
-            className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold transition-all active:scale-95 shadow-sm ${
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-full text-xs font-bold transition-all active:scale-95 shadow-sm uppercase ${
               showFavorites
                 ? "bg-accent text-accent-foreground shadow-md"
                 : "bg-card text-muted-foreground border border-border hover:border-accent/30"
             }`}
           >
-            <Star size={16} className={showFavorites ? "fill-accent-foreground" : ""} />
+            <Star size={14} className={showFavorites ? "fill-accent-foreground" : ""} />
             Favoritos {favorites.size > 0 && `(${favorites.size})`}
           </button>
           <p className="text-xs text-muted-foreground font-medium">
@@ -143,12 +169,19 @@ const Index = () => {
         </div>
 
         {/* Cards */}
-        <div className="space-y-4 max-w-2xl">
+        <div className="space-y-3 sm:space-y-4 max-w-2xl">
           {filtered.length === 0 ? (
             <div className="text-center py-16 text-muted-foreground">
               <Music size={44} className="mx-auto mb-4 opacity-20" />
-              <p className="text-base font-medium">Nenhum ponto encontrado</p>
-              <p className="text-sm mt-1 opacity-70">Tente outra busca</p>
+              <p className="text-base font-medium uppercase">Nenhum ponto encontrado</p>
+              <p className="text-sm mt-1 opacity-70">Tente outra busca ou adicione um novo ponto</p>
+              <button
+                onClick={() => { setEditingPonto(null); setFormOpen(true); }}
+                className="mt-4 inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-primary text-primary-foreground text-sm font-bold transition-all active:scale-95 uppercase"
+              >
+                <Plus size={18} />
+                Adicionar Ponto
+              </button>
             </div>
           ) : (
             filtered.map((ponto) => (
@@ -159,11 +192,23 @@ const Index = () => {
                 isFavorite={favorites.has(ponto.id)}
                 onTogglePlay={togglePlay}
                 onToggleFavorite={toggleFavorite}
+                onEdit={handleEditPonto}
+                onDelete={handleDeletePonto}
               />
             ))
           )}
         </div>
       </main>
+
+      {/* Form Dialog */}
+      <PontoFormDialog
+        open={formOpen}
+        onClose={() => { setFormOpen(false); setEditingPonto(null); }}
+        onSave={handleSavePonto}
+        ponto={editingPonto}
+        defaultCategoria={categoria}
+        defaultSubcategoria={subcategoria}
+      />
     </div>
   );
 };
