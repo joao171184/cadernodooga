@@ -23,6 +23,7 @@ const App = () => (
               <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/guia/:categoria" element={<Index />} />
+                <Route path="/guia/:categoria/:subcategoria" element={<Index />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </div>

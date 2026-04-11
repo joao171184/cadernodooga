@@ -13,24 +13,105 @@ import {
 } from "@/components/ui/sidebar";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
-import { Home, Star, Sparkles } from "lucide-react";
-
-const guias = [
-  { titulo: "Todos os Pontos", url: "/", emoji: "📖", icon: Home },
-  { titulo: "Exu", url: "/guia/Exu", emoji: "🔱" },
-  { titulo: "Ogum", url: "/guia/Ogum", emoji: "⚔️" },
-  { titulo: "Oxóssi", url: "/guia/Oxóssi", emoji: "🏹" },
-  { titulo: "Xangô", url: "/guia/Xangô", emoji: "⚡" },
-  { titulo: "Iemanjá", url: "/guia/Iemanjá", emoji: "🌊" },
-  { titulo: "Oxum", url: "/guia/Oxum", emoji: "🪞" },
-  { titulo: "Preto-Velho", url: "/guia/Preto-Velho", emoji: "🕯️" },
-];
+import { ChevronDown, ChevronRight, Sparkles } from "lucide-react";
+import { categoriaTree, type CategoriaNode } from "@/data/pontos";
+import { useState } from "react";
 
 export function AppSidebar() {
-  const { state } = useSidebar();
+  const { state, setOpenMobile } = useSidebar();
   const collapsed = state === "collapsed";
   const location = useLocation();
   const currentPath = decodeURIComponent(location.pathname);
+  const [openFolders, setOpenFolders] = useState<Set<string>>(new Set(["Orixás", "Guias de Direita", "Guias de Esquerda"]));
+
+  const toggleFolder = (nome: string) => {
+    setOpenFolders((prev) => {
+      const next = new Set(prev);
+      if (next.has(nome)) next.delete(nome);
+      else next.add(nome);
+      return next;
+    });
+  };
+
+  const handleNavClick = () => {
+    setOpenMobile(false);
+  };
+
+  const renderNode = (node: CategoriaNode, parentPath = "") => {
+    const hasChildren = node.filhos && node.filhos.length > 0;
+    const isOpen = openFolders.has(node.nome);
+
+    if (hasChildren) {
+      return (
+        <div key={node.nome} className="mb-1">
+          <button
+            onClick={() => toggleFolder(node.nome)}
+            className="w-full flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-bold text-foreground hover:bg-muted/60 transition-all"
+          >
+            <span className="text-base">{node.emoji}</span>
+            {!collapsed && (
+              <>
+                <span className="flex-1 text-left uppercase tracking-wide text-xs">{node.nome}</span>
+                {isOpen ? <ChevronDown size={14} className="text-muted-foreground" /> : <ChevronRight size={14} className="text-muted-foreground" />}
+              </>
+            )}
+          </button>
+          {isOpen && !collapsed && (
+            <div className="ml-3 pl-3 border-l-2 border-accent/20 space-y-0.5 mt-1">
+              {node.filhos!.map((child) => {
+                const url = `/guia/${encodeURIComponent(node.nome)}/${encodeURIComponent(child.nome)}`;
+                const isActive = currentPath === `/guia/${node.nome}/${child.nome}`;
+                return (
+                  <SidebarMenuItem key={child.nome}>
+                    <SidebarMenuButton asChild>
+                      <NavLink
+                        to={url}
+                        end
+                        onClick={handleNavClick}
+                        className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all text-sm ${
+                          isActive
+                            ? "bg-accent/20 text-accent-foreground font-bold"
+                            : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                        }`}
+                        activeClassName=""
+                      >
+                        <span className="text-sm">{child.emoji}</span>
+                        <span>{child.nome}</span>
+                      </NavLink>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    // Leaf node (Abertura, Esquenta)
+    const url = `/guia/${encodeURIComponent(node.nome)}`;
+    const isActive = currentPath === `/guia/${node.nome}`;
+    return (
+      <SidebarMenuItem key={node.nome}>
+        <SidebarMenuButton asChild>
+          <NavLink
+            to={url}
+            end
+            onClick={handleNavClick}
+            className={`flex items-center gap-2 px-3 py-2.5 rounded-xl transition-all text-sm font-bold ${
+              isActive
+                ? "bg-accent/20 text-accent-foreground"
+                : "text-muted-foreground hover:bg-muted hover:text-foreground"
+            }`}
+            activeClassName=""
+          >
+            <span className="text-base">{node.emoji}</span>
+            {!collapsed && <span className="uppercase tracking-wide text-xs">{node.nome}</span>}
+          </NavLink>
+        </SidebarMenuButton>
+      </SidebarMenuItem>
+    );
+  };
 
   return (
     <Sidebar collapsible="icon" className="border-r border-border">
@@ -54,33 +135,29 @@ export function AppSidebar() {
 
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel className="text-xs uppercase tracking-wider text-muted-foreground/70">
-            Guias
-          </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {guias.map((guia) => {
-                const isActive = currentPath === guia.url;
-                return (
-                  <SidebarMenuItem key={guia.url}>
-                    <SidebarMenuButton asChild>
-                      <NavLink
-                        to={guia.url}
-                        end
-                        className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all text-sm font-medium ${
-                          isActive
-                            ? "bg-accent/20 text-accent-foreground font-semibold"
-                            : "text-muted-foreground hover:bg-muted hover:text-foreground"
-                        }`}
-                        activeClassName=""
-                      >
-                        <span className="text-lg">{guia.emoji}</span>
-                        {!collapsed && <span>{guia.titulo}</span>}
-                      </NavLink>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                );
-              })}
+              {/* Todos os Pontos */}
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild>
+                  <NavLink
+                    to="/"
+                    end
+                    onClick={handleNavClick}
+                    className={`flex items-center gap-2 px-3 py-2.5 rounded-xl transition-all text-sm font-bold ${
+                      currentPath === "/"
+                        ? "bg-accent/20 text-accent-foreground"
+                        : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                    }`}
+                    activeClassName=""
+                  >
+                    <span className="text-base">📖</span>
+                    {!collapsed && <span className="uppercase tracking-wide text-xs">Todos os Pontos</span>}
+                  </NavLink>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+
+              {categoriaTree.map((node) => renderNode(node))}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
