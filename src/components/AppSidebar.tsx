@@ -3,7 +3,6 @@ import {
   SidebarContent,
   SidebarGroup,
   SidebarGroupContent,
-  SidebarGroupLabel,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
@@ -13,9 +12,10 @@ import {
 } from "@/components/ui/sidebar";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
-import { ChevronDown, ChevronRight, Sparkles } from "lucide-react";
+import { ChevronDown, ChevronRight, Sparkles, Lock, LogOut, Shield, Eye } from "lucide-react";
 import { categoriaTree, type CategoriaNode } from "@/data/pontos";
 import { useState } from "react";
+import { useAuth } from "@/contexts/AuthContext";
 
 export function AppSidebar() {
   const { state, setOpenMobile } = useSidebar();
@@ -23,6 +23,10 @@ export function AppSidebar() {
   const location = useLocation();
   const currentPath = decodeURIComponent(location.pathname);
   const [openFolders, setOpenFolders] = useState<Set<string>>(new Set(["Orixás", "Guias de Direita", "Guias de Esquerda"]));
+  const [showLogin, setShowLogin] = useState(false);
+  const [password, setPassword] = useState("");
+  const [loginError, setLoginError] = useState(false);
+  const { role, isLoggedIn, isAdmin, login, logout } = useAuth();
 
   const toggleFolder = (nome: string) => {
     setOpenFolders((prev) => {
@@ -37,7 +41,19 @@ export function AppSidebar() {
     setOpenMobile(false);
   };
 
-  const renderNode = (node: CategoriaNode, parentPath = "") => {
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    const success = login(password);
+    if (success) {
+      setShowLogin(false);
+      setPassword("");
+      setLoginError(false);
+    } else {
+      setLoginError(true);
+    }
+  };
+
+  const renderNode = (node: CategoriaNode) => {
     const hasChildren = node.filhos && node.filhos.length > 0;
     const isOpen = openFolders.has(node.nome);
 
@@ -88,7 +104,6 @@ export function AppSidebar() {
       );
     }
 
-    // Leaf node (Abertura, Esquenta)
     const url = `/guia/${encodeURIComponent(node.nome)}`;
     const isActive = currentPath === `/guia/${node.nome}`;
     return (
@@ -137,7 +152,6 @@ export function AppSidebar() {
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
-              {/* Todos os Pontos */}
               <SidebarMenuItem>
                 <SidebarMenuButton asChild>
                   <NavLink
@@ -163,11 +177,73 @@ export function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter className="p-3">
+      <SidebarFooter className="p-3 space-y-2">
         {!collapsed && (
-          <p className="text-[10px] text-muted-foreground/50 text-center">
-            Axé 🙏
-          </p>
+          <>
+            {isLoggedIn ? (
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-muted/60 text-xs">
+                  {isAdmin ? (
+                    <Shield size={14} className="text-accent" />
+                  ) : (
+                    <Eye size={14} className="text-muted-foreground" />
+                  )}
+                  <span className="font-bold uppercase tracking-wide flex-1">
+                    {isAdmin ? "Administrador" : "Visitante"}
+                  </span>
+                </div>
+                <button
+                  onClick={logout}
+                  className="w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-xs font-bold text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-all"
+                >
+                  <LogOut size={14} />
+                  SAIR
+                </button>
+              </div>
+            ) : showLogin ? (
+              <form onSubmit={handleLogin} className="space-y-2">
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(e) => { setPassword(e.target.value); setLoginError(false); }}
+                  placeholder="DIGITE A SENHA..."
+                  className={`w-full px-3 py-2.5 rounded-xl bg-muted text-foreground text-xs outline-none focus:ring-2 focus:ring-accent/50 border uppercase ${
+                    loginError ? "border-destructive" : "border-border"
+                  }`}
+                  autoFocus
+                />
+                {loginError && (
+                  <p className="text-[10px] text-destructive font-medium px-1">Senha incorreta</p>
+                )}
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => { setShowLogin(false); setPassword(""); setLoginError(false); }}
+                    className="flex-1 py-2 rounded-xl text-xs font-bold text-muted-foreground bg-muted hover:bg-muted/80 transition-all"
+                  >
+                    CANCELAR
+                  </button>
+                  <button
+                    type="submit"
+                    className="flex-1 py-2 rounded-xl text-xs font-bold text-primary-foreground bg-primary hover:bg-primary/90 transition-all"
+                  >
+                    ENTRAR
+                  </button>
+                </div>
+              </form>
+            ) : (
+              <button
+                onClick={() => setShowLogin(true)}
+                className="w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-xs font-bold text-muted-foreground hover:bg-muted hover:text-foreground transition-all border border-border"
+              >
+                <Lock size={14} />
+                ENTRAR
+              </button>
+            )}
+            <p className="text-[10px] text-muted-foreground/50 text-center">
+              Axé 🙏
+            </p>
+          </>
         )}
       </SidebarFooter>
     </Sidebar>
