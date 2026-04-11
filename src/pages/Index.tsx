@@ -5,6 +5,7 @@ import { loadPontos, savePontos, type Ponto } from "@/data/pontos";
 import PontoCard from "@/components/PontoCard";
 import { PontoFormDialog } from "@/components/PontoFormDialog";
 import { SidebarTrigger } from "@/components/ui/sidebar";
+import { useAuth } from "@/contexts/AuthContext";
 
 const FAVORITES_KEY = "pontos-favoritos";
 
@@ -18,6 +19,7 @@ const loadFavorites = (): Set<string> => {
 };
 
 const Index = () => {
+  const { isAdmin } = useAuth();
   const { categoria, subcategoria } = useParams<{ categoria?: string; subcategoria?: string }>();
   const [search, setSearch] = useState("");
   const [showFavorites, setShowFavorites] = useState(false);
@@ -126,13 +128,15 @@ const Index = () => {
                 {pageSubtitle}
               </p>
             </div>
-            <button
-              onClick={() => { setEditingPonto(null); setFormOpen(true); }}
-              className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-accent text-accent-foreground text-xs font-bold transition-all active:scale-95 shadow-sm uppercase"
-            >
-              <Plus size={16} />
-              <span className="hidden sm:inline">Novo</span>
-            </button>
+            {isAdmin && (
+              <button
+                onClick={() => { setEditingPonto(null); setFormOpen(true); }}
+                className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-accent text-accent-foreground text-xs font-bold transition-all active:scale-95 shadow-sm uppercase"
+              >
+                <Plus size={16} />
+                <span className="hidden sm:inline">Novo</span>
+              </button>
+            )}
           </div>
           {/* Search */}
           <div className="relative">
@@ -175,13 +179,15 @@ const Index = () => {
               <Music size={44} className="mx-auto mb-4 opacity-20" />
               <p className="text-base font-medium uppercase">Nenhum ponto encontrado</p>
               <p className="text-sm mt-1 opacity-70">Tente outra busca ou adicione um novo ponto</p>
-              <button
-                onClick={() => { setEditingPonto(null); setFormOpen(true); }}
-                className="mt-4 inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-primary text-primary-foreground text-sm font-bold transition-all active:scale-95 uppercase"
-              >
-                <Plus size={18} />
-                Adicionar Ponto
-              </button>
+              {isAdmin && (
+                <button
+                  onClick={() => { setEditingPonto(null); setFormOpen(true); }}
+                  className="mt-4 inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-primary text-primary-foreground text-sm font-bold transition-all active:scale-95 uppercase"
+                >
+                  <Plus size={18} />
+                  Adicionar Ponto
+                </button>
+              )}
             </div>
           ) : (
             filtered.map((ponto) => (
