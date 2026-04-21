@@ -1,9 +1,11 @@
-import { useState, useRef, useCallback, useMemo, useEffect } from "react";
-import { Search, Star, Music, Plus } from "lucide-react";
+import { useState, useCallback, useMemo, useEffect } from "react";
+import { Search, Star, Music, Plus, Settings, LogOut } from "lucide-react";
 import { useParams } from "react-router-dom";
 import { loadPontos, savePontos, type Ponto } from "@/data/pontos";
 import PontoCard from "@/components/PontoCard";
 import { PontoFormDialog } from "@/components/PontoFormDialog";
+import { CategoriasManagerDialog } from "@/components/CategoriasManagerDialog";
+import { MediaPlayer } from "@/components/MediaPlayer";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -19,7 +21,7 @@ const loadFavorites = (): Set<string> => {
 };
 
 const Index = () => {
-  const { isAdmin } = useAuth();
+  const { isAdmin, logout } = useAuth();
   const { categoria, subcategoria } = useParams<{ categoria?: string; subcategoria?: string }>();
   const [search, setSearch] = useState("");
   const [showFavorites, setShowFavorites] = useState(false);
@@ -28,7 +30,7 @@ const Index = () => {
   const [pontos, setPontos] = useState<Ponto[]>(loadPontos);
   const [formOpen, setFormOpen] = useState(false);
   const [editingPonto, setEditingPonto] = useState<Ponto | null>(null);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const [adminOpen, setAdminOpen] = useState(false);
 
   useEffect(() => {
     localStorage.setItem(FAVORITES_KEY, JSON.stringify([...favorites]));
@@ -48,22 +50,8 @@ const Index = () => {
   }, []);
 
   const togglePlay = useCallback((id: string) => {
-    if (playingId === id) {
-      audioRef.current?.pause();
-      setPlayingId(null);
-      return;
-    }
-    if (audioRef.current) {
-      audioRef.current.pause();
-    }
-    const ponto = pontos.find((p) => p.id === id);
-    if (!ponto) return;
-    const audio = new Audio(ponto.audio);
-    audio.onended = () => setPlayingId(null);
-    audio.play().catch(() => {});
-    audioRef.current = audio;
-    setPlayingId(id);
-  }, [playingId, pontos]);
+    setPlayingId((curr) => (curr === id ? null : id));
+  }, []);
 
   const handleSavePonto = useCallback((data: Omit<Ponto, "id"> & { id?: string }) => {
     if (data.id) {
@@ -80,6 +68,7 @@ const Index = () => {
   const handleDeletePonto = useCallback((id: string) => {
     if (window.confirm("Tem certeza que deseja excluir este ponto?")) {
       setPontos((prev) => prev.filter((p) => p.id !== id));
+      setPlayingId((curr) => (curr === id ? null : curr));
     }
   }, []);
 
@@ -110,6 +99,8 @@ const Index = () => {
     );
   }, [search, showFavorites, favorites, categoria, subcategoria, pontos]);
 
+  const playingPonto = playingId ? pontos.find((p) => p.id === playingId) : null;
+
   const pageTitle = subcategoria || categoria || "Todos os Pontos";
   const pageSubtitle = subcategoria ? categoria : "Caderno do Ogã";
 
@@ -129,14 +120,32 @@ const Index = () => {
               </p>
             </div>
             {isAdmin && (
-              <button
-                onClick={() => { setEditingPonto(null); setFormOpen(true); }}
-                className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-accent text-accent-foreground text-xs font-bold transition-all active:scale-95 shadow-sm uppercase"
-              >
-                <Plus size={16} />
-                <span className="hidden sm:inline">Novo</span>
-              </button>
+              <>
+                <button
+                  onClick={() => setAdminOpen(true)}
+                  className="p-2 rounded-xl text-primary-foreground hover:bg-primary-foreground/10 transition-all active:scale-95"
+                  aria-label="Painel de admin"
+                  title="Gerenciar categorias"
+                >
+                  <Settings size={18} />
+                </button>
+                <button
+                  onClick={() => { setEditingPonto(null); setFormOpen(true); }}
+                  className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-accent text-accent-foreground text-xs font-bold transition-all active:scale-95 shadow-sm uppercase"
+                >
+                  <Plus size={16} />
+                  <span className="hidden sm:inline">Novo</span>
+                </button>
+              </>
             )}
+            <button
+              onClick={logout}
+              className="p-2 rounded-xl text-primary-foreground hover:bg-primary-foreground/10 transition-all active:scale-95"
+              aria-label="Sair"
+              title="Sair"
+            >
+              <LogOut size={18} />
+            </button>
           </div>
           {/* Search */}
           <div className="relative">
@@ -153,7 +162,7 @@ const Index = () => {
       </header>
 
       {/* Content */}
-      <main className="flex-1 px-3 sm:px-4 py-4 sm:py-5 pb-10">
+      <main className="flex-1 px-3 sm:px-4 py-4 sm:py-5 pb-32">
         {/* Favorites toggle + count */}
         <div className="flex items-center justify-between mb-4">
           <button
@@ -206,6 +215,15 @@ const Index = () => {
         </div>
       </main>
 
+      {/* Media Player */}
+      {playingPonto && (
+        <MediaPlayer
+          url={playingPonto.audio}
+          title={playingPonto.nome}
+          onClose={() => setPlayingId(null)}
+        />
+      )}
+
       {/* Form Dialog */}
       <PontoFormDialog
         open={formOpen}
@@ -215,6 +233,11 @@ const Index = () => {
         defaultCategoria={categoria}
         defaultSubcategoria={subcategoria}
       />
+
+      {/* Admin: gerenciar categorias */}
+      {isAdmin && (
+        <CategoriasManagerDialog open={adminOpen} onClose={() => setAdminOpen(false)} />
+      )}
     </div>
   );
 };
