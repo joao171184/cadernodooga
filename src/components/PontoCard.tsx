@@ -1,6 +1,7 @@
 import { Play, Pause, Heart, Pencil, Trash2 } from "lucide-react";
 import type { Ponto } from "@/data/pontos";
 import { useAuth } from "@/contexts/AuthContext";
+import { getEmbedInfo } from "@/lib/embed";
 
 interface PontoCardProps {
   ponto: Ponto;
@@ -14,10 +15,10 @@ interface PontoCardProps {
 
 const PontoCard = ({ ponto, isPlaying, isFavorite, onTogglePlay, onToggleFavorite, onEdit, onDelete }: PontoCardProps) => {
   const { isAdmin } = useAuth();
+  const hasMedia = getEmbedInfo(ponto.audio).kind !== "none";
   return (
     <div className={`bg-card rounded-2xl border border-border shadow-sm overflow-hidden transition-all duration-200 ${isPlaying ? "ring-2 ring-accent/40 shadow-lg" : "hover:shadow-md"}`}>
       <div className="p-4 sm:p-5">
-        {/* Header */}
         <div className="flex items-start justify-between gap-2 mb-3">
           <div className="flex-1 min-w-0">
             <h3 className="font-display text-base sm:text-lg font-bold text-card-foreground leading-tight uppercase">
@@ -61,7 +62,6 @@ const PontoCard = ({ ponto, isPlaying, isFavorite, onTogglePlay, onToggleFavorit
           </div>
         </div>
 
-        {/* Letra */}
         <div className="relative mb-4">
           <div className="absolute left-0 top-0 bottom-0 w-1 rounded-full bg-accent/30" />
           <pre className="text-sm sm:text-base text-card-foreground/80 whitespace-pre-wrap font-[inherit] leading-relaxed pl-4 py-1 uppercase">
@@ -69,27 +69,28 @@ const PontoCard = ({ ponto, isPlaying, isFavorite, onTogglePlay, onToggleFavorit
           </pre>
         </div>
 
-        {/* Play button */}
-        <button
-          onClick={() => onTogglePlay(ponto.id)}
-          className={`w-full flex items-center justify-center gap-2.5 py-3.5 rounded-xl text-sm font-bold transition-all active:scale-[0.98] uppercase ${
-            isPlaying
-              ? "bg-accent/15 text-accent-foreground border-2 border-accent"
-              : "bg-primary text-primary-foreground shadow-sm hover:shadow-md"
-          }`}
-        >
-          {isPlaying ? (
-            <>
-              <Pause size={20} />
-              Pausar
-            </>
-          ) : (
-            <>
-              <Play size={20} className="ml-0.5" />
-              Ouvir Ponto
-            </>
-          )}
-        </button>
+        {hasMedia && (
+          <button
+            onClick={() => onTogglePlay(ponto.id)}
+            className={`w-full flex items-center justify-center gap-2.5 py-3.5 rounded-xl text-sm font-bold transition-all active:scale-[0.98] uppercase ${
+              isPlaying
+                ? "bg-accent/15 text-accent-foreground border-2 border-accent"
+                : "bg-primary text-primary-foreground shadow-sm hover:shadow-md"
+            }`}
+          >
+            {isPlaying ? (
+              <>
+                <Pause size={20} />
+                Pausar
+              </>
+            ) : (
+              <>
+                <Play size={20} className="ml-0.5" />
+                Ouvir Ponto
+              </>
+            )}
+          </button>
+        )}
       </div>
     </div>
   );

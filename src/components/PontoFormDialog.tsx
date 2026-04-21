@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { categoriaTree, type Ponto } from "@/data/pontos";
+import { useCategorias } from "@/contexts/CategoriasContext";
+import type { Ponto } from "@/data/pontos";
 
 interface PontoFormDialogProps {
   open: boolean;
@@ -12,6 +13,7 @@ interface PontoFormDialogProps {
 }
 
 export function PontoFormDialog({ open, onClose, onSave, ponto, defaultCategoria, defaultSubcategoria }: PontoFormDialogProps) {
+  const { categorias } = useCategorias();
   const [nome, setNome] = useState("");
   const [categoria, setCategoria] = useState("");
   const [subcategoria, setSubcategoria] = useState("");
@@ -34,9 +36,7 @@ export function PontoFormDialog({ open, onClose, onSave, ponto, defaultCategoria
     }
   }, [ponto, open, defaultCategoria, defaultSubcategoria]);
 
-  const categoriasComFilhos = categoriaTree.filter((c) => c.filhos);
-  const categoriasSemFilhos = categoriaTree.filter((c) => !c.filhos);
-  const subcategorias = categoriaTree.find((c) => c.nome === categoria)?.filhos || [];
+  const subcategorias = categorias.find((c) => c.nome === categoria)?.filhos || [];
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -47,7 +47,7 @@ export function PontoFormDialog({ open, onClose, onSave, ponto, defaultCategoria
       categoria,
       subcategoria,
       letra: letra.toUpperCase(),
-      audio: audio.trim() || `audio/${nome.toLowerCase().replace(/\s+/g, "-")}.mp3`,
+      audio: audio.trim(),
     });
     onClose();
   };
@@ -87,10 +87,7 @@ export function PontoFormDialog({ open, onClose, onSave, ponto, defaultCategoria
                 required
               >
                 <option value="">Selecione...</option>
-                {categoriasSemFilhos.map((c) => (
-                  <option key={c.nome} value={c.nome}>{c.emoji} {c.nome}</option>
-                ))}
-                {categoriasComFilhos.map((c) => (
+                {categorias.map((c) => (
                   <option key={c.nome} value={c.nome}>{c.emoji} {c.nome}</option>
                 ))}
               </select>
@@ -131,15 +128,18 @@ export function PontoFormDialog({ open, onClose, onSave, ponto, defaultCategoria
 
           <div>
             <label className="block text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1.5">
-              Áudio (opcional)
+              Link do YouTube ou Spotify (opcional)
             </label>
             <input
               type="text"
               value={audio}
               onChange={(e) => setAudio(e.target.value)}
               className="w-full px-4 py-3 rounded-xl bg-muted text-foreground text-sm outline-none focus:ring-2 focus:ring-accent/50 border border-border"
-              placeholder="audio/nome-do-ponto.mp3"
+              placeholder="https://youtube.com/... ou https://open.spotify.com/track/..."
             />
+            <p className="text-[11px] text-muted-foreground/70 mt-1.5">
+              Cole o link do YouTube ou Spotify. Toca dentro do app, sem sair da gira.
+            </p>
           </div>
 
           <div className="flex gap-3 pt-2">
