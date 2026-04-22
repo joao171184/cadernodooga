@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useCategorias } from "@/contexts/CategoriasContext";
 import type { Ponto } from "@/data/pontos";
+import { X, Check } from "lucide-react";
 
 interface PontoFormDialogProps {
   open: boolean;
@@ -16,7 +17,7 @@ export function PontoFormDialog({ open, onClose, onSave, ponto, defaultCategoria
   const { categorias } = useCategorias();
   const [nome, setNome] = useState("");
   const [categoria, setCategoria] = useState("");
-  const [subcategoria, setSubcategoria] = useState("");
+  const [subcategorias, setSubcategorias] = useState<string[]>([]);
   const [letra, setLetra] = useState("");
   const [audio, setAudio] = useState("");
   const [puxador, setPuxador] = useState("");
@@ -25,21 +26,30 @@ export function PontoFormDialog({ open, onClose, onSave, ponto, defaultCategoria
     if (ponto) {
       setNome(ponto.nome);
       setCategoria(ponto.categoria);
-      setSubcategoria(ponto.subcategoria);
+      const subs = ponto.subcategorias && ponto.subcategorias.length > 0
+        ? ponto.subcategorias
+        : ponto.subcategoria ? [ponto.subcategoria] : [];
+      setSubcategorias(subs);
       setLetra(ponto.letra);
       setAudio(ponto.audio);
       setPuxador(ponto.puxador || "");
     } else {
       setNome("");
       setCategoria(defaultCategoria || "");
-      setSubcategoria(defaultSubcategoria || "");
+      setSubcategorias(defaultSubcategoria ? [defaultSubcategoria] : []);
       setLetra("");
       setAudio("");
       setPuxador("");
     }
   }, [ponto, open, defaultCategoria, defaultSubcategoria]);
 
-  const subcategorias = categorias.find((c) => c.nome === categoria)?.filhos || [];
+  const subOptions = categorias.find((c) => c.nome === categoria)?.filhos || [];
+
+  const toggleSub = (nome: string) => {
+    setSubcategorias((prev) =>
+      prev.includes(nome) ? prev.filter((s) => s !== nome) : [...prev, nome]
+    );
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -48,7 +58,8 @@ export function PontoFormDialog({ open, onClose, onSave, ponto, defaultCategoria
       ...(ponto ? { id: ponto.id } : {}),
       nome: nome.trim(),
       categoria,
-      subcategoria,
+      subcategoria: subcategorias[0] || "",
+      subcategorias,
       letra: letra.toUpperCase(),
       audio: audio.trim(),
       puxador: puxador.trim(),
@@ -79,42 +90,55 @@ export function PontoFormDialog({ open, onClose, onSave, ponto, defaultCategoria
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1.5">
-                Categoria
-              </label>
-              <select
-                value={categoria}
-                onChange={(e) => { setCategoria(e.target.value); setSubcategoria(""); }}
-                className="w-full px-3 py-3 rounded-xl bg-muted text-foreground text-sm outline-none focus:ring-2 focus:ring-accent/50 border border-border"
-                required
-              >
-                <option value="">Selecione...</option>
-                {categorias.map((c) => (
-                  <option key={c.nome} value={c.nome}>{c.emoji} {c.nome}</option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="block text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1.5">
-                Subcategoria
-              </label>
-              <select
-                value={subcategoria}
-                onChange={(e) => setSubcategoria(e.target.value)}
-                className="w-full px-3 py-3 rounded-xl bg-muted text-foreground text-sm outline-none focus:ring-2 focus:ring-accent/50 border border-border"
-                disabled={subcategorias.length === 0}
-              >
-                <option value="">
-                  {subcategorias.length === 0 ? "N/A" : "Selecione..."}
-                </option>
-                {subcategorias.map((s) => (
-                  <option key={s.nome} value={s.nome}>{s.emoji} {s.nome}</option>
-                ))}
-              </select>
-            </div>
+          <div>
+            <label className="block text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1.5">
+              Categoria
+            </label>
+            <select
+              value={categoria}
+              onChange={(e) => { setCategoria(e.target.value); setSubcategorias([]); }}
+              className="w-full px-3 py-3 rounded-xl bg-muted text-foreground text-sm outline-none focus:ring-2 focus:ring-accent/50 border border-border"
+              required
+            >
+              <option value="">Selecione...</option>
+              {categorias.map((c) => (
+                <option key={c.nome} value={c.nome}>{c.emoji} {c.nome}</option>
+              ))}
+            </select>
           </div>
+
+          {subOptions.length > 0 && (
+            <div>
+              <label className="block text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1.5">
+                Subcategorias <span className="normal-case text-muted-foreground/70 font-normal">(pode escolher mais de uma)</span>
+              </label>
+              <div className="flex flex-wrap gap-2 p-2 rounded-xl bg-muted/40 border border-border">
+                {subOptions.map((s) => {
+                  const active = subcategorias.includes(s.nome);
+                  return (
+                    <button
+                      key={s.nome}
+                      type="button"
+                      onClick={() => toggleSub(s.nome)}
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all active:scale-95 ${
+                        active
+                          ? "bg-accent text-accent-foreground shadow-sm"
+                          : "bg-background text-foreground/70 border border-border hover:border-accent/50"
+                      }`}
+                    >
+                      {active ? <Check size={12} /> : null}
+                      <span>{s.emoji} {s.nome}</span>
+                    </button>
+                  );
+                })}
+              </div>
+              {subcategorias.length > 0 && (
+                <p className="text-[11px] text-muted-foreground mt-1.5">
+                  Aparecerá em: {subcategorias.join(", ")}
+                </p>
+              )}
+            </div>
+          )}
 
           <div>
             <label className="block text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1.5">
@@ -163,15 +187,15 @@ export function PontoFormDialog({ open, onClose, onSave, ponto, defaultCategoria
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 py-3 rounded-xl text-sm font-bold text-muted-foreground bg-muted hover:bg-muted/80 transition-all active:scale-[0.98]"
+              className="flex-1 py-3 rounded-xl text-sm font-bold text-muted-foreground bg-muted hover:bg-muted/80 transition-all active:scale-[0.98] flex items-center justify-center gap-2"
             >
-              CANCELAR
+              <X size={16} /> CANCELAR
             </button>
             <button
               type="submit"
-              className="flex-1 py-3 rounded-xl text-sm font-bold text-primary-foreground bg-primary hover:bg-primary/90 transition-all active:scale-[0.98] shadow-sm"
+              className="flex-1 py-3 rounded-xl text-sm font-bold text-primary-foreground bg-primary hover:bg-primary/90 transition-all active:scale-[0.98] shadow-sm flex items-center justify-center gap-2"
             >
-              {ponto ? "SALVAR" : "ADICIONAR"}
+              <Check size={16} /> {ponto ? "SALVAR" : "ADICIONAR"}
             </button>
           </div>
         </form>

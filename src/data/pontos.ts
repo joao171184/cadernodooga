@@ -2,7 +2,10 @@ export interface Ponto {
   id: string;
   nome: string;
   categoria: string;
+  /** Subcategoria principal (compat). Use `subcategorias` para múltiplas. */
   subcategoria: string;
+  /** Lista de subcategorias (novo). Inclui a principal. */
+  subcategorias?: string[];
   letra: string;
   audio: string;
   puxador?: string;
