@@ -128,6 +128,19 @@ export function PontoFormDialog({ open, onClose, onSave, ponto, defaultCategoria
 
           <div>
             <label className="block text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1.5">
+              Quem puxa o ponto (opcional)
+            </label>
+            <input
+              type="text"
+              value={puxador}
+              onChange={(e) => setPuxador(e.target.value)}
+              className="w-full px-4 py-3 rounded-xl bg-muted text-foreground text-sm outline-none focus:ring-2 focus:ring-accent/50 border border-border"
+              placeholder="Ex: Pai João, Mãe Maria, Ogã Pedro..."
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1.5">
               Link do YouTube ou Spotify (opcional)
             </label>
             <input
