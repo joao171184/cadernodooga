@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Plus, Pencil, Trash2, Check, X, ChevronDown, ChevronRight } from "lucide-react";
+import { Plus, Pencil, Trash2, Check, X, ChevronDown, ChevronRight, FolderTree, Folder, FolderPlus } from "lucide-react";
 import { useCategorias } from "@/contexts/CategoriasContext";
 import { toast } from "sonner";
 
