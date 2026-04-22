@@ -119,6 +119,11 @@ const Index = () => {
         <div className="px-3 sm:px-4 pt-3 pb-3 sm:pt-4 sm:pb-4">
           <div className="flex items-center gap-2 sm:gap-3 mb-3">
             <SidebarTrigger className="text-primary-foreground hover:bg-primary-foreground/10 rounded-lg p-2 -ml-1" />
+            <img
+              src={logoImg}
+              alt="Caderno do Ogã"
+              className="w-10 h-10 rounded-xl object-cover bg-primary-foreground/10 shrink-0 hidden sm:block"
+            />
             <div className="flex-1 min-w-0">
               <h1 className="font-display text-lg sm:text-xl font-bold text-primary-foreground tracking-tight uppercase truncate">
                 {pageTitle}
@@ -131,18 +136,26 @@ const Index = () => {
               <>
                 <button
                   onClick={() => setAdminOpen(true)}
-                  className="p-2 rounded-xl text-primary-foreground hover:bg-primary-foreground/10 transition-all active:scale-95"
-                  aria-label="Painel de admin"
+                  className="hidden sm:flex items-center gap-1.5 px-3 py-2 rounded-xl bg-primary-foreground/10 hover:bg-primary-foreground/20 text-primary-foreground text-xs font-bold transition-all active:scale-95 uppercase border border-primary-foreground/10"
                   title="Gerenciar categorias"
+                >
+                  <Settings size={14} />
+                  <span>Categorias</span>
+                </button>
+                <button
+                  onClick={() => setAdminOpen(true)}
+                  className="sm:hidden p-2 rounded-xl text-primary-foreground hover:bg-primary-foreground/10 transition-all active:scale-95"
+                  aria-label="Gerenciar categorias"
                 >
                   <Settings size={18} />
                 </button>
                 <button
                   onClick={() => { setEditingPonto(null); setFormOpen(true); }}
                   className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-accent text-accent-foreground text-xs font-bold transition-all active:scale-95 shadow-sm uppercase"
+                  title="Adicionar novo ponto"
                 >
                   <Plus size={16} />
-                  <span className="hidden sm:inline">Novo</span>
+                  <span className="hidden sm:inline">Novo Ponto</span>
                 </button>
               </>
             )}
@@ -247,6 +260,26 @@ const Index = () => {
       {isAdmin && (
         <CategoriasManagerDialog open={adminOpen} onClose={() => setAdminOpen(false)} />
       )}
+
+      {/* Footer com créditos */}
+      <footer className="mt-auto border-t border-border bg-card/50 backdrop-blur-sm">
+        <div className="px-4 py-5 max-w-2xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
+          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+            <span>Feito com</span>
+            <Heart size={12} className="fill-accent text-accent" />
+            <span>por <span className="font-bold text-foreground">João Pedro de Andrade Marques</span></span>
+          </div>
+          <a
+            href="https://www.instagram.com/46marques__/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-accent/15 hover:bg-accent/25 text-accent text-xs font-bold transition-all active:scale-95"
+          >
+            <Instagram size={14} />
+            <span>@46marques__</span>
+          </a>
+        </div>
+      </footer>
     </div>
   );
 };
