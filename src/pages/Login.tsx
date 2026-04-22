@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { Navigate } from "react-router-dom";
-import { Shield, Eye, ArrowLeft, Mail, Lock, UserPlus, LogIn, Loader2 } from "lucide-react";
+import { Shield, Eye, ArrowLeft, Mail, Lock, UserPlus, LogIn, Loader2, Instagram, Heart } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import logoImg from "@/assets/logo.png";
 
 type Mode = null | "viewer" | "signin" | "signup";
 
@@ -100,8 +101,8 @@ const Login = () => {
       <div className="relative w-full max-w-md">
         {/* Header */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-primary-foreground/10 backdrop-blur-md border border-primary-foreground/20 mb-4 shadow-2xl">
-            <span className="text-5xl">🪘</span>
+          <div className="inline-flex items-center justify-center w-28 h-28 rounded-3xl bg-primary-foreground/10 backdrop-blur-md border border-primary-foreground/20 mb-4 shadow-2xl overflow-hidden p-2">
+            <img src={logoImg} alt="Caderno do Ogã" className="w-full h-full object-contain" />
           </div>
           <h1 className="font-display text-4xl sm:text-5xl font-bold text-primary-foreground tracking-tight drop-shadow-lg">
             Caderno do Ogã
@@ -220,9 +221,20 @@ const Login = () => {
           )}
         </div>
 
-        <p className="text-center text-[10px] text-primary-foreground/50 mt-6 uppercase tracking-widest">
-          🙏 Que a gira seja firme
-        </p>
+        <div className="mt-6 flex flex-col items-center gap-2">
+          <p className="text-[10px] text-primary-foreground/50 uppercase tracking-widest">
+            🙏 Que a gira seja firme
+          </p>
+          <a
+            href="https://www.instagram.com/46marques__/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-1.5 text-[11px] text-primary-foreground/70 hover:text-primary-foreground transition-colors"
+          >
+            Feito com <Heart size={11} className="fill-accent text-accent" /> por João Pedro Marques
+            <Instagram size={11} />
+          </a>
+        </div>
       </div>
     </div>
   );

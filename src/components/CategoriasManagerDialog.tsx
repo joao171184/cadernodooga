@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Plus, Pencil, Trash2, Check, X, ChevronDown, ChevronRight } from "lucide-react";
+import { Plus, Pencil, Trash2, Check, X, ChevronDown, ChevronRight, FolderTree, Folder, FolderPlus } from "lucide-react";
 import { useCategorias } from "@/contexts/CategoriasContext";
 import { toast } from "sonner";
 
@@ -115,7 +115,10 @@ export function CategoriasManagerDialog({ open, onClose }: Props) {
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
       <DialogContent className="max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="font-display text-lg uppercase">Painel de Categorias</DialogTitle>
+          <DialogTitle className="font-display text-lg uppercase flex items-center gap-2">
+            <FolderTree size={20} className="text-accent" />
+            Painel de Categorias
+          </DialogTitle>
         </DialogHeader>
 
         {/* Add new top-level */}

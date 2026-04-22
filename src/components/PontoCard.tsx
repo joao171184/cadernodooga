@@ -16,6 +16,10 @@ interface PontoCardProps {
 const PontoCard = ({ ponto, isPlaying, isFavorite, onTogglePlay, onToggleFavorite, onEdit, onDelete }: PontoCardProps) => {
   const { isAdmin } = useAuth();
   const hasMedia = getEmbedInfo(ponto.audio).kind !== "none";
+  const subs = ponto.subcategorias && ponto.subcategorias.length > 0
+    ? ponto.subcategorias
+    : ponto.subcategoria ? [ponto.subcategoria] : [];
+
   return (
     <div className={`bg-card rounded-2xl border border-border shadow-sm overflow-hidden transition-all duration-200 ${isPlaying ? "ring-2 ring-accent/40 shadow-lg" : "hover:shadow-md"}`}>
       <div className="p-4 sm:p-5">
@@ -25,8 +29,15 @@ const PontoCard = ({ ponto, isPlaying, isFavorite, onTogglePlay, onToggleFavorit
               {ponto.nome}
             </h3>
             <p className="text-xs text-muted-foreground mt-1">
-              {ponto.categoria}{ponto.subcategoria ? ` › ${ponto.subcategoria}` : ""}
+              {ponto.categoria}{subs.length > 0 ? ` › ${subs.join(" • ")}` : ""}
             </p>
+            {ponto.puxador && (
+              <div className="flex items-center gap-1.5 mt-2 text-xs">
+                <Mic2 size={12} className="text-accent shrink-0" />
+                <span className="text-muted-foreground uppercase tracking-wide font-semibold">Puxa:</span>
+                <span className="text-card-foreground font-medium truncate">{ponto.puxador}</span>
+              </div>
+            )}
           </div>
           <div className="flex items-center gap-1">
             {isAdmin && onEdit && (
