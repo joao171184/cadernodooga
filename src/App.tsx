@@ -7,15 +7,24 @@ import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { CategoriasProvider } from "@/contexts/CategoriasContext";
+import { ThemeProvider } from "@/contexts/ThemeContext";
 import Index from "./pages/Index.tsx";
 import Login from "./pages/Login.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import type { ReactNode } from "react";
+import { Loader2 } from "lucide-react";
 
 const queryClient = new QueryClient();
 
 function ProtectedLayout({ children }: { children: ReactNode }) {
-  const { isLoggedIn } = useAuth();
+  const { isLoggedIn, loading } = useAuth();
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <Loader2 className="animate-spin text-primary" size={32} />
+      </div>
+    );
+  }
   if (!isLoggedIn) return <Navigate to="/login" replace />;
   return (
     <SidebarProvider>
@@ -29,23 +38,25 @@ function ProtectedLayout({ children }: { children: ReactNode }) {
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <AuthProvider>
-          <CategoriasProvider>
-            <Routes>
-              <Route path="/login" element={<Login />} />
-              <Route path="/" element={<ProtectedLayout><Index /></ProtectedLayout>} />
-              <Route path="/guia/:categoria" element={<ProtectedLayout><Index /></ProtectedLayout>} />
-              <Route path="/guia/:categoria/:subcategoria" element={<ProtectedLayout><Index /></ProtectedLayout>} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </CategoriasProvider>
-        </AuthProvider>
-      </BrowserRouter>
-    </TooltipProvider>
+    <ThemeProvider>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <AuthProvider>
+            <CategoriasProvider>
+              <Routes>
+                <Route path="/login" element={<Login />} />
+                <Route path="/" element={<ProtectedLayout><Index /></ProtectedLayout>} />
+                <Route path="/guia/:categoria" element={<ProtectedLayout><Index /></ProtectedLayout>} />
+                <Route path="/guia/:categoria/:subcategoria" element={<ProtectedLayout><Index /></ProtectedLayout>} />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </CategoriasProvider>
+          </AuthProvider>
+        </BrowserRouter>
+      </TooltipProvider>
+    </ThemeProvider>
   </QueryClientProvider>
 );
 
