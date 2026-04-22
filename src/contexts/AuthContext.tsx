@@ -1,61 +1,110 @@
-import { createContext, useContext, useState, useCallback, type ReactNode } from "react";
+import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import type { Session, User } from "@supabase/supabase-js";
 
 export type UserRole = "admin" | "viewer" | null;
 
 interface AuthContextType {
   role: UserRole;
+  user: User | null;
+  session: Session | null;
   isAdmin: boolean;
   isViewer: boolean;
   isLoggedIn: boolean;
-  login: (password: string, intent: "admin" | "viewer") => boolean;
-  logout: () => void;
+  loading: boolean;
+  loginViewer: (password: string) => boolean;
+  signIn: (email: string, password: string) => Promise<{ error: string | null }>;
+  signUp: (email: string, password: string) => Promise<{ error: string | null; needsConfirm: boolean }>;
+  logout: () => Promise<void>;
 }
 
-const ADMIN_PASSWORD = "admin123";
 const VIEWER_PASSWORD = "102030";
-
-const AUTH_KEY = "user-role";
-
-function loadRole(): UserRole {
-  try {
-    const saved = localStorage.getItem(AUTH_KEY);
-    if (saved === "admin" || saved === "viewer") return saved;
-  } catch {}
-  return null;
-}
+const VIEWER_KEY = "user-role-viewer";
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
-export function AuthProvider({ children }: { children: ReactNode }) {
-  const [role, setRole] = useState<UserRole>(loadRole);
+function loadViewer(): boolean {
+  try {
+    return localStorage.getItem(VIEWER_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
 
-  const login = useCallback((password: string, intent: "admin" | "viewer"): boolean => {
-    if (intent === "admin" && password === ADMIN_PASSWORD) {
-      setRole("admin");
-      localStorage.setItem(AUTH_KEY, "admin");
-      return true;
-    }
-    if (intent === "viewer" && password === VIEWER_PASSWORD) {
-      setRole("viewer");
-      localStorage.setItem(AUTH_KEY, "viewer");
+export function AuthProvider({ children }: { children: ReactNode }) {
+  const [session, setSession] = useState<Session | null>(null);
+  const [user, setUser] = useState<User | null>(null);
+  const [viewerMode, setViewerMode] = useState<boolean>(loadViewer);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Listener primeiro
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, sess) => {
+      setSession(sess);
+      setUser(sess?.user ?? null);
+    });
+
+    // Depois carrega sessão atual
+    supabase.auth.getSession().then(({ data: { session: sess } }) => {
+      setSession(sess);
+      setUser(sess?.user ?? null);
+      setLoading(false);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const loginViewer = useCallback((password: string): boolean => {
+    if (password === VIEWER_PASSWORD) {
+      setViewerMode(true);
+      try { localStorage.setItem(VIEWER_KEY, "1"); } catch {}
       return true;
     }
     return false;
   }, []);
 
-  const logout = useCallback(() => {
-    setRole(null);
-    localStorage.removeItem(AUTH_KEY);
+  const signIn = useCallback(async (email: string, password: string) => {
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    return { error: error?.message ?? null };
   }, []);
+
+  const signUp = useCallback(async (email: string, password: string) => {
+    const redirectUrl = `${window.location.origin}/`;
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: { emailRedirectTo: redirectUrl },
+    });
+    return {
+      error: error?.message ?? null,
+      needsConfirm: !error && !data.session,
+    };
+  }, []);
+
+  const logout = useCallback(async () => {
+    if (session) await supabase.auth.signOut();
+    setViewerMode(false);
+    try { localStorage.removeItem(VIEWER_KEY); } catch {}
+  }, [session]);
+
+  const isAdmin = !!session;
+  const isViewer = !session && viewerMode;
+  const isLoggedIn = isAdmin || isViewer;
+  const role: UserRole = isAdmin ? "admin" : isViewer ? "viewer" : null;
 
   return (
     <AuthContext.Provider
       value={{
         role,
-        isAdmin: role === "admin",
-        isViewer: role === "viewer",
-        isLoggedIn: role !== null,
-        login,
+        user,
+        session,
+        isAdmin,
+        isViewer,
+        isLoggedIn,
+        loading,
+        loginViewer,
+        signIn,
+        signUp,
         logout,
       }}
     >
