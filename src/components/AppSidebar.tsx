@@ -21,8 +21,7 @@ import { getCategoryIcon } from "@/lib/categoryIcons";
 import logoImg from "@/assets/logo.png";
 
 export function AppSidebar() {
-  const { state, setOpenMobile } = useSidebar();
-  const collapsed = state === "collapsed";
+  const { setOpenMobile } = useSidebar();
   const location = useLocation();
   const currentPath = decodeURIComponent(location.pathname);
   const [openFolders, setOpenFolders] = useState<Set<string>>(new Set(["Orixás", "Guias de Direita", "Guias de Esquerda"]));
