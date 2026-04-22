@@ -12,12 +12,13 @@ import {
 } from "@/components/ui/sidebar";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
-import { ChevronDown, ChevronRight, Shield, Eye, BookOpen } from "lucide-react";
+import { ChevronDown, ChevronRight, Shield, Eye, BookOpen, Instagram } from "lucide-react";
 import { type CategoriaNode } from "@/data/pontos";
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCategorias } from "@/contexts/CategoriasContext";
 import { getCategoryIcon } from "@/lib/categoryIcons";
+import logoImg from "@/assets/logo.png";
 
 export function AppSidebar() {
   const { state, setOpenMobile } = useSidebar();
@@ -119,29 +120,27 @@ export function AppSidebar() {
   };
 
   return (
-    <Sidebar collapsible="icon" className="border-r border-sidebar-border">
+    <Sidebar collapsible="offcanvas" className="border-r border-sidebar-border">
       <SidebarHeader className="p-4 border-b border-sidebar-border">
-        {!collapsed ? (
-          <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-sidebar-primary/15 flex items-center justify-center text-xl">
-              🪘
-            </div>
-            <div className="min-w-0">
-              <h2 className="font-display text-base font-bold text-sidebar-foreground leading-tight truncate">
-                Caderno do Ogã
-              </h2>
-              <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-semibold">
-                Pontos Cantados
-              </p>
-            </div>
+        <div className="flex items-center gap-3">
+          <img
+            src={logoImg}
+            alt="Caderno do Ogã"
+            className="w-11 h-11 rounded-xl object-cover bg-sidebar-accent shrink-0 shadow-sm"
+          />
+          <div className="min-w-0">
+            <h2 className="font-display text-base font-bold text-sidebar-foreground leading-tight truncate">
+              Caderno do Ogã
+            </h2>
+            <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-semibold">
+              Pontos Cantados
+            </p>
           </div>
-        ) : (
-          <span className="text-xl mx-auto">🪘</span>
-        )}
+        </div>
       </SidebarHeader>
 
-      <SidebarContent className="scrollbar-none overflow-y-auto">
-        <SidebarGroup>
+      <SidebarContent className="scrollbar-none overflow-y-auto px-2 py-3">
+        <SidebarGroup className="p-0">
           <SidebarGroupContent>
             <SidebarMenu className="gap-0.5">
               <SidebarMenuItem>
@@ -159,7 +158,7 @@ export function AppSidebar() {
                     activeClassName=""
                   >
                     <BookOpen size={18} strokeWidth={2} className="shrink-0" />
-                    {!collapsed && <span className="tracking-wide text-[13px] font-display">Todos os Pontos</span>}
+                    <span className="tracking-wide text-[13px] font-display">Todos os Pontos</span>
                   </NavLink>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -170,19 +169,22 @@ export function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter className="p-3 border-t border-sidebar-border">
-        {!collapsed ? (
-          <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-sidebar-accent text-xs">
-            {isAdmin ? <Shield size={14} className="text-sidebar-primary" /> : <Eye size={14} className="text-muted-foreground" />}
-            <span className="font-semibold uppercase tracking-wide flex-1 text-sidebar-foreground">
-              {isAdmin ? "Administrador" : "Visitante"}
-            </span>
-          </div>
-        ) : (
-          <div className="flex justify-center">
-            {isAdmin ? <Shield size={14} className="text-sidebar-primary" /> : <Eye size={14} className="text-muted-foreground" />}
-          </div>
-        )}
+      <SidebarFooter className="p-3 border-t border-sidebar-border space-y-2">
+        <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-sidebar-accent text-xs">
+          {isAdmin ? <Shield size={14} className="text-sidebar-primary" /> : <Eye size={14} className="text-muted-foreground" />}
+          <span className="font-semibold uppercase tracking-wide flex-1 text-sidebar-foreground">
+            {isAdmin ? "Administrador" : "Visitante"}
+          </span>
+        </div>
+        <a
+          href="https://www.instagram.com/46marques__/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center gap-2 px-3 py-2 rounded-xl text-[11px] text-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent transition-all"
+        >
+          <Instagram size={12} />
+          <span className="truncate">por João Pedro Marques</span>
+        </a>
       </SidebarFooter>
     </Sidebar>
   );
