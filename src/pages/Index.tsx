@@ -8,6 +8,7 @@ import { CategoriasManagerDialog } from "@/components/CategoriasManagerDialog";
 import { MediaPlayer } from "@/components/MediaPlayer";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { useAuth } from "@/contexts/AuthContext";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 const FAVORITES_KEY = "pontos-favoritos";
 
@@ -138,6 +139,7 @@ const Index = () => {
                 </button>
               </>
             )}
+            <ThemeToggle />
             <button
               onClick={logout}
               className="p-2 rounded-xl text-primary-foreground hover:bg-primary-foreground/10 transition-all active:scale-95"
