@@ -102,4 +102,13 @@
   .font-display {
     font-family: 'Playfair Display', serif;
   }
+
+  /* Scroll invisível mas funcional */
+  .scrollbar-none {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
 }
