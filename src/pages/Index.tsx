@@ -1,5 +1,6 @@
 import { useState, useCallback, useMemo, useEffect } from "react";
-import { Search, Star, Music, Plus, Settings, LogOut } from "lucide-react";
+import { Search, Star, Music, Plus, Settings, LogOut, Instagram, Heart } from "lucide-react";
+import logoImg from "@/assets/logo.png";
 import { useParams } from "react-router-dom";
 import { loadPontos, savePontos, type Ponto } from "@/data/pontos";
 import PontoCard from "@/components/PontoCard";
@@ -83,7 +84,13 @@ const Index = () => {
     let list = pontos;
 
     if (categoria && subcategoria) {
-      list = list.filter((p) => p.categoria === categoria && p.subcategoria === subcategoria);
+      list = list.filter((p) => {
+        if (p.categoria !== categoria) return false;
+        const subs = p.subcategorias && p.subcategorias.length > 0
+          ? p.subcategorias
+          : p.subcategoria ? [p.subcategoria] : [];
+        return subs.includes(subcategoria);
+      });
     } else if (categoria) {
       list = list.filter((p) => p.categoria === categoria);
     }
