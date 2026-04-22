@@ -5,6 +5,7 @@ export interface Ponto {
   subcategoria: string;
   letra: string;
   audio: string;
+  puxador?: string;
 }
 
 // Estrutura de categorias com pastas e subpastas

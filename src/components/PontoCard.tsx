@@ -1,4 +1,4 @@
-import { Play, Pause, Heart, Pencil, Trash2 } from "lucide-react";
+import { Play, Pause, Heart, Pencil, Trash2, Mic2 } from "lucide-react";
 import type { Ponto } from "@/data/pontos";
 import { useAuth } from "@/contexts/AuthContext";
 import { getEmbedInfo } from "@/lib/embed";

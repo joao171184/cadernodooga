@@ -19,6 +19,7 @@ export function PontoFormDialog({ open, onClose, onSave, ponto, defaultCategoria
   const [subcategoria, setSubcategoria] = useState("");
   const [letra, setLetra] = useState("");
   const [audio, setAudio] = useState("");
+  const [puxador, setPuxador] = useState("");
 
   useEffect(() => {
     if (ponto) {
@@ -27,12 +28,14 @@ export function PontoFormDialog({ open, onClose, onSave, ponto, defaultCategoria
       setSubcategoria(ponto.subcategoria);
       setLetra(ponto.letra);
       setAudio(ponto.audio);
+      setPuxador(ponto.puxador || "");
     } else {
       setNome("");
       setCategoria(defaultCategoria || "");
       setSubcategoria(defaultSubcategoria || "");
       setLetra("");
       setAudio("");
+      setPuxador("");
     }
   }, [ponto, open, defaultCategoria, defaultSubcategoria]);
 
@@ -48,6 +51,7 @@ export function PontoFormDialog({ open, onClose, onSave, ponto, defaultCategoria
       subcategoria,
       letra: letra.toUpperCase(),
       audio: audio.trim(),
+      puxador: puxador.trim(),
     });
     onClose();
   };
@@ -123,6 +127,19 @@ export function PontoFormDialog({ open, onClose, onSave, ponto, defaultCategoria
               className="w-full px-4 py-3 rounded-xl bg-muted text-foreground text-sm outline-none focus:ring-2 focus:ring-accent/50 border border-border font-mono leading-relaxed uppercase"
               placeholder="DIGITE A LETRA DO PONTO AQUI..."
               required
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1.5">
+              Quem puxa o ponto (opcional)
+            </label>
+            <input
+              type="text"
+              value={puxador}
+              onChange={(e) => setPuxador(e.target.value)}
+              className="w-full px-4 py-3 rounded-xl bg-muted text-foreground text-sm outline-none focus:ring-2 focus:ring-accent/50 border border-border"
+              placeholder="Ex: Pai João, Mãe Maria, Ogã Pedro..."
             />
           </div>
 
