@@ -19,6 +19,7 @@ export function PontoFormDialog({ open, onClose, onSave, ponto, defaultCategoria
   const [subcategoria, setSubcategoria] = useState("");
   const [letra, setLetra] = useState("");
   const [audio, setAudio] = useState("");
+  const [puxador, setPuxador] = useState("");
 
   useEffect(() => {
     if (ponto) {
@@ -27,12 +28,14 @@ export function PontoFormDialog({ open, onClose, onSave, ponto, defaultCategoria
       setSubcategoria(ponto.subcategoria);
       setLetra(ponto.letra);
       setAudio(ponto.audio);
+      setPuxador(ponto.puxador || "");
     } else {
       setNome("");
       setCategoria(defaultCategoria || "");
       setSubcategoria(defaultSubcategoria || "");
       setLetra("");
       setAudio("");
+      setPuxador("");
     }
   }, [ponto, open, defaultCategoria, defaultSubcategoria]);
 
@@ -48,6 +51,7 @@ export function PontoFormDialog({ open, onClose, onSave, ponto, defaultCategoria
       subcategoria,
       letra: letra.toUpperCase(),
       audio: audio.trim(),
+      puxador: puxador.trim(),
     });
     onClose();
   };
