@@ -53,14 +53,10 @@ export function AppSidebar() {
             title={node.nome}
           >
             <Icon size={18} className="text-sidebar-primary shrink-0" strokeWidth={2} />
-            {!collapsed && (
-              <>
-                <span className="flex-1 text-left tracking-wide text-[13px] font-display">{node.nome}</span>
-                {isOpen ? <ChevronDown size={14} className="text-muted-foreground" /> : <ChevronRight size={14} className="text-muted-foreground" />}
-              </>
-            )}
+            <span className="flex-1 text-left tracking-wide text-[13px] font-display">{node.nome}</span>
+            {isOpen ? <ChevronDown size={14} className="text-muted-foreground" /> : <ChevronRight size={14} className="text-muted-foreground" />}
           </button>
-          {isOpen && !collapsed && (
+          {isOpen && (
             <div className="ml-3 pl-3 border-l-2 border-sidebar-primary/20 space-y-0.5 mt-0.5">
               {node.filhos!.map((child) => {
                 const url = `/guia/${encodeURIComponent(node.nome)}/${encodeURIComponent(child.nome)}`;
@@ -111,7 +107,7 @@ export function AppSidebar() {
             activeClassName=""
           >
             <Icon size={18} strokeWidth={2} className="shrink-0" />
-            {!collapsed && <span className="tracking-wide text-[13px] font-display">{node.nome}</span>}
+            <span className="tracking-wide text-[13px] font-display">{node.nome}</span>
           </NavLink>
         </SidebarMenuButton>
       </SidebarMenuItem>
