@@ -67,8 +67,7 @@ const Login = () => {
     }
     if (needsConfirm) {
       toast.success("Conta criada!", {
-        description: "Verifique seu e-mail para confirmar o cadastro.",
-        duration: 6000,
+        description: "Faça login com seu e-mail e senha.",
       });
       setMode("signin");
       setPassword("");
@@ -146,9 +145,6 @@ const Login = () => {
               <Field icon={<Mail size={16} />} label="E-mail" type="email" value={email} onChange={setEmail} placeholder="seu@email.com" autoFocus />
               <PasswordField label="Senha" value={password} onChange={setPassword} show={showPwd} onToggle={() => setShowPwd((s) => !s)} placeholder="MÍNIMO 6 CARACTERES" />
               <PasswordField label="Confirmar senha" value={confirmPassword} onChange={setConfirmPassword} show={showPwd2} onToggle={() => setShowPwd2((s) => !s)} placeholder="REPITA A SENHA" />
-              <p className="text-[11px] text-muted-foreground -mt-2">
-                Você receberá um e-mail de confirmação para ativar sua conta.
-              </p>
               <SubmitButton label="Criar conta" busy={busy} icon={<UserPlus size={16} />} />
             </form>
           )}
