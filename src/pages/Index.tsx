@@ -5,7 +5,7 @@ import { useParams } from "react-router-dom";
 import { loadPontos, savePontos, type Ponto } from "@/data/pontos";
 import PontoCard from "@/components/PontoCard";
 import { PontoFormDialog } from "@/components/PontoFormDialog";
-import { CategoriasManagerDialog } from "@/components/CategoriasManagerDialog";
+import { SettingsDialog } from "@/components/SettingsDialog";
 import { MediaPlayer } from "@/components/MediaPlayer";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { useAuth } from "@/contexts/AuthContext";
@@ -23,7 +23,10 @@ const loadFavorites = (): Set<string> => {
 };
 
 const Index = () => {
-  const { isAdmin, logout } = useAuth();
+  const { isAdmin, logout, can } = useAuth();
+  const canAdd = can("add_pontos");
+  const canManageCats = can("manage_categories");
+  const showSettings = canManageCats || isAdmin;
   const { categoria, subcategoria } = useParams<{ categoria?: string; subcategoria?: string }>();
   const [search, setSearch] = useState("");
   const [showFavorites, setShowFavorites] = useState(false);
@@ -132,32 +135,34 @@ const Index = () => {
                 {pageSubtitle}
               </p>
             </div>
-            {isAdmin && (
+            {showSettings && (
               <>
                 <button
                   onClick={() => setAdminOpen(true)}
                   className="hidden sm:flex items-center gap-1.5 px-3 py-2 rounded-xl bg-primary-foreground/10 hover:bg-primary-foreground/20 text-primary-foreground text-xs font-bold transition-all active:scale-95 uppercase border border-primary-foreground/10"
-                  title="Gerenciar categorias"
+                  title="Configurações"
                 >
                   <Settings size={14} />
-                  <span>Categorias</span>
+                  <span>Configurações</span>
                 </button>
                 <button
                   onClick={() => setAdminOpen(true)}
                   className="sm:hidden p-2 rounded-xl text-primary-foreground hover:bg-primary-foreground/10 transition-all active:scale-95"
-                  aria-label="Gerenciar categorias"
+                  aria-label="Configurações"
                 >
                   <Settings size={18} />
                 </button>
-                <button
-                  onClick={() => { setEditingPonto(null); setFormOpen(true); }}
-                  className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-accent text-accent-foreground text-xs font-bold transition-all active:scale-95 shadow-sm uppercase"
-                  title="Adicionar novo ponto"
-                >
-                  <Plus size={16} />
-                  <span className="hidden sm:inline">Novo Ponto</span>
-                </button>
               </>
+            )}
+            {canAdd && (
+              <button
+                onClick={() => { setEditingPonto(null); setFormOpen(true); }}
+                className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-accent text-accent-foreground text-xs font-bold transition-all active:scale-95 shadow-sm uppercase"
+                title="Adicionar novo ponto"
+              >
+                <Plus size={16} />
+                <span className="hidden sm:inline">Novo Ponto</span>
+              </button>
             )}
             <ThemeToggle />
             <button
@@ -210,7 +215,7 @@ const Index = () => {
               <Music size={44} className="mx-auto mb-4 opacity-20" />
               <p className="text-base font-medium uppercase">Nenhum ponto encontrado</p>
               <p className="text-sm mt-1 opacity-70">Tente outra busca ou adicione um novo ponto</p>
-              {isAdmin && (
+              {canAdd && (
                 <button
                   onClick={() => { setEditingPonto(null); setFormOpen(true); }}
                   className="mt-4 inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-primary text-primary-foreground text-sm font-bold transition-all active:scale-95 uppercase"
@@ -256,9 +261,9 @@ const Index = () => {
         defaultSubcategoria={subcategoria}
       />
 
-      {/* Admin: gerenciar categorias */}
-      {isAdmin && (
-        <CategoriasManagerDialog open={adminOpen} onClose={() => setAdminOpen(false)} />
+      {/* Configurações */}
+      {showSettings && (
+        <SettingsDialog open={adminOpen} onClose={() => setAdminOpen(false)} />
       )}
 
       {/* Footer com créditos */}
