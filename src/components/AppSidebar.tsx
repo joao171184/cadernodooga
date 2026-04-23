@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/sidebar";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
-import { ChevronDown, ChevronRight, Shield, Eye, BookOpen, Instagram } from "lucide-react";
+import { ChevronDown, ChevronRight, Shield, Eye, BookOpen, Instagram, UserCog } from "lucide-react";
 import { type CategoriaNode } from "@/data/pontos";
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
@@ -25,7 +25,9 @@ export function AppSidebar() {
   const location = useLocation();
   const currentPath = decodeURIComponent(location.pathname);
   const [openFolders, setOpenFolders] = useState<Set<string>>(new Set(["Orixás", "Guias de Direita", "Guias de Esquerda"]));
-  const { isAdmin } = useAuth();
+  const { isAdmin, role, user } = useAuth();
+  const roleLabel = role === "admin" ? "Administrador" : role === "oga" ? "Ogã" : "Visitante";
+  const RoleIcon = role === "admin" ? Shield : role === "oga" ? UserCog : Eye;
   const { categorias } = useCategorias();
 
   const toggleFolder = (nome: string) => {
@@ -166,10 +168,13 @@ export function AppSidebar() {
 
       <SidebarFooter className="p-3 border-t border-sidebar-border space-y-2">
         <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-sidebar-accent text-xs">
-          {isAdmin ? <Shield size={14} className="text-sidebar-primary" /> : <Eye size={14} className="text-muted-foreground" />}
-          <span className="font-semibold uppercase tracking-wide flex-1 text-sidebar-foreground">
-            {isAdmin ? "Administrador" : "Visitante"}
-          </span>
+          <RoleIcon size={14} className={isAdmin ? "text-sidebar-primary" : "text-muted-foreground"} />
+          <div className="flex-1 min-w-0">
+            <div className="font-semibold uppercase tracking-wide text-sidebar-foreground truncate">{roleLabel}</div>
+            {user?.email && (
+              <div className="text-[10px] text-muted-foreground truncate">{user.email}</div>
+            )}
+          </div>
         </div>
         <a
           href="https://www.instagram.com/46marques__/"

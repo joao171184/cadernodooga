@@ -1,12 +1,12 @@
 import { useState } from "react";
 import { Navigate } from "react-router-dom";
-import { Shield, Eye, ArrowLeft, Mail, Lock, UserPlus, LogIn, Loader2, Instagram, Heart } from "lucide-react";
+import { Mail, Lock, UserPlus, LogIn, Loader2, Instagram, Heart, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import logoImg from "@/assets/logo.png";
 
-type Mode = null | "viewer" | "signin" | "signup";
+type Mode = "signin" | "signup";
 
 const FRASES = [
   "“Onde há fé, há axé.”",
@@ -16,26 +16,17 @@ const FRASES = [
 ];
 
 const Login = () => {
-  const { isLoggedIn, loginViewer, signIn, signUp } = useAuth();
-  const [mode, setMode] = useState<Mode>(null);
+  const { isLoggedIn, signIn, signUp } = useAuth();
+  const [mode, setMode] = useState<Mode>("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [viewerPassword, setViewerPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPwd, setShowPwd] = useState(false);
+  const [showPwd2, setShowPwd2] = useState(false);
   const [busy, setBusy] = useState(false);
   const [frase] = useState(() => FRASES[Math.floor(Math.random() * FRASES.length)]);
 
   if (isLoggedIn) return <Navigate to="/" replace />;
-
-  const handleViewerSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const ok = loginViewer(viewerPassword);
-    if (!ok) {
-      toast.error("Senha incorreta");
-      setViewerPassword("");
-    } else {
-      toast.success("Modo visualização ativado");
-    }
-  };
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -50,7 +41,7 @@ const Login = () => {
         : error;
       toast.error(msg);
     } else {
-      toast.success("Bem-vindo, Ogã 🪘");
+      toast.success("Bem-vindo 🪘");
     }
   };
 
@@ -58,6 +49,10 @@ const Login = () => {
     e.preventDefault();
     if (password.length < 6) {
       toast.error("A senha precisa ter no mínimo 6 caracteres");
+      return;
+    }
+    if (password !== confirmPassword) {
+      toast.error("As senhas não coincidem");
       return;
     }
     setBusy(true);
@@ -77,6 +72,7 @@ const Login = () => {
       });
       setMode("signin");
       setPassword("");
+      setConfirmPassword("");
     } else {
       toast.success("Conta criada e login efetuado!");
     }
@@ -84,7 +80,6 @@ const Login = () => {
 
   return (
     <div className="relative min-h-screen w-full flex items-center justify-center px-4 py-8 overflow-hidden">
-      {/* Fundo desfocado em camadas */}
       <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary/90 to-accent/40" />
       <div className="absolute inset-0 opacity-30">
         <div className="absolute top-0 -left-20 w-[28rem] h-[28rem] rounded-full bg-accent/40 blur-[120px]" />
@@ -93,13 +88,11 @@ const Login = () => {
       </div>
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_1px_1px,_hsl(var(--primary-foreground))_1px,_transparent_0)] [background-size:32px_32px] opacity-[0.04]" />
 
-      {/* Toggle de tema */}
       <div className="absolute top-5 right-5 z-10">
         <ThemeToggle variant="login" />
       </div>
 
       <div className="relative w-full max-w-md">
-        {/* Header */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-28 h-28 rounded-3xl bg-primary-foreground/10 backdrop-blur-md border border-primary-foreground/20 mb-4 shadow-2xl overflow-hidden p-2">
             <img src={logoImg} alt="Caderno do Ogã" className="w-full h-full object-contain" />
@@ -115,108 +108,48 @@ const Login = () => {
           </p>
         </div>
 
-        {/* Card */}
         <div className="bg-card/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-primary-foreground/10 p-6 sm:p-7">
-          {mode === null && (
-            <div className="space-y-3">
-              <button
-                onClick={() => setMode("signin")}
-                className="w-full text-left p-4 rounded-2xl bg-gradient-to-br from-primary to-primary/80 text-primary-foreground hover:shadow-lg transition-all active:scale-[0.98] flex items-center gap-4 shadow-md"
-              >
-                <div className="w-12 h-12 rounded-xl bg-primary-foreground/15 flex items-center justify-center shrink-0">
-                  <Shield size={22} />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="font-display font-bold text-base uppercase">Acesso Admin</div>
-                  <div className="text-xs opacity-80 mt-0.5">Entre com sua conta para gerenciar</div>
-                </div>
-              </button>
+          {/* Tabs */}
+          <div className="flex gap-1 p-1 rounded-xl bg-muted mb-5">
+            <button
+              type="button"
+              onClick={() => setMode("signin")}
+              className={`flex-1 py-2.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 ${
+                mode === "signin"
+                  ? "bg-card text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              <LogIn size={14} /> Login
+            </button>
+            <button
+              type="button"
+              onClick={() => setMode("signup")}
+              className={`flex-1 py-2.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 ${
+                mode === "signup"
+                  ? "bg-card text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              <UserPlus size={14} /> Criar Conta
+            </button>
+          </div>
 
-              <button
-                onClick={() => setMode("signup")}
-                className="w-full text-left p-4 rounded-2xl bg-accent/15 hover:bg-accent/25 transition-all active:scale-[0.98] flex items-center gap-4 border border-accent/30"
-              >
-                <div className="w-12 h-12 rounded-xl bg-accent/25 flex items-center justify-center shrink-0">
-                  <UserPlus size={22} className="text-accent" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="font-display font-bold text-base text-card-foreground uppercase">Criar Conta</div>
-                  <div className="text-xs text-muted-foreground mt-0.5">Cadastre-se com confirmação por e-mail</div>
-                </div>
-              </button>
-
-              <div className="relative my-2 flex items-center gap-3">
-                <div className="flex-1 h-px bg-border" />
-                <span className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold">ou</span>
-                <div className="flex-1 h-px bg-border" />
-              </div>
-
-              <button
-                onClick={() => setMode("viewer")}
-                className="w-full text-left p-4 rounded-2xl bg-muted hover:bg-muted/80 transition-all active:scale-[0.98] flex items-center gap-4"
-              >
-                <div className="w-12 h-12 rounded-xl bg-background flex items-center justify-center shrink-0">
-                  <Eye size={22} className="text-muted-foreground" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="font-display font-bold text-base text-card-foreground uppercase">Apenas Visualizar</div>
-                  <div className="text-xs text-muted-foreground mt-0.5">Ler, buscar, favoritar e ouvir</div>
-                </div>
-              </button>
-            </div>
-          )}
-
-          {mode === "viewer" && (
-            <form onSubmit={handleViewerSubmit} className="space-y-4">
-              <BackButton onClick={() => { setMode(null); setViewerPassword(""); }} />
-              <Header icon={<Eye size={22} className="text-muted-foreground" />} title="Apenas Visualizar" />
-              <Field
-                icon={<Lock size={16} />}
-                label="Senha de visitante"
-                type="password"
-                value={viewerPassword}
-                onChange={setViewerPassword}
-                placeholder="DIGITE A SENHA"
-                autoFocus
-              />
-              <SubmitButton label="Entrar" />
-            </form>
-          )}
-
-          {mode === "signin" && (
+          {mode === "signin" ? (
             <form onSubmit={handleSignIn} className="space-y-4">
-              <BackButton onClick={() => { setMode(null); setEmail(""); setPassword(""); }} />
-              <Header icon={<Shield size={22} className="text-accent" />} title="Acesso Admin" />
               <Field icon={<Mail size={16} />} label="E-mail" type="email" value={email} onChange={setEmail} placeholder="seu@email.com" autoFocus />
-              <Field icon={<Lock size={16} />} label="Senha" type="password" value={password} onChange={setPassword} placeholder="••••••••" />
+              <PasswordField label="Senha" value={password} onChange={setPassword} show={showPwd} onToggle={() => setShowPwd((s) => !s)} placeholder="••••••••" />
               <SubmitButton label="Entrar" busy={busy} icon={<LogIn size={16} />} />
-              <button
-                type="button"
-                onClick={() => { setMode("signup"); setPassword(""); }}
-                className="block w-full text-center text-xs text-muted-foreground hover:text-foreground mt-1"
-              >
-                Não tem conta? <span className="font-bold text-accent">Cadastre-se</span>
-              </button>
             </form>
-          )}
-
-          {mode === "signup" && (
+          ) : (
             <form onSubmit={handleSignUp} className="space-y-4">
-              <BackButton onClick={() => { setMode(null); setEmail(""); setPassword(""); }} />
-              <Header icon={<UserPlus size={22} className="text-accent" />} title="Criar Conta" />
               <Field icon={<Mail size={16} />} label="E-mail" type="email" value={email} onChange={setEmail} placeholder="seu@email.com" autoFocus />
-              <Field icon={<Lock size={16} />} label="Senha" type="password" value={password} onChange={setPassword} placeholder="MÍNIMO 6 CARACTERES" />
+              <PasswordField label="Senha" value={password} onChange={setPassword} show={showPwd} onToggle={() => setShowPwd((s) => !s)} placeholder="MÍNIMO 6 CARACTERES" />
+              <PasswordField label="Confirmar senha" value={confirmPassword} onChange={setConfirmPassword} show={showPwd2} onToggle={() => setShowPwd2((s) => !s)} placeholder="REPITA A SENHA" />
               <p className="text-[11px] text-muted-foreground -mt-2">
                 Você receberá um e-mail de confirmação para ativar sua conta.
               </p>
               <SubmitButton label="Criar conta" busy={busy} icon={<UserPlus size={16} />} />
-              <button
-                type="button"
-                onClick={() => { setMode("signin"); setPassword(""); }}
-                className="block w-full text-center text-xs text-muted-foreground hover:text-foreground mt-1"
-              >
-                Já tem conta? <span className="font-bold text-accent">Entrar</span>
-              </button>
             </form>
           )}
         </div>
@@ -240,27 +173,6 @@ const Login = () => {
   );
 };
 
-function BackButton({ onClick }: { onClick: () => void }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className="flex items-center gap-1.5 text-xs font-bold text-muted-foreground hover:text-foreground uppercase"
-    >
-      <ArrowLeft size={14} /> Voltar
-    </button>
-  );
-}
-
-function Header({ icon, title }: { icon: React.ReactNode; title: string }) {
-  return (
-    <div className="flex items-center gap-3">
-      {icon}
-      <h2 className="font-display font-bold text-lg text-card-foreground uppercase">{title}</h2>
-    </div>
-  );
-}
-
 function Field({
   icon, label, type, value, onChange, placeholder, autoFocus,
 }: {
@@ -283,6 +195,42 @@ function Field({
           required
           className="w-full pl-10 pr-4 py-3 rounded-xl bg-muted text-foreground text-sm outline-none focus:ring-2 focus:ring-accent/50 border border-border"
         />
+      </div>
+    </div>
+  );
+}
+
+function PasswordField({
+  label, value, onChange, placeholder, show, onToggle,
+}: {
+  label: string; value: string; onChange: (v: string) => void;
+  placeholder?: string; show: boolean; onToggle: () => void;
+}) {
+  return (
+    <div>
+      <label className="block text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1.5">
+        {label}
+      </label>
+      <div className="relative">
+        <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground">
+          <Lock size={16} />
+        </span>
+        <input
+          type={show ? "text" : "password"}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder={placeholder}
+          required
+          className="w-full pl-10 pr-11 py-3 rounded-xl bg-muted text-foreground text-sm outline-none focus:ring-2 focus:ring-accent/50 border border-border"
+        />
+        <button
+          type="button"
+          onClick={onToggle}
+          aria-label={show ? "Ocultar senha" : "Mostrar senha"}
+          className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-background/50 transition-all"
+        >
+          {show ? <EyeOff size={16} /> : <Eye size={16} />}
+        </button>
       </div>
     </div>
   );
