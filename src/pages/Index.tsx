@@ -7,6 +7,7 @@ import PontoCard from "@/components/PontoCard";
 import { PontoFormDialog } from "@/components/PontoFormDialog";
 import { SettingsDialog } from "@/components/SettingsDialog";
 import { MediaPlayer } from "@/components/MediaPlayer";
+import { AutoScrollControl } from "@/components/AutoScrollControl";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { useAuth } from "@/contexts/AuthContext";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -80,6 +81,18 @@ const Index = () => {
   const handleEditPonto = useCallback((ponto: Ponto) => {
     setEditingPonto(ponto);
     setFormOpen(true);
+  }, []);
+
+  const movePonto = useCallback((id: string, dir: -1 | 1) => {
+    setPontos((prev) => {
+      const idx = prev.findIndex((p) => p.id === id);
+      if (idx < 0) return prev;
+      const target = idx + dir;
+      if (target < 0 || target >= prev.length) return prev;
+      const next = [...prev];
+      [next[idx], next[target]] = [next[target], next[idx]];
+      return next;
+    });
   }, []);
 
   const filtered = useMemo(() => {
