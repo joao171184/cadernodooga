@@ -106,9 +106,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => subscription.unsubscribe();
   }, [loadRoleAndPerms]);
 
+  const translateError = (msg?: string | null) => {
+    if (!msg) return null;
+    const m = msg.toLowerCase();
+    if (m.includes("invalid login") || m.includes("invalid credentials")) return "E-mail ou senha incorretos";
+    if (m.includes("email not confirmed")) return "Confirme seu e-mail antes de entrar";
+    if (m.includes("user already registered") || m.includes("already registered")) return "Este e-mail já está cadastrado";
+    if (m.includes("password should be at least")) return "A senha precisa ter no mínimo 6 caracteres";
+    if (m.includes("unable to validate email")) return "E-mail inválido";
+    if (m.includes("rate limit")) return "Muitas tentativas. Aguarde um momento.";
+    if (m.includes("network")) return "Erro de conexão. Verifique sua internet.";
+    if (m.includes("pwned") || m.includes("compromised")) return "Esta senha aparece em vazamentos. Escolha outra.";
+    return msg;
+  };
+
   const signIn = useCallback(async (email: string, password: string) => {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
-    return { error: error?.message ?? null };
+    return { error: translateError(error?.message) };
   }, []);
 
   const signUp = useCallback(async (email: string, password: string) => {
@@ -118,7 +132,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       password,
       options: { emailRedirectTo: redirectUrl },
     });
-    return { error: error?.message ?? null, needsConfirm: !error && !data.session };
+    return { error: translateError(error?.message), needsConfirm: !error && !data.session };
   }, []);
 
   const logout = useCallback(async () => {

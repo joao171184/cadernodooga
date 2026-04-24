@@ -1,4 +1,4 @@
-import { Play, Pause, Heart, Pencil, Trash2, Mic2 } from "lucide-react";
+import { Play, Pause, Heart, Pencil, Trash2, Mic2, ArrowUp, ArrowDown } from "lucide-react";
 import type { Ponto } from "@/data/pontos";
 import { useAuth } from "@/contexts/AuthContext";
 import { getEmbedInfo } from "@/lib/embed";
@@ -11,9 +11,13 @@ interface PontoCardProps {
   onToggleFavorite: (id: string) => void;
   onEdit?: (ponto: Ponto) => void;
   onDelete?: (id: string) => void;
+  onMoveUp?: (id: string) => void;
+  onMoveDown?: (id: string) => void;
+  canMoveUp?: boolean;
+  canMoveDown?: boolean;
 }
 
-const PontoCard = ({ ponto, isPlaying, isFavorite, onTogglePlay, onToggleFavorite, onEdit, onDelete }: PontoCardProps) => {
+const PontoCard = ({ ponto, isPlaying, isFavorite, onTogglePlay, onToggleFavorite, onEdit, onDelete, onMoveUp, onMoveDown, canMoveUp, canMoveDown }: PontoCardProps) => {
   const { isAdmin } = useAuth();
   const hasMedia = getEmbedInfo(ponto.audio).kind !== "none";
   const subs = ponto.subcategorias && ponto.subcategorias.length > 0
@@ -40,6 +44,28 @@ const PontoCard = ({ ponto, isPlaying, isFavorite, onTogglePlay, onToggleFavorit
             )}
           </div>
           <div className="flex items-center gap-1">
+            {isAdmin && onMoveUp && (
+              <button
+                onClick={() => onMoveUp(ponto.id)}
+                disabled={!canMoveUp}
+                className="p-2 rounded-lg hover:bg-muted transition-all active:scale-90 disabled:opacity-30 disabled:cursor-not-allowed"
+                aria-label="Mover para cima"
+                title="Mover para cima"
+              >
+                <ArrowUp size={16} className="text-muted-foreground" />
+              </button>
+            )}
+            {isAdmin && onMoveDown && (
+              <button
+                onClick={() => onMoveDown(ponto.id)}
+                disabled={!canMoveDown}
+                className="p-2 rounded-lg hover:bg-muted transition-all active:scale-90 disabled:opacity-30 disabled:cursor-not-allowed"
+                aria-label="Mover para baixo"
+                title="Mover para baixo"
+              >
+                <ArrowDown size={16} className="text-muted-foreground" />
+              </button>
+            )}
             {isAdmin && onEdit && (
               <button
                 onClick={() => onEdit(ponto)}

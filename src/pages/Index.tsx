@@ -7,6 +7,7 @@ import PontoCard from "@/components/PontoCard";
 import { PontoFormDialog } from "@/components/PontoFormDialog";
 import { SettingsDialog } from "@/components/SettingsDialog";
 import { MediaPlayer } from "@/components/MediaPlayer";
+import { AutoScrollControl } from "@/components/AutoScrollControl";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { useAuth } from "@/contexts/AuthContext";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -80,6 +81,21 @@ const Index = () => {
   const handleEditPonto = useCallback((ponto: Ponto) => {
     setEditingPonto(ponto);
     setFormOpen(true);
+  }, []);
+
+  const movePonto = useCallback((id: string, dir: -1 | 1, neighborId?: string) => {
+    setPontos((prev) => {
+      const idx = prev.findIndex((p) => p.id === id);
+      if (idx < 0) return prev;
+      const targetIdx = neighborId
+        ? prev.findIndex((p) => p.id === neighborId)
+        : idx + dir;
+      if (targetIdx < 0 || targetIdx >= prev.length) return prev;
+      const next = [...prev];
+      const [item] = next.splice(idx, 1);
+      next.splice(targetIdx, 0, item);
+      return next;
+    });
   }, []);
 
   const filtered = useMemo(() => {
@@ -226,7 +242,7 @@ const Index = () => {
               )}
             </div>
           ) : (
-            filtered.map((ponto) => (
+            filtered.map((ponto, i) => (
               <PontoCard
                 key={ponto.id}
                 ponto={ponto}
@@ -236,11 +252,18 @@ const Index = () => {
                 onToggleFavorite={toggleFavorite}
                 onEdit={handleEditPonto}
                 onDelete={handleDeletePonto}
+                onMoveUp={(id) => movePonto(id, -1, filtered[i - 1]?.id)}
+                onMoveDown={(id) => movePonto(id, 1, filtered[i + 1]?.id)}
+                canMoveUp={i > 0}
+                canMoveDown={i < filtered.length - 1}
               />
             ))
           )}
         </div>
       </main>
+
+      {/* Auto-scroll */}
+      <AutoScrollControl />
 
       {/* Media Player */}
       {playingPonto && (

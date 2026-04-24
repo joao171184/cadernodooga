@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { FolderTree, Eye, ShieldCheck, Loader2, Save, Users } from "lucide-react";
+import { FolderTree, Eye, ShieldCheck, Loader2, Save, Users, Trash2 } from "lucide-react";
 import { useAuth, ALL_PERMISSIONS, type AppRole, type PermissionKey } from "@/contexts/AuthContext";
 import { useCategorias } from "@/contexts/CategoriasContext";
 import { CategoriasManagerDialog } from "@/components/CategoriasManagerDialog";
@@ -212,7 +212,7 @@ function Check({ checked, onChange, labelHint }: { checked: boolean; onChange: (
 type ProfileRow = { id: string; email: string; role: AppRole };
 
 function AcessosPanel() {
-  const { refreshPermissions } = useAuth();
+  const { refreshPermissions, user } = useAuth();
   const [users, setUsers] = useState<ProfileRow[]>([]);
   const [perms, setPerms] = useState<Record<AppRole, Record<string, boolean>>>({
     admin: {}, oga: {}, visitante: {},
@@ -257,6 +257,22 @@ function AcessosPanel() {
     toast.success("Papel atualizado");
   };
 
+  const deleteUser = async (u: ProfileRow) => {
+    if (u.id === user?.id) {
+      return toast.error("Você não pode excluir sua própria conta");
+    }
+    if (!window.confirm(`Excluir definitivamente a conta de ${u.email}? Esta ação não pode ser desfeita.`)) return;
+    const { data, error } = await supabase.functions.invoke("admin-delete-user", {
+      body: { userId: u.id },
+    });
+    if (error || (data && (data as { error?: string }).error)) {
+      const msg = (data as { error?: string } | null)?.error || error?.message || "Erro desconhecido";
+      return toast.error("Erro ao excluir: " + msg);
+    }
+    setUsers((arr) => arr.filter((x) => x.id !== u.id));
+    toast.success("Conta excluída");
+  };
+
   const togglePerm = (role: AppRole, key: PermissionKey) => {
     if (role === "admin") return; // travado
     setPerms((p) => ({ ...p, [role]: { ...p[role], [key]: !p[role][key] } }));
@@ -297,9 +313,12 @@ function AcessosPanel() {
           <p className="text-sm text-muted-foreground py-2">Nenhum usuário cadastrado ainda.</p>
         ) : (
           users.map((u) => (
-            <div key={u.id} className="flex items-center gap-3 py-2 border-b border-border last:border-0">
+            <div key={u.id} className="flex items-center gap-2 py-2 border-b border-border last:border-0">
               <Users size={14} className="text-muted-foreground shrink-0" />
-              <span className="flex-1 text-sm truncate">{u.email}</span>
+              <span className="flex-1 text-sm truncate">
+                {u.email}
+                {u.id === user?.id && <span className="ml-2 text-[10px] text-accent font-bold uppercase">(você)</span>}
+              </span>
               <select
                 value={u.role}
                 onChange={(e) => changeUserRole(u.id, e.target.value as AppRole)}
@@ -309,6 +328,15 @@ function AcessosPanel() {
                 <option value="oga">Ogã</option>
                 <option value="visitante">Visitante</option>
               </select>
+              <button
+                onClick={() => deleteUser(u)}
+                disabled={u.id === user?.id}
+                className="p-1.5 rounded-lg text-destructive/70 hover:bg-destructive/10 hover:text-destructive transition-all active:scale-90 disabled:opacity-30 disabled:cursor-not-allowed"
+                aria-label="Excluir conta"
+                title={u.id === user?.id ? "Não é possível excluir sua própria conta" : "Excluir conta"}
+              >
+                <Trash2 size={15} />
+              </button>
             </div>
           ))
         )}
