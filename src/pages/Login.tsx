@@ -93,8 +93,8 @@ const Login = () => {
 
       <div className="relative w-full max-w-md">
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-28 h-28 rounded-3xl bg-primary-foreground/10 backdrop-blur-md border border-primary-foreground/20 mb-4 shadow-2xl overflow-hidden p-2">
-            <img src={logoImg} alt="Caderno do Ogã" className="w-full h-full object-contain" />
+          <div className="inline-flex items-center justify-center w-28 h-28 rounded-full bg-primary-foreground/10 backdrop-blur-md border border-primary-foreground/20 mb-4 shadow-2xl overflow-hidden">
+            <img src={logoImg} alt="Caderno do Ogã" className="w-full h-full object-cover rounded-full" />
           </div>
           <h1 className="font-display text-4xl sm:text-5xl font-bold text-primary-foreground tracking-tight drop-shadow-lg">
             Caderno do Ogã
