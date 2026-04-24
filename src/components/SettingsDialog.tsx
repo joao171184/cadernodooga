@@ -272,6 +272,8 @@ function AcessosPanel() {
     setUsers((arr) => arr.filter((x) => x.id !== u.id));
     toast.success("Conta excluída");
   };
+
+  const togglePerm = (role: AppRole, key: PermissionKey) => {
     if (role === "admin") return; // travado
     setPerms((p) => ({ ...p, [role]: { ...p[role], [key]: !p[role][key] } }));
   };
