@@ -257,7 +257,21 @@ function AcessosPanel() {
     toast.success("Papel atualizado");
   };
 
-  const togglePerm = (role: AppRole, key: PermissionKey) => {
+  const deleteUser = async (u: ProfileRow) => {
+    if (u.id === user?.id) {
+      return toast.error("Você não pode excluir sua própria conta");
+    }
+    if (!window.confirm(`Excluir definitivamente a conta de ${u.email}? Esta ação não pode ser desfeita.`)) return;
+    const { data, error } = await supabase.functions.invoke("admin-delete-user", {
+      body: { userId: u.id },
+    });
+    if (error || (data && (data as { error?: string }).error)) {
+      const msg = (data as { error?: string } | null)?.error || error?.message || "Erro desconhecido";
+      return toast.error("Erro ao excluir: " + msg);
+    }
+    setUsers((arr) => arr.filter((x) => x.id !== u.id));
+    toast.success("Conta excluída");
+  };
     if (role === "admin") return; // travado
     setPerms((p) => ({ ...p, [role]: { ...p[role], [key]: !p[role][key] } }));
   };
