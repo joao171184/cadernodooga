@@ -252,8 +252,8 @@ const Index = () => {
                 onToggleFavorite={toggleFavorite}
                 onEdit={handleEditPonto}
                 onDelete={handleDeletePonto}
-                onMoveUp={(id) => movePonto(id, -1)}
-                onMoveDown={(id) => movePonto(id, 1)}
+                onMoveUp={(id) => movePonto(id, -1, filtered[i - 1]?.id)}
+                onMoveDown={(id) => movePonto(id, 1, filtered[i + 1]?.id)}
                 canMoveUp={i > 0}
                 canMoveDown={i < filtered.length - 1}
               />
@@ -261,6 +261,9 @@ const Index = () => {
           )}
         </div>
       </main>
+
+      {/* Auto-scroll */}
+      <AutoScrollControl />
 
       {/* Media Player */}
       {playingPonto && (
