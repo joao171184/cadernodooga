@@ -19,7 +19,8 @@ interface PontoCardProps {
 
 const PontoCard = ({ ponto, isPlaying, isFavorite, onTogglePlay, onToggleFavorite, onEdit, onDelete, onMoveUp, onMoveDown, canMoveUp, canMoveDown }: PontoCardProps) => {
   const { isAdmin } = useAuth();
-  const hasMedia = getEmbedInfo(ponto.audio).kind !== "none";
+  const embed = getEmbedInfo(ponto.audio);
+  const hasMedia = embed.kind !== "none";
   const subs = ponto.subcategorias && ponto.subcategorias.length > 0
     ? ponto.subcategorias
     : ponto.subcategoria ? [ponto.subcategoria] : [];
