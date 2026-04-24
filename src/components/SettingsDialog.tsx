@@ -313,9 +313,12 @@ function AcessosPanel() {
           <p className="text-sm text-muted-foreground py-2">Nenhum usuário cadastrado ainda.</p>
         ) : (
           users.map((u) => (
-            <div key={u.id} className="flex items-center gap-3 py-2 border-b border-border last:border-0">
+            <div key={u.id} className="flex items-center gap-2 py-2 border-b border-border last:border-0">
               <Users size={14} className="text-muted-foreground shrink-0" />
-              <span className="flex-1 text-sm truncate">{u.email}</span>
+              <span className="flex-1 text-sm truncate">
+                {u.email}
+                {u.id === user?.id && <span className="ml-2 text-[10px] text-accent font-bold uppercase">(você)</span>}
+              </span>
               <select
                 value={u.role}
                 onChange={(e) => changeUserRole(u.id, e.target.value as AppRole)}
@@ -325,6 +328,15 @@ function AcessosPanel() {
                 <option value="oga">Ogã</option>
                 <option value="visitante">Visitante</option>
               </select>
+              <button
+                onClick={() => deleteUser(u)}
+                disabled={u.id === user?.id}
+                className="p-1.5 rounded-lg text-destructive/70 hover:bg-destructive/10 hover:text-destructive transition-all active:scale-90 disabled:opacity-30 disabled:cursor-not-allowed"
+                aria-label="Excluir conta"
+                title={u.id === user?.id ? "Não é possível excluir sua própria conta" : "Excluir conta"}
+              >
+                <Trash2 size={15} />
+              </button>
             </div>
           ))
         )}
