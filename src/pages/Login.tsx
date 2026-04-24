@@ -67,7 +67,7 @@ const Login = () => {
     }
     if (needsConfirm) {
       toast.success("Conta criada!", {
-        description: "Faça login com seu e-mail e senha.",
+        description: "Enviamos um e-mail de confirmação. Confirme para poder entrar.",
       });
       setMode("signin");
       setPassword("");
