@@ -239,7 +239,7 @@ const Index = () => {
               )}
             </div>
           ) : (
-            filtered.map((ponto) => (
+            filtered.map((ponto, i) => (
               <PontoCard
                 key={ponto.id}
                 ponto={ponto}
@@ -249,6 +249,10 @@ const Index = () => {
                 onToggleFavorite={toggleFavorite}
                 onEdit={handleEditPonto}
                 onDelete={handleDeletePonto}
+                onMoveUp={(id) => movePonto(id, -1)}
+                onMoveDown={(id) => movePonto(id, 1)}
+                canMoveUp={i > 0}
+                canMoveDown={i < filtered.length - 1}
               />
             ))
           )}
