@@ -83,14 +83,17 @@ const Index = () => {
     setFormOpen(true);
   }, []);
 
-  const movePonto = useCallback((id: string, dir: -1 | 1) => {
+  const movePonto = useCallback((id: string, dir: -1 | 1, neighborId?: string) => {
     setPontos((prev) => {
       const idx = prev.findIndex((p) => p.id === id);
       if (idx < 0) return prev;
-      const target = idx + dir;
-      if (target < 0 || target >= prev.length) return prev;
+      const targetIdx = neighborId
+        ? prev.findIndex((p) => p.id === neighborId)
+        : idx + dir;
+      if (targetIdx < 0 || targetIdx >= prev.length) return prev;
       const next = [...prev];
-      [next[idx], next[target]] = [next[target], next[idx]];
+      const [item] = next.splice(idx, 1);
+      next.splice(targetIdx, 0, item);
       return next;
     });
   }, []);
