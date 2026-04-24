@@ -44,6 +44,28 @@ const PontoCard = ({ ponto, isPlaying, isFavorite, onTogglePlay, onToggleFavorit
             )}
           </div>
           <div className="flex items-center gap-1">
+            {isAdmin && onMoveUp && (
+              <button
+                onClick={() => onMoveUp(ponto.id)}
+                disabled={!canMoveUp}
+                className="p-2 rounded-lg hover:bg-muted transition-all active:scale-90 disabled:opacity-30 disabled:cursor-not-allowed"
+                aria-label="Mover para cima"
+                title="Mover para cima"
+              >
+                <ArrowUp size={16} className="text-muted-foreground" />
+              </button>
+            )}
+            {isAdmin && onMoveDown && (
+              <button
+                onClick={() => onMoveDown(ponto.id)}
+                disabled={!canMoveDown}
+                className="p-2 rounded-lg hover:bg-muted transition-all active:scale-90 disabled:opacity-30 disabled:cursor-not-allowed"
+                aria-label="Mover para baixo"
+                title="Mover para baixo"
+              >
+                <ArrowDown size={16} className="text-muted-foreground" />
+              </button>
+            )}
             {isAdmin && onEdit && (
               <button
                 onClick={() => onEdit(ponto)}
