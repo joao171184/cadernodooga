@@ -1,7 +1,9 @@
-import { Play, Pause, Heart, Pencil, Trash2, Mic2, ArrowUp, ArrowDown, Youtube, Music2, Volume2 } from "lucide-react";
+import { Heart, Pencil, Trash2, Mic2, ArrowUp, ArrowDown, Volume2, Pause } from "lucide-react";
 import type { Ponto } from "@/data/pontos";
 import { useAuth } from "@/contexts/AuthContext";
 import { getEmbedInfo, type EmbedKind } from "@/lib/embed";
+import spotifyIcon from "@/assets/spotify-icon.png";
+import youtubeIcon from "@/assets/youtube-icon.png";
 
 interface PontoCardProps {
   ponto: Ponto;
@@ -97,78 +99,62 @@ const PontoCard = ({ ponto, isPlaying, isFavorite, onTogglePlay, onToggleFavorit
                 className={`transition-colors ${isFavorite ? "fill-accent text-accent" : "text-muted-foreground"}`}
               />
             </button>
+            {hasMedia && (
+              <MediaIconButton
+                kind={embed.kind}
+                isPlaying={isPlaying}
+                onClick={() => onTogglePlay(ponto.id)}
+              />
+            )}
           </div>
         </div>
 
-        <div className="relative mb-4">
+        <div className="relative">
           <div className="absolute left-0 top-0 bottom-0 w-1 rounded-full bg-accent/30" />
           <pre className="text-sm sm:text-base text-card-foreground/80 whitespace-pre-wrap font-[inherit] leading-relaxed pl-4 py-1 uppercase">
             {ponto.letra}
           </pre>
         </div>
-
-        {hasMedia && (
-          <div className="flex justify-center">
-            <MediaButton
-              kind={embed.kind}
-              isPlaying={isPlaying}
-              onClick={() => onTogglePlay(ponto.id)}
-            />
-          </div>
-        )}
       </div>
     </div>
   );
 };
 
-function MediaButton({
+function MediaIconButton({
   kind, isPlaying, onClick,
 }: { kind: EmbedKind; isPlaying: boolean; onClick: () => void }) {
-  const cfg = getMediaCfg(kind);
+  const labelMap: Record<EmbedKind, string> = {
+    youtube: "YouTube",
+    spotify: "Spotify",
+    audio: "Áudio",
+    none: "",
+  };
+  const label = labelMap[kind];
+
   return (
     <button
       onClick={onClick}
-      aria-label={isPlaying ? `Pausar (${cfg.label})` : `Ouvir no ${cfg.label}`}
-      title={isPlaying ? "Pausar" : `Ouvir no ${cfg.label}`}
-      className={`relative w-14 h-14 rounded-full flex items-center justify-center shadow-md transition-all active:scale-90 hover:scale-105 ${cfg.bg} ${cfg.text} ${
-        isPlaying ? "ring-4 ring-offset-2 ring-offset-card animate-pulse " + cfg.ring : ""
+      aria-label={isPlaying ? `Pausar (${label})` : `Ouvir no ${label}`}
+      title={isPlaying ? "Pausar" : `Ouvir no ${label}`}
+      className={`p-1 rounded-lg transition-all active:scale-90 hover:bg-muted ${
+        isPlaying ? "ring-2 ring-accent/60" : ""
       }`}
     >
-      {isPlaying ? <Pause size={22} /> : <cfg.Icon size={26} className={cfg.iconExtra} />}
+      {isPlaying ? (
+        <div className="w-6 h-6 rounded-md bg-accent text-accent-foreground flex items-center justify-center">
+          <Pause size={14} />
+        </div>
+      ) : kind === "youtube" ? (
+        <img src={youtubeIcon} alt="YouTube" className="w-6 h-6 object-contain" />
+      ) : kind === "spotify" ? (
+        <img src={spotifyIcon} alt="Spotify" className="w-6 h-6 object-contain" />
+      ) : (
+        <div className="w-6 h-6 rounded-md bg-primary text-primary-foreground flex items-center justify-center">
+          <Volume2 size={14} />
+        </div>
+      )}
     </button>
   );
-}
-
-function getMediaCfg(kind: EmbedKind) {
-  switch (kind) {
-    case "youtube":
-      return {
-        label: "YouTube",
-        Icon: Youtube,
-        bg: "bg-[#FF0000] hover:bg-[#e60000]",
-        text: "text-white",
-        ring: "ring-[#FF0000]/50",
-        iconExtra: "",
-      };
-    case "spotify":
-      return {
-        label: "Spotify",
-        Icon: Music2,
-        bg: "bg-[#1DB954] hover:bg-[#1aa34a]",
-        text: "text-white",
-        ring: "ring-[#1DB954]/50",
-        iconExtra: "fill-current",
-      };
-    default:
-      return {
-        label: "Áudio",
-        Icon: Volume2,
-        bg: "bg-primary hover:bg-primary/90",
-        text: "text-primary-foreground",
-        ring: "ring-primary/50",
-        iconExtra: "",
-      };
-  }
 }
 
 export default PontoCard;
