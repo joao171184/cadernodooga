@@ -1,7 +1,7 @@
-import { Play, Pause, Heart, Pencil, Trash2, Mic2, ArrowUp, ArrowDown } from "lucide-react";
+import { Play, Pause, Heart, Pencil, Trash2, Mic2, ArrowUp, ArrowDown, Youtube, Music2, Volume2 } from "lucide-react";
 import type { Ponto } from "@/data/pontos";
 import { useAuth } from "@/contexts/AuthContext";
-import { getEmbedInfo } from "@/lib/embed";
+import { getEmbedInfo, type EmbedKind } from "@/lib/embed";
 
 interface PontoCardProps {
   ponto: Ponto;
@@ -19,7 +19,8 @@ interface PontoCardProps {
 
 const PontoCard = ({ ponto, isPlaying, isFavorite, onTogglePlay, onToggleFavorite, onEdit, onDelete, onMoveUp, onMoveDown, canMoveUp, canMoveDown }: PontoCardProps) => {
   const { isAdmin } = useAuth();
-  const hasMedia = getEmbedInfo(ponto.audio).kind !== "none";
+  const embed = getEmbedInfo(ponto.audio);
+  const hasMedia = embed.kind !== "none";
   const subs = ponto.subcategorias && ponto.subcategorias.length > 0
     ? ponto.subcategorias
     : ponto.subcategoria ? [ponto.subcategoria] : [];
@@ -107,30 +108,67 @@ const PontoCard = ({ ponto, isPlaying, isFavorite, onTogglePlay, onToggleFavorit
         </div>
 
         {hasMedia && (
-          <button
-            onClick={() => onTogglePlay(ponto.id)}
-            className={`w-full flex items-center justify-center gap-2.5 py-3.5 rounded-xl text-sm font-bold transition-all active:scale-[0.98] uppercase ${
-              isPlaying
-                ? "bg-accent/15 text-accent-foreground border-2 border-accent"
-                : "bg-primary text-primary-foreground shadow-sm hover:shadow-md"
-            }`}
-          >
-            {isPlaying ? (
-              <>
-                <Pause size={20} />
-                Pausar
-              </>
-            ) : (
-              <>
-                <Play size={20} className="ml-0.5" />
-                Ouvir Ponto
-              </>
-            )}
-          </button>
+          <div className="flex justify-center">
+            <MediaButton
+              kind={embed.kind}
+              isPlaying={isPlaying}
+              onClick={() => onTogglePlay(ponto.id)}
+            />
+          </div>
         )}
       </div>
     </div>
   );
 };
+
+function MediaButton({
+  kind, isPlaying, onClick,
+}: { kind: EmbedKind; isPlaying: boolean; onClick: () => void }) {
+  const cfg = getMediaCfg(kind);
+  return (
+    <button
+      onClick={onClick}
+      aria-label={isPlaying ? `Pausar (${cfg.label})` : `Ouvir no ${cfg.label}`}
+      title={isPlaying ? "Pausar" : `Ouvir no ${cfg.label}`}
+      className={`relative w-14 h-14 rounded-full flex items-center justify-center shadow-md transition-all active:scale-90 hover:scale-105 ${cfg.bg} ${cfg.text} ${
+        isPlaying ? "ring-4 ring-offset-2 ring-offset-card animate-pulse " + cfg.ring : ""
+      }`}
+    >
+      {isPlaying ? <Pause size={22} /> : <cfg.Icon size={26} className={cfg.iconExtra} />}
+    </button>
+  );
+}
+
+function getMediaCfg(kind: EmbedKind) {
+  switch (kind) {
+    case "youtube":
+      return {
+        label: "YouTube",
+        Icon: Youtube,
+        bg: "bg-[#FF0000] hover:bg-[#e60000]",
+        text: "text-white",
+        ring: "ring-[#FF0000]/50",
+        iconExtra: "",
+      };
+    case "spotify":
+      return {
+        label: "Spotify",
+        Icon: Music2,
+        bg: "bg-[#1DB954] hover:bg-[#1aa34a]",
+        text: "text-white",
+        ring: "ring-[#1DB954]/50",
+        iconExtra: "fill-current",
+      };
+    default:
+      return {
+        label: "Áudio",
+        Icon: Volume2,
+        bg: "bg-primary hover:bg-primary/90",
+        text: "text-primary-foreground",
+        ring: "ring-primary/50",
+        iconExtra: "",
+      };
+  }
+}
 
 export default PontoCard;
