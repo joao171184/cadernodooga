@@ -1,7 +1,7 @@
-import { Play, Pause, Heart, Pencil, Trash2, Mic2, ArrowUp, ArrowDown } from "lucide-react";
+import { Play, Pause, Heart, Pencil, Trash2, Mic2, ArrowUp, ArrowDown, Youtube, Music2, Volume2 } from "lucide-react";
 import type { Ponto } from "@/data/pontos";
 import { useAuth } from "@/contexts/AuthContext";
-import { getEmbedInfo } from "@/lib/embed";
+import { getEmbedInfo, type EmbedKind } from "@/lib/embed";
 
 interface PontoCardProps {
   ponto: Ponto;
