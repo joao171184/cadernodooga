@@ -14,6 +14,141 @@ export type Database = {
   }
   public: {
     Tables: {
+      categorias: {
+        Row: {
+          created_at: string
+          emoji: string
+          id: string
+          nome: string
+          ordem: number
+          parent_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          emoji?: string
+          id?: string
+          nome: string
+          ordem?: number
+          parent_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          emoji?: string
+          id?: string
+          nome?: string
+          ordem?: number
+          parent_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "categorias_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "categorias"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      favoritos: {
+        Row: {
+          created_at: string
+          ponto_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          ponto_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          ponto_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "favoritos_ponto_id_fkey"
+            columns: ["ponto_id"]
+            isOneToOne: false
+            referencedRelation: "pontos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ponto_subcategorias: {
+        Row: {
+          ponto_id: string
+          subcategoria: string
+        }
+        Insert: {
+          ponto_id: string
+          subcategoria: string
+        }
+        Update: {
+          ponto_id?: string
+          subcategoria?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ponto_subcategorias_ponto_id_fkey"
+            columns: ["ponto_id"]
+            isOneToOne: false
+            referencedRelation: "pontos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pontos: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          audio: string
+          categoria: string
+          created_at: string
+          created_by: string
+          id: string
+          letra: string
+          nome: string
+          ordem: number
+          puxador: string
+          status: Database["public"]["Enums"]["ponto_status"]
+          toque: Database["public"]["Enums"]["toque_tipo"] | null
+          updated_at: string
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          audio?: string
+          categoria: string
+          created_at?: string
+          created_by: string
+          id?: string
+          letra: string
+          nome: string
+          ordem?: number
+          puxador?: string
+          status?: Database["public"]["Enums"]["ponto_status"]
+          toque?: Database["public"]["Enums"]["toque_tipo"] | null
+          updated_at?: string
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          audio?: string
+          categoria?: string
+          created_at?: string
+          created_by?: string
+          id?: string
+          letra?: string
+          nome?: string
+          ordem?: number
+          puxador?: string
+          status?: Database["public"]["Enums"]["ponto_status"]
+          toque?: Database["public"]["Enums"]["toque_tipo"] | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
@@ -94,6 +229,8 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "oga" | "visitante"
+      ponto_status: "pending" | "approved" | "rejected"
+      toque_tipo: "ijexa" | "nago" | "congo" | "barravento" | "samba"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -222,6 +359,8 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "oga", "visitante"],
+      ponto_status: ["pending", "approved", "rejected"],
+      toque_tipo: ["ijexa", "nago", "congo", "barravento", "samba"],
     },
   },
 } as const

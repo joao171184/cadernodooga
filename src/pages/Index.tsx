@@ -1,8 +1,7 @@
-import { useState, useCallback, useMemo, useEffect } from "react";
-import { Search, Star, Music, Plus, Settings, LogOut, Instagram, Heart } from "lucide-react";
+import { useState, useCallback, useMemo } from "react";
+import { Search, Star, Music, Plus, Settings, LogOut, Instagram, Heart, Inbox, Loader2 } from "lucide-react";
 import logoImg from "@/assets/logo.png";
-import { useParams } from "react-router-dom";
-import { loadPontos, savePontos, type Ponto } from "@/data/pontos";
+import { useParams, useNavigate } from "react-router-dom";
 import PontoCard from "@/components/PontoCard";
 import { PontoFormDialog } from "@/components/PontoFormDialog";
 import { SettingsDialog } from "@/components/SettingsDialog";
@@ -10,92 +9,48 @@ import { MediaPlayer } from "@/components/MediaPlayer";
 import { AutoScrollControl } from "@/components/AutoScrollControl";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { useAuth } from "@/contexts/AuthContext";
+import { usePontos, type Ponto } from "@/contexts/PontosContext";
 import { ThemeToggle } from "@/components/ThemeToggle";
-
-const FAVORITES_KEY = "pontos-favoritos";
-
-const loadFavorites = (): Set<string> => {
-  try {
-    const saved = localStorage.getItem(FAVORITES_KEY);
-    return saved ? new Set(JSON.parse(saved)) : new Set();
-  } catch {
-    return new Set();
-  }
-};
+import { toast } from "sonner";
 
 const Index = () => {
   const { isAdmin, logout, can } = useAuth();
+  const navigate = useNavigate();
   const canAdd = can("add_pontos");
   const canManageCats = can("manage_categories");
   const showSettings = canManageCats || isAdmin;
   const { categoria, subcategoria } = useParams<{ categoria?: string; subcategoria?: string }>();
   const [search, setSearch] = useState("");
   const [showFavorites, setShowFavorites] = useState(false);
-  const [favorites, setFavorites] = useState<Set<string>>(loadFavorites);
   const [playingId, setPlayingId] = useState<string | null>(null);
-  const [pontos, setPontos] = useState<Ponto[]>(loadPontos);
   const [formOpen, setFormOpen] = useState(false);
   const [editingPonto, setEditingPonto] = useState<Ponto | null>(null);
   const [adminOpen, setAdminOpen] = useState(false);
 
-  useEffect(() => {
-    localStorage.setItem(FAVORITES_KEY, JSON.stringify([...favorites]));
-  }, [favorites]);
-
-  useEffect(() => {
-    savePontos(pontos);
-  }, [pontos]);
-
-  const toggleFavorite = useCallback((id: string) => {
-    setFavorites((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
-  }, []);
+  const { pontos, pendentes, favoritos, loading, savePonto, deletePonto, toggleFavorito, movePonto } = usePontos();
 
   const togglePlay = useCallback((id: string) => {
     setPlayingId((curr) => (curr === id ? null : id));
   }, []);
 
-  const handleSavePonto = useCallback((data: Omit<Ponto, "id"> & { id?: string }) => {
-    if (data.id) {
-      setPontos((prev) => prev.map((p) => (p.id === data.id ? { ...p, ...data } as Ponto : p)));
-    } else {
-      const newPonto: Ponto = {
-        ...data,
-        id: `ponto-${Date.now()}`,
-      };
-      setPontos((prev) => [...prev, newPonto]);
-    }
-  }, []);
+  const handleSavePonto = useCallback(async (data: Parameters<typeof savePonto>[0]) => {
+    const { error, pending } = await savePonto(data);
+    if (error) { toast.error("Erro: " + error); return; }
+    if (pending) toast.success("Ponto enviado para aprovação do admin");
+    else toast.success("Ponto salvo");
+  }, [savePonto]);
 
-  const handleDeletePonto = useCallback((id: string) => {
+  const handleDeletePonto = useCallback(async (id: string) => {
     if (window.confirm("Tem certeza que deseja excluir este ponto?")) {
-      setPontos((prev) => prev.filter((p) => p.id !== id));
+      await deletePonto(id);
       setPlayingId((curr) => (curr === id ? null : curr));
+      toast.success("Ponto excluído");
     }
-  }, []);
+  }, [deletePonto]);
 
   const handleEditPonto = useCallback((ponto: Ponto) => {
     setEditingPonto(ponto);
     setFormOpen(true);
-  }, []);
-
-  const movePonto = useCallback((id: string, dir: -1 | 1, neighborId?: string) => {
-    setPontos((prev) => {
-      const idx = prev.findIndex((p) => p.id === id);
-      if (idx < 0) return prev;
-      const targetIdx = neighborId
-        ? prev.findIndex((p) => p.id === neighborId)
-        : idx + dir;
-      if (targetIdx < 0 || targetIdx >= prev.length) return prev;
-      const next = [...prev];
-      const [item] = next.splice(idx, 1);
-      next.splice(targetIdx, 0, item);
-      return next;
-    });
   }, []);
 
   const filtered = useMemo(() => {
@@ -103,19 +58,13 @@ const Index = () => {
     let list = pontos;
 
     if (categoria && subcategoria) {
-      list = list.filter((p) => {
-        if (p.categoria !== categoria) return false;
-        const subs = p.subcategorias && p.subcategorias.length > 0
-          ? p.subcategorias
-          : p.subcategoria ? [p.subcategoria] : [];
-        return subs.includes(subcategoria);
-      });
+      list = list.filter((p) => p.categoria === categoria && p.subcategorias.includes(subcategoria));
     } else if (categoria) {
       list = list.filter((p) => p.categoria === categoria);
     }
 
     if (showFavorites) {
-      list = list.filter((p) => favorites.has(p.id));
+      list = list.filter((p) => favoritos.has(p.id));
     }
     if (!q) return list;
     return list.filter(
@@ -124,7 +73,7 @@ const Index = () => {
         p.categoria.toLowerCase().includes(q) ||
         p.letra.toLowerCase().includes(q)
     );
-  }, [search, showFavorites, favorites, categoria, subcategoria, pontos]);
+  }, [search, showFavorites, favoritos, categoria, subcategoria, pontos]);
 
   const playingPonto = playingId ? pontos.find((p) => p.id === playingId) : null;
 
@@ -151,6 +100,19 @@ const Index = () => {
                 {pageSubtitle}
               </p>
             </div>
+
+            {isAdmin && pendentes.length > 0 && (
+              <button
+                onClick={() => navigate("/pendentes")}
+                className="relative flex items-center gap-1.5 px-3 py-2 rounded-xl bg-amber-500 text-white text-xs font-bold transition-all active:scale-95 shadow-sm uppercase"
+                title="Pontos pendentes de aprovação"
+              >
+                <Inbox size={14} />
+                <span className="hidden sm:inline">Pendentes</span>
+                <span className="bg-white text-amber-600 rounded-full px-1.5 min-w-[20px] text-center">{pendentes.length}</span>
+              </button>
+            )}
+
             {showSettings && (
               <>
                 <button
@@ -217,7 +179,7 @@ const Index = () => {
             }`}
           >
             <Star size={14} className={showFavorites ? "fill-accent-foreground" : ""} />
-            Favoritos {favorites.size > 0 && `(${favorites.size})`}
+            Favoritos {favoritos.size > 0 && `(${favoritos.size})`}
           </button>
           <p className="text-xs text-muted-foreground font-medium">
             {filtered.length} {filtered.length === 1 ? "ponto" : "pontos"}
@@ -226,7 +188,12 @@ const Index = () => {
 
         {/* Cards */}
         <div className="space-y-3 sm:space-y-4 max-w-2xl">
-          {filtered.length === 0 ? (
+          {loading ? (
+            <div className="text-center py-16 text-muted-foreground">
+              <Loader2 size={32} className="mx-auto animate-spin opacity-60" />
+              <p className="text-sm mt-3 uppercase">Carregando pontos...</p>
+            </div>
+          ) : filtered.length === 0 ? (
             <div className="text-center py-16 text-muted-foreground">
               <Music size={44} className="mx-auto mb-4 opacity-20" />
               <p className="text-base font-medium uppercase">Nenhum ponto encontrado</p>
@@ -247,13 +214,13 @@ const Index = () => {
                 key={ponto.id}
                 ponto={ponto}
                 isPlaying={playingId === ponto.id}
-                isFavorite={favorites.has(ponto.id)}
+                isFavorite={favoritos.has(ponto.id)}
                 onTogglePlay={togglePlay}
-                onToggleFavorite={toggleFavorite}
+                onToggleFavorite={toggleFavorito}
                 onEdit={handleEditPonto}
                 onDelete={handleDeletePonto}
-                onMoveUp={(id) => movePonto(id, -1, filtered[i - 1]?.id)}
-                onMoveDown={(id) => movePonto(id, 1, filtered[i + 1]?.id)}
+                onMoveUp={(id) => movePonto(id, -1)}
+                onMoveDown={(id) => movePonto(id, 1)}
                 canMoveUp={i > 0}
                 canMoveDown={i < filtered.length - 1}
               />

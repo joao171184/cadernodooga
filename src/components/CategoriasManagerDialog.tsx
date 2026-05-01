@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Plus, Pencil, Trash2, Check, X, ChevronDown, ChevronRight, FolderTree, Folder, FolderPlus } from "lucide-react";
-import { useCategorias } from "@/contexts/CategoriasContext";
+import { Plus, Pencil, Trash2, Check, X, ChevronDown, ChevronRight, FolderTree } from "lucide-react";
+import { useCategorias, type CategoriaNode } from "@/contexts/CategoriasContext";
 import { toast } from "sonner";
 
 interface Props {
@@ -38,77 +38,70 @@ function EmojiPicker({ value, onChange }: { value: string; onChange: (v: string)
 }
 
 export function CategoriasManagerDialog({ open, onClose }: Props) {
-  const { categorias, addCategoria, addSubcategoria, renameCategoria, renameSubcategoria, deleteCategoria, deleteSubcategoria } = useCategorias();
+  const { categorias, addCategoria, addSubcategoria, renameCategoria, deleteCategoria } = useCategorias();
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
   const [newCatNome, setNewCatNome] = useState("");
   const [newCatEmoji, setNewCatEmoji] = useState("✨");
-  const [addSubFor, setAddSubFor] = useState<string | null>(null);
+  const [addSubFor, setAddSubFor] = useState<string | null>(null); // parent id
   const [newSubNome, setNewSubNome] = useState("");
   const [newSubEmoji, setNewSubEmoji] = useState("🪶");
-  const [editing, setEditing] = useState<{ parent?: string; nome: string } | null>(null);
+  const [editing, setEditing] = useState<{ id: string } | null>(null);
   const [editNome, setEditNome] = useState("");
   const [editEmoji, setEditEmoji] = useState("");
 
-  const toggle = (n: string) => {
+  const toggle = (id: string) => {
     setExpanded((p) => {
       const s = new Set(p);
-      s.has(n) ? s.delete(n) : s.add(n);
+      s.has(id) ? s.delete(id) : s.add(id);
       return s;
     });
   };
 
-  const startEdit = (parent: string | undefined, nome: string, emoji: string) => {
-    setEditing({ parent, nome });
-    setEditNome(nome);
-    setEditEmoji(emoji);
+  const startEdit = (node: CategoriaNode) => {
+    setEditing({ id: node.id });
+    setEditNome(node.nome);
+    setEditEmoji(node.emoji);
   };
 
-  const saveEdit = () => {
+  const saveEdit = async () => {
     if (!editing || !editNome.trim()) return;
-    if (editing.parent) {
-      renameSubcategoria(editing.parent, editing.nome, editNome.trim(), editEmoji || "•");
-    } else {
-      renameCategoria(editing.nome, editNome.trim(), editEmoji || "•");
-    }
+    await renameCategoria(editing.id, editNome.trim(), editEmoji || "•");
     setEditing(null);
     toast.success("Atualizado");
   };
 
-  const handleAddCat = () => {
+  const handleAddCat = async () => {
     const n = newCatNome.trim();
     if (!n) return;
     if (categorias.some((c) => c.nome === n)) {
       toast.error("Já existe uma categoria com esse nome");
       return;
     }
-    addCategoria(n, newCatEmoji || "•");
+    const { error } = await addCategoria(n, newCatEmoji || "•");
+    if (error) return toast.error("Erro: " + error);
     setNewCatNome("");
     setNewCatEmoji("✨");
     toast.success("Categoria criada");
   };
 
-  const handleAddSub = (parent: string) => {
+  const handleAddSub = async (parentId: string) => {
     const n = newSubNome.trim();
     if (!n) return;
-    addSubcategoria(parent, n, newSubEmoji || "•");
+    const { error } = await addSubcategoria(parentId, n, newSubEmoji || "•");
+    if (error) return toast.error("Erro: " + error);
     setNewSubNome("");
     setNewSubEmoji("🪶");
     setAddSubFor(null);
     toast.success("Subcategoria criada");
   };
 
-  const handleDeleteCat = (nome: string) => {
-    if (window.confirm(`Excluir a pasta "${nome}" e todas as suas subpastas? Os pontos não são apagados, mas perdem o vínculo.`)) {
-      deleteCategoria(nome);
-      toast.success("Categoria excluída");
-    }
-  };
-
-  const handleDeleteSub = (parent: string, nome: string) => {
-    if (window.confirm(`Excluir a subpasta "${nome}"?`)) {
-      deleteSubcategoria(parent, nome);
-      toast.success("Subcategoria excluída");
-    }
+  const handleDelete = async (node: CategoriaNode, isSub: boolean) => {
+    const msg = isSub
+      ? `Excluir a subpasta "${node.nome}"?`
+      : `Excluir a pasta "${node.nome}" e todas as suas subpastas? Os pontos não são apagados, mas perdem o vínculo.`;
+    if (!window.confirm(msg)) return;
+    await deleteCategoria(node.id);
+    toast.success("Excluído");
   };
 
   return (
@@ -149,17 +142,14 @@ export function CategoriasManagerDialog({ open, onClose }: Props) {
         {/* Tree */}
         <div className="space-y-2 mt-2">
           {categorias.map((cat) => {
-            const hasChildren = cat.filhos !== undefined;
-            const isOpen = expanded.has(cat.nome);
-            const isEditing = editing && !editing.parent && editing.nome === cat.nome;
+            const isOpen = expanded.has(cat.id);
+            const isEditing = editing && editing.id === cat.id;
             return (
-              <div key={cat.nome} className="rounded-xl border border-border bg-card">
+              <div key={cat.id} className="rounded-xl border border-border bg-card">
                 <div className="flex items-center gap-2 p-2.5">
-                  {hasChildren ? (
-                    <button onClick={() => toggle(cat.nome)} className="p-1 rounded hover:bg-muted">
-                      {isOpen ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
-                    </button>
-                  ) : <div className="w-6" />}
+                  <button onClick={() => toggle(cat.id)} className="p-1 rounded hover:bg-muted">
+                    {isOpen ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+                  </button>
 
                   {isEditing ? (
                     <>
@@ -183,23 +173,22 @@ export function CategoriasManagerDialog({ open, onClose }: Props) {
                     <>
                       <span className="text-lg">{cat.emoji}</span>
                       <span className="flex-1 font-bold text-sm uppercase">{cat.nome}</span>
-                      {hasChildren && (
-                        <button
-                          onClick={() => { setAddSubFor(addSubFor === cat.nome ? null : cat.nome); toggle(cat.nome); }}
-                          className="p-2 rounded-lg hover:bg-muted text-muted-foreground"
-                          aria-label="Adicionar subcategoria"
-                        >
-                          <Plus size={16} />
-                        </button>
-                      )}
                       <button
-                        onClick={() => startEdit(undefined, cat.nome, cat.emoji)}
+                        onClick={() => { setAddSubFor(addSubFor === cat.id ? null : cat.id); if (!isOpen) toggle(cat.id); }}
+                        className="p-2 rounded-lg hover:bg-muted text-muted-foreground"
+                        aria-label="Adicionar subcategoria"
+                        title="Adicionar subcategoria"
+                      >
+                        <Plus size={16} />
+                      </button>
+                      <button
+                        onClick={() => startEdit(cat)}
                         className="p-2 rounded-lg hover:bg-muted text-muted-foreground"
                       >
                         <Pencil size={14} />
                       </button>
                       <button
-                        onClick={() => handleDeleteCat(cat.nome)}
+                        onClick={() => handleDelete(cat, false)}
                         className="p-2 rounded-lg hover:bg-destructive/10 text-destructive/70"
                       >
                         <Trash2 size={14} />
@@ -208,12 +197,12 @@ export function CategoriasManagerDialog({ open, onClose }: Props) {
                   )}
                 </div>
 
-                {hasChildren && isOpen && (
+                {isOpen && (
                   <div className="px-3 pb-3 space-y-2">
-                    {(cat.filhos || []).map((sub) => {
-                      const isSubEditing = editing && editing.parent === cat.nome && editing.nome === sub.nome;
+                    {cat.filhos.map((sub) => {
+                      const isSubEditing = editing && editing.id === sub.id;
                       return (
-                        <div key={sub.nome} className="flex items-center gap-2 pl-6 py-1.5">
+                        <div key={sub.id} className="flex items-center gap-2 pl-6 py-1.5">
                           {isSubEditing ? (
                             <>
                               <input
@@ -237,13 +226,13 @@ export function CategoriasManagerDialog({ open, onClose }: Props) {
                               <span className="text-base">{sub.emoji}</span>
                               <span className="flex-1 text-sm">{sub.nome}</span>
                               <button
-                                onClick={() => startEdit(cat.nome, sub.nome, sub.emoji)}
+                                onClick={() => startEdit(sub)}
                                 className="p-1.5 rounded-lg hover:bg-muted text-muted-foreground"
                               >
                                 <Pencil size={13} />
                               </button>
                               <button
-                                onClick={() => handleDeleteSub(cat.nome, sub.nome)}
+                                onClick={() => handleDelete(sub, true)}
                                 className="p-1.5 rounded-lg hover:bg-destructive/10 text-destructive/70"
                               >
                                 <Trash2 size={13} />
@@ -254,7 +243,7 @@ export function CategoriasManagerDialog({ open, onClose }: Props) {
                       );
                     })}
 
-                    {addSubFor === cat.nome && (
+                    {addSubFor === cat.id && (
                       <div className="rounded-lg border border-dashed border-border p-3 ml-6 space-y-2">
                         <div className="flex gap-2 items-start">
                           <div>
@@ -265,7 +254,7 @@ export function CategoriasManagerDialog({ open, onClose }: Props) {
                               type="text"
                               value={newSubNome}
                               onChange={(e) => setNewSubNome(e.target.value)}
-                              placeholder="Nome da subcategoria"
+                              placeholder="Nome da subcategoria (ex: Chamada)"
                               className="w-full px-3 py-2 rounded-lg bg-muted text-sm border border-border"
                             />
                             <div className="flex gap-2">
@@ -274,7 +263,7 @@ export function CategoriasManagerDialog({ open, onClose }: Props) {
                                 className="flex-1 py-1.5 rounded-lg text-xs font-bold text-muted-foreground bg-muted uppercase"
                               >Cancelar</button>
                               <button
-                                onClick={() => handleAddSub(cat.nome)}
+                                onClick={() => handleAddSub(cat.id)}
                                 className="flex-1 py-1.5 rounded-lg text-xs font-bold text-primary-foreground bg-primary uppercase"
                               >Adicionar</button>
                             </div>
@@ -297,7 +286,7 @@ export function CategoriasManagerDialog({ open, onClose }: Props) {
             Concluir
           </button>
           <p className="text-[11px] text-muted-foreground/70 text-center mt-2">
-            Tudo é salvo automaticamente no seu dispositivo.
+            Salvo no servidor — aparece para todos.
           </p>
         </div>
       </DialogContent>

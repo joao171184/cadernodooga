@@ -13,7 +13,7 @@ import {
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
 import { ChevronDown, ChevronRight, Shield, Eye, BookOpen, Instagram, UserCog } from "lucide-react";
-import { type CategoriaNode } from "@/data/pontos";
+import type { CategoriaNode } from "@/contexts/CategoriasContext";
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCategorias } from "@/contexts/CategoriasContext";
@@ -48,7 +48,7 @@ export function AppSidebar() {
 
     if (hasChildren) {
       return (
-        <div key={node.nome} className="mb-0.5">
+        <div key={node.id} className="mb-0.5">
           <button
             onClick={() => toggleFolder(node.nome)}
             className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-semibold text-sidebar-foreground hover:bg-sidebar-accent transition-all"
@@ -60,12 +60,12 @@ export function AppSidebar() {
           </button>
           {isOpen && (
             <div className="ml-3 pl-3 border-l-2 border-sidebar-primary/20 space-y-0.5 mt-0.5">
-              {node.filhos!.map((child) => {
+              {node.filhos.map((child) => {
                 const url = `/guia/${encodeURIComponent(node.nome)}/${encodeURIComponent(child.nome)}`;
                 const isActive = currentPath === `/guia/${node.nome}/${child.nome}`;
                 const ChildIcon = getCategoryIcon(child.nome);
                 return (
-                  <SidebarMenuItem key={child.nome}>
+                  <SidebarMenuItem key={child.id}>
                     <SidebarMenuButton asChild>
                       <NavLink
                         to={url}
@@ -94,7 +94,7 @@ export function AppSidebar() {
     const url = `/guia/${encodeURIComponent(node.nome)}`;
     const isActive = currentPath === `/guia/${node.nome}`;
     return (
-      <SidebarMenuItem key={node.nome}>
+      <SidebarMenuItem key={node.id}>
         <SidebarMenuButton asChild>
           <NavLink
             to={url}

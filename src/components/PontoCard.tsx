@@ -1,9 +1,8 @@
-import { Heart, Pencil, Trash2, Mic2, ArrowUp, ArrowDown, Volume2, Pause } from "lucide-react";
-import type { Ponto } from "@/data/pontos";
+import { Heart, Pencil, Trash2, Mic2, ArrowUp, ArrowDown, Volume2, Pause, Drum } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { getEmbedInfo, type EmbedKind } from "@/lib/embed";
-import spotifyIcon from "@/assets/spotify-icon.png";
-import youtubeIcon from "@/assets/youtube-icon.png";
+import { type Ponto, TOQUE_OPTIONS } from "@/contexts/PontosContext";
+import { YoutubeGlyph, SpotifyGlyph } from "@/components/MediaIcons";
 
 interface PontoCardProps {
   ponto: Ponto;
@@ -23,9 +22,8 @@ const PontoCard = ({ ponto, isPlaying, isFavorite, onTogglePlay, onToggleFavorit
   const { isAdmin } = useAuth();
   const embed = getEmbedInfo(ponto.audio);
   const hasMedia = embed.kind !== "none";
-  const subs = ponto.subcategorias && ponto.subcategorias.length > 0
-    ? ponto.subcategorias
-    : ponto.subcategoria ? [ponto.subcategoria] : [];
+  const subs = ponto.subcategorias;
+  const toqueLabel = TOQUE_OPTIONS.find((t) => t.value === ponto.toque)?.label;
 
   return (
     <div className={`bg-card rounded-2xl border border-border shadow-sm overflow-hidden transition-all duration-200 ${isPlaying ? "ring-2 ring-accent/40 shadow-lg" : "hover:shadow-md"}`}>
@@ -38,13 +36,22 @@ const PontoCard = ({ ponto, isPlaying, isFavorite, onTogglePlay, onToggleFavorit
             <p className="text-xs text-muted-foreground mt-1">
               {ponto.categoria}{subs.length > 0 ? ` › ${subs.join(" • ")}` : ""}
             </p>
-            {ponto.puxador && (
-              <div className="flex items-center gap-1.5 mt-2 text-xs">
-                <Mic2 size={12} className="text-accent shrink-0" />
-                <span className="text-muted-foreground uppercase tracking-wide font-semibold">Puxa:</span>
-                <span className="text-card-foreground font-medium truncate">{ponto.puxador}</span>
-              </div>
-            )}
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-2">
+              {toqueLabel && (
+                <div className="flex items-center gap-1.5 text-xs">
+                  <Drum size={12} className="text-accent shrink-0" />
+                  <span className="text-muted-foreground uppercase tracking-wide font-semibold">Toque:</span>
+                  <span className="text-card-foreground font-medium">{toqueLabel}</span>
+                </div>
+              )}
+              {ponto.puxador && (
+                <div className="flex items-center gap-1.5 text-xs">
+                  <Mic2 size={12} className="text-accent shrink-0" />
+                  <span className="text-muted-foreground uppercase tracking-wide font-semibold">Puxa:</span>
+                  <span className="text-card-foreground font-medium truncate">{ponto.puxador}</span>
+                </div>
+              )}
+            </div>
           </div>
           <div className="flex items-center gap-1">
             {isAdmin && onMoveUp && (
@@ -53,7 +60,6 @@ const PontoCard = ({ ponto, isPlaying, isFavorite, onTogglePlay, onToggleFavorit
                 disabled={!canMoveUp}
                 className="p-2 rounded-lg hover:bg-muted transition-all active:scale-90 disabled:opacity-30 disabled:cursor-not-allowed"
                 aria-label="Mover para cima"
-                title="Mover para cima"
               >
                 <ArrowUp size={16} className="text-muted-foreground" />
               </button>
@@ -64,7 +70,6 @@ const PontoCard = ({ ponto, isPlaying, isFavorite, onTogglePlay, onToggleFavorit
                 disabled={!canMoveDown}
                 className="p-2 rounded-lg hover:bg-muted transition-all active:scale-90 disabled:opacity-30 disabled:cursor-not-allowed"
                 aria-label="Mover para baixo"
-                title="Mover para baixo"
               >
                 <ArrowDown size={16} className="text-muted-foreground" />
               </button>
@@ -136,21 +141,21 @@ function MediaIconButton({
       onClick={onClick}
       aria-label={isPlaying ? `Pausar (${label})` : `Ouvir no ${label}`}
       title={isPlaying ? "Pausar" : `Ouvir no ${label}`}
-      className={`p-1 rounded-lg transition-all active:scale-90 hover:bg-muted ${
-        isPlaying ? "ring-2 ring-accent/60" : ""
+      className={`p-1.5 rounded-lg transition-all active:scale-90 hover:bg-muted ${
+        isPlaying ? "ring-2 ring-accent/60 bg-accent/10" : ""
       }`}
     >
       {isPlaying ? (
-        <div className="w-6 h-6 rounded-md bg-accent text-accent-foreground flex items-center justify-center">
-          <Pause size={14} />
+        <div className="w-5 h-5 rounded-md bg-accent text-accent-foreground flex items-center justify-center">
+          <Pause size={12} />
         </div>
       ) : kind === "youtube" ? (
-        <img src={youtubeIcon} alt="YouTube" className="w-6 h-6 object-contain" />
+        <YoutubeGlyph size={20} />
       ) : kind === "spotify" ? (
-        <img src={spotifyIcon} alt="Spotify" className="w-6 h-6 object-contain" />
+        <SpotifyGlyph size={20} />
       ) : (
-        <div className="w-6 h-6 rounded-md bg-primary text-primary-foreground flex items-center justify-center">
-          <Volume2 size={14} />
+        <div className="w-5 h-5 rounded-md bg-primary text-primary-foreground flex items-center justify-center">
+          <Volume2 size={12} />
         </div>
       )}
     </button>
