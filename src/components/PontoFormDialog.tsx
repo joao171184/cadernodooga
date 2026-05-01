@@ -1,13 +1,13 @@
 import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useCategorias } from "@/contexts/CategoriasContext";
-import type { Ponto } from "@/data/pontos";
+import { TOQUE_OPTIONS, type Ponto, type PontoInput, type ToqueTipo } from "@/contexts/PontosContext";
 import { X, Check } from "lucide-react";
 
 interface PontoFormDialogProps {
   open: boolean;
   onClose: () => void;
-  onSave: (ponto: Omit<Ponto, "id"> & { id?: string }) => void;
+  onSave: (ponto: PontoInput) => void | Promise<void>;
   ponto?: Ponto | null;
   defaultCategoria?: string;
   defaultSubcategoria?: string;
@@ -21,18 +21,17 @@ export function PontoFormDialog({ open, onClose, onSave, ponto, defaultCategoria
   const [letra, setLetra] = useState("");
   const [audio, setAudio] = useState("");
   const [puxador, setPuxador] = useState("");
+  const [toque, setToque] = useState<ToqueTipo | "">("");
 
   useEffect(() => {
     if (ponto) {
       setNome(ponto.nome);
       setCategoria(ponto.categoria);
-      const subs = ponto.subcategorias && ponto.subcategorias.length > 0
-        ? ponto.subcategorias
-        : ponto.subcategoria ? [ponto.subcategoria] : [];
-      setSubcategorias(subs);
+      setSubcategorias(ponto.subcategorias);
       setLetra(ponto.letra);
       setAudio(ponto.audio);
-      setPuxador(ponto.puxador || "");
+      setPuxador(ponto.puxador);
+      setToque(ponto.toque ?? "");
     } else {
       setNome("");
       setCategoria(defaultCategoria || "");
@@ -40,10 +39,11 @@ export function PontoFormDialog({ open, onClose, onSave, ponto, defaultCategoria
       setLetra("");
       setAudio("");
       setPuxador("");
+      setToque("");
     }
   }, [ponto, open, defaultCategoria, defaultSubcategoria]);
 
-  const subOptions = categorias.find((c) => c.nome === categoria)?.filhos || [];
+  const subOptions = categorias.find((c) => c.nome === categoria)?.filhos ?? [];
 
   const toggleSub = (nome: string) => {
     setSubcategorias((prev) =>
@@ -51,18 +51,18 @@ export function PontoFormDialog({ open, onClose, onSave, ponto, defaultCategoria
     );
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!nome.trim() || !letra.trim() || !categoria) return;
-    onSave({
+    await onSave({
       ...(ponto ? { id: ponto.id } : {}),
       nome: nome.trim(),
       categoria,
-      subcategoria: subcategorias[0] || "",
       subcategorias,
       letra: letra.toUpperCase(),
       audio: audio.trim(),
       puxador: puxador.trim(),
+      toque: toque || null,
     });
     onClose();
   };
@@ -102,7 +102,7 @@ export function PontoFormDialog({ open, onClose, onSave, ponto, defaultCategoria
             >
               <option value="">Selecione...</option>
               {categorias.map((c) => (
-                <option key={c.nome} value={c.nome}>{c.emoji} {c.nome}</option>
+                <option key={c.id} value={c.nome}>{c.emoji} {c.nome}</option>
               ))}
             </select>
           </div>
@@ -117,7 +117,7 @@ export function PontoFormDialog({ open, onClose, onSave, ponto, defaultCategoria
                   const active = subcategorias.includes(s.nome);
                   return (
                     <button
-                      key={s.nome}
+                      key={s.id}
                       type="button"
                       onClick={() => toggleSub(s.nome)}
                       className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all active:scale-95 ${
@@ -132,13 +132,45 @@ export function PontoFormDialog({ open, onClose, onSave, ponto, defaultCategoria
                   );
                 })}
               </div>
-              {subcategorias.length > 0 && (
-                <p className="text-[11px] text-muted-foreground mt-1.5">
-                  Aparecerá em: {subcategorias.join(", ")}
-                </p>
-              )}
             </div>
           )}
+
+          <div>
+            <label className="block text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1.5">
+              Tipo de Toque
+            </label>
+            <div className="flex flex-wrap gap-2 p-2 rounded-xl bg-muted/40 border border-border">
+              <button
+                type="button"
+                onClick={() => setToque("")}
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all active:scale-95 ${
+                  toque === ""
+                    ? "bg-accent text-accent-foreground shadow-sm"
+                    : "bg-background text-foreground/70 border border-border hover:border-accent/50"
+                }`}
+              >
+                — Não definido
+              </button>
+              {TOQUE_OPTIONS.map((t) => {
+                const active = toque === t.value;
+                return (
+                  <button
+                    key={t.value}
+                    type="button"
+                    onClick={() => setToque(t.value)}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all active:scale-95 ${
+                      active
+                        ? "bg-accent text-accent-foreground shadow-sm"
+                        : "bg-background text-foreground/70 border border-border hover:border-accent/50"
+                    }`}
+                  >
+                    {active && <Check size={12} />}
+                    <span>🪘 {t.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
 
           <div>
             <label className="block text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1.5">
@@ -178,9 +210,6 @@ export function PontoFormDialog({ open, onClose, onSave, ponto, defaultCategoria
               className="w-full px-4 py-3 rounded-xl bg-muted text-foreground text-sm outline-none focus:ring-2 focus:ring-accent/50 border border-border"
               placeholder="https://youtube.com/... ou https://open.spotify.com/track/..."
             />
-            <p className="text-[11px] text-muted-foreground/70 mt-1.5">
-              Cole o link do YouTube ou Spotify. Toca dentro do app, sem sair da gira.
-            </p>
           </div>
 
           <div className="flex gap-3 pt-2">
