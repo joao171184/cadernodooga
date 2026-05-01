@@ -7,10 +7,12 @@ import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { CategoriasProvider } from "@/contexts/CategoriasContext";
+import { PontosProvider } from "@/contexts/PontosContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import Index from "./pages/Index.tsx";
 import Login from "./pages/Login.tsx";
 import NotFound from "./pages/NotFound.tsx";
+import Pendentes from "./pages/Pendentes.tsx";
 import type { ReactNode } from "react";
 import { Loader2 } from "lucide-react";
 
@@ -45,13 +47,16 @@ const App = () => (
         <BrowserRouter>
           <AuthProvider>
             <CategoriasProvider>
-              <Routes>
-                <Route path="/login" element={<Login />} />
-                <Route path="/" element={<ProtectedLayout><Index /></ProtectedLayout>} />
-                <Route path="/guia/:categoria" element={<ProtectedLayout><Index /></ProtectedLayout>} />
-                <Route path="/guia/:categoria/:subcategoria" element={<ProtectedLayout><Index /></ProtectedLayout>} />
-                <Route path="*" element={<NotFound />} />
-              </Routes>
+              <PontosProvider>
+                <Routes>
+                  <Route path="/login" element={<Login />} />
+                  <Route path="/" element={<ProtectedLayout><Index /></ProtectedLayout>} />
+                  <Route path="/pendentes" element={<ProtectedLayout><Pendentes /></ProtectedLayout>} />
+                  <Route path="/guia/:categoria" element={<ProtectedLayout><Index /></ProtectedLayout>} />
+                  <Route path="/guia/:categoria/:subcategoria" element={<ProtectedLayout><Index /></ProtectedLayout>} />
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </PontosProvider>
             </CategoriasProvider>
           </AuthProvider>
         </BrowserRouter>

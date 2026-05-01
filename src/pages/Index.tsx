@@ -35,7 +35,7 @@ const Index = () => {
 
   const handleSavePonto = useCallback(async (data: Parameters<typeof savePonto>[0]) => {
     const { error, pending } = await savePonto(data);
-    if (error) return toast.error("Erro: " + error);
+    if (error) { toast.error("Erro: " + error); return; }
     if (pending) toast.success("Ponto enviado para aprovação do admin");
     else toast.success("Ponto salvo");
   }, [savePonto]);
