@@ -87,10 +87,31 @@ export function CategoriasProvider({ children }: { children: ReactNode }) {
     await refresh();
   }, [refresh]);
 
+  const moveCategoria = useCallback(async (id: string, dir: -1 | 1, parentId: string | null) => {
+    // Lista escopada (irmãos): roots ou filhos do parentId
+    const flatRoots = categorias;
+    const siblings = parentId
+      ? (flatRoots.find((c) => c.id === parentId)?.filhos ?? [])
+      : flatRoots;
+    const idx = siblings.findIndex((c) => c.id === id);
+    if (idx < 0) return;
+    const target = idx + dir;
+    if (target < 0 || target >= siblings.length) return;
+    const reordered = [...siblings];
+    const [moved] = reordered.splice(idx, 1);
+    reordered.splice(target, 0, moved);
+    await Promise.all(
+      reordered.map((c, i) =>
+        supabase.from("categorias").update({ ordem: (i + 1) * 10 }).eq("id", c.id)
+      )
+    );
+    await refresh();
+  }, [categorias, refresh]);
+
   return (
     <CategoriasContext.Provider value={{
       categorias, loading, refresh,
-      addCategoria, addSubcategoria, renameCategoria, deleteCategoria,
+      addCategoria, addSubcategoria, renameCategoria, deleteCategoria, moveCategoria,
     }}>
       {children}
     </CategoriasContext.Provider>
