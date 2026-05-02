@@ -17,6 +17,7 @@ interface Ctx {
   addSubcategoria: (parentId: string, nome: string, emoji: string) => Promise<{ error: string | null }>;
   renameCategoria: (id: string, nome: string, emoji: string) => Promise<void>;
   deleteCategoria: (id: string) => Promise<void>;
+  moveCategoria: (id: string, dir: -1 | 1, parentId: string | null) => Promise<void>;
 }
 
 const CategoriasContext = createContext<Ctx | null>(null);
