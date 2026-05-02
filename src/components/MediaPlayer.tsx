@@ -1,4 +1,4 @@
-import { X } from "lucide-react";
+import { X, ExternalLink } from "lucide-react";
 import { getEmbedInfo } from "@/lib/embed";
 
 interface Props {
@@ -44,6 +44,38 @@ export function MediaPlayer({ url, title, onClose }: Props) {
             height={152}
             allow="autoplay; clipboard-write; encrypted-media; picture-in-picture"
           />
+        )}
+        {info.kind === "tiktok" && (
+          info.src ? (
+            <div className="relative w-full mx-auto rounded-xl overflow-hidden bg-black" style={{ maxWidth: 360, aspectRatio: "9 / 16" }}>
+              <iframe
+                src={info.src}
+                title={title}
+                className="w-full h-full"
+                allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
+                allowFullScreen
+              />
+              {info.externalUrl && (
+                <a
+                  href={info.externalUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="absolute bottom-2 right-2 flex items-center gap-1 px-2 py-1 rounded-md bg-black/70 text-white text-[10px] font-bold uppercase"
+                >
+                  <ExternalLink size={10} /> Abrir TikTok
+                </a>
+              )}
+            </div>
+          ) : (
+            <a
+              href={info.externalUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center justify-center gap-2 w-full py-4 rounded-xl bg-black text-white text-sm font-bold uppercase"
+            >
+              <ExternalLink size={16} /> Abrir no TikTok
+            </a>
+          )
         )}
         {info.kind === "audio" && (
           <audio src={info.src} controls autoPlay className="w-full" />
