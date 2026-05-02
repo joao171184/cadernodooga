@@ -322,6 +322,16 @@ function AcessosPanel() {
       </div>
     );
   }
+  if (loadError) {
+    return (
+      <div className="py-8 text-center space-y-3">
+        <p className="text-sm text-destructive">Erro ao carregar: {loadError}</p>
+        <button onClick={load} className="px-4 py-2 rounded-lg bg-primary text-primary-foreground text-xs font-bold uppercase">
+          Tentar de novo
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-5">
