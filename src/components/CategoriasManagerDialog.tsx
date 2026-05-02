@@ -141,7 +141,7 @@ export function CategoriasManagerDialog({ open, onClose }: Props) {
 
         {/* Tree */}
         <div className="space-y-2 mt-2">
-          {categorias.map((cat) => {
+          {categorias.map((cat, ci) => {
             const isOpen = expanded.has(cat.id);
             const isEditing = editing && editing.id === cat.id;
             return (
@@ -172,7 +172,25 @@ export function CategoriasManagerDialog({ open, onClose }: Props) {
                   ) : (
                     <>
                       <span className="text-lg">{cat.emoji}</span>
-                      <span className="flex-1 font-bold text-sm uppercase">{cat.nome}</span>
+                      <span className="flex-1 font-bold text-sm uppercase truncate">{cat.nome}</span>
+                      <button
+                        onClick={() => moveCategoria(cat.id, -1, null)}
+                        disabled={ci === 0}
+                        className="p-1.5 rounded-lg hover:bg-muted text-muted-foreground disabled:opacity-30 disabled:cursor-not-allowed"
+                        aria-label="Mover para cima"
+                        title="Mover para cima"
+                      >
+                        <ArrowUp size={14} />
+                      </button>
+                      <button
+                        onClick={() => moveCategoria(cat.id, 1, null)}
+                        disabled={ci === categorias.length - 1}
+                        className="p-1.5 rounded-lg hover:bg-muted text-muted-foreground disabled:opacity-30 disabled:cursor-not-allowed"
+                        aria-label="Mover para baixo"
+                        title="Mover para baixo"
+                      >
+                        <ArrowDown size={14} />
+                      </button>
                       <button
                         onClick={() => { setAddSubFor(addSubFor === cat.id ? null : cat.id); if (!isOpen) toggle(cat.id); }}
                         className="p-2 rounded-lg hover:bg-muted text-muted-foreground"
