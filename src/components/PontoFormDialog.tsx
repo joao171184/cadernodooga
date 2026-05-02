@@ -154,6 +154,32 @@ export function PontoFormDialog({ open, onClose, onSave, ponto, defaultCategoria
 
           <div>
             <label className="block text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1.5">
+              Classificação <span className="normal-case text-muted-foreground/70 font-normal">(opcional, pode escolher mais de uma)</span>
+            </label>
+            <div className="flex flex-wrap gap-2 p-2 rounded-xl bg-muted/40 border border-border">
+              {CLASSIFICACAO_OPTIONS.map((c) => {
+                const active = classificacoes.includes(c.value);
+                return (
+                  <button
+                    key={c.value}
+                    type="button"
+                    onClick={() => toggleClassif(c.value)}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all active:scale-95 ${
+                      active
+                        ? "bg-accent text-accent-foreground shadow-sm"
+                        : "bg-background text-foreground/70 border border-border hover:border-accent/50"
+                    }`}
+                  >
+                    {active && <Check size={12} />}
+                    <span>{c.emoji} {c.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1.5">
               Tipo de Toque
             </label>
             <div className="flex flex-wrap gap-2 p-2 rounded-xl bg-muted/40 border border-border">
