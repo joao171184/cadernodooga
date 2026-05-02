@@ -1,7 +1,14 @@
 import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useCategorias } from "@/contexts/CategoriasContext";
-import { TOQUE_OPTIONS, type Ponto, type PontoInput, type ToqueTipo } from "@/contexts/PontosContext";
+import {
+  TOQUE_OPTIONS,
+  CLASSIFICACAO_OPTIONS,
+  type Ponto,
+  type PontoInput,
+  type ToqueTipo,
+  type Classificacao,
+} from "@/contexts/PontosContext";
 import { X, Check } from "lucide-react";
 
 interface PontoFormDialogProps {
@@ -18,6 +25,7 @@ export function PontoFormDialog({ open, onClose, onSave, ponto, defaultCategoria
   const [nome, setNome] = useState("");
   const [categoria, setCategoria] = useState("");
   const [subcategorias, setSubcategorias] = useState<string[]>([]);
+  const [classificacoes, setClassificacoes] = useState<Classificacao[]>([]);
   const [letra, setLetra] = useState("");
   const [audio, setAudio] = useState("");
   const [puxador, setPuxador] = useState("");
@@ -28,6 +36,7 @@ export function PontoFormDialog({ open, onClose, onSave, ponto, defaultCategoria
       setNome(ponto.nome);
       setCategoria(ponto.categoria);
       setSubcategorias(ponto.subcategorias);
+      setClassificacoes(ponto.classificacoes);
       setLetra(ponto.letra);
       setAudio(ponto.audio);
       setPuxador(ponto.puxador);
@@ -36,6 +45,7 @@ export function PontoFormDialog({ open, onClose, onSave, ponto, defaultCategoria
       setNome("");
       setCategoria(defaultCategoria || "");
       setSubcategorias(defaultSubcategoria ? [defaultSubcategoria] : []);
+      setClassificacoes([]);
       setLetra("");
       setAudio("");
       setPuxador("");
@@ -51,6 +61,12 @@ export function PontoFormDialog({ open, onClose, onSave, ponto, defaultCategoria
     );
   };
 
+  const toggleClassif = (c: Classificacao) => {
+    setClassificacoes((prev) =>
+      prev.includes(c) ? prev.filter((x) => x !== c) : [...prev, c]
+    );
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!nome.trim() || !letra.trim() || !categoria) return;
@@ -59,6 +75,7 @@ export function PontoFormDialog({ open, onClose, onSave, ponto, defaultCategoria
       nome: nome.trim(),
       categoria,
       subcategorias,
+      classificacoes,
       letra: letra.toUpperCase(),
       audio: audio.trim(),
       puxador: puxador.trim(),
