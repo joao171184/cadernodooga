@@ -75,6 +75,29 @@ export type Database = {
           },
         ]
       }
+      ponto_classificacoes: {
+        Row: {
+          classificacao: Database["public"]["Enums"]["classificacao_tipo"]
+          ponto_id: string
+        }
+        Insert: {
+          classificacao: Database["public"]["Enums"]["classificacao_tipo"]
+          ponto_id: string
+        }
+        Update: {
+          classificacao?: Database["public"]["Enums"]["classificacao_tipo"]
+          ponto_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ponto_classificacoes_ponto_id_fkey"
+            columns: ["ponto_id"]
+            isOneToOne: false
+            referencedRelation: "pontos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ponto_subcategorias: {
         Row: {
           ponto_id: string
@@ -218,6 +241,10 @@ export type Database = {
         Args: never
         Returns: Database["public"]["Enums"]["app_role"]
       }
+      has_permission: {
+        Args: { _permission: string; _user_id: string }
+        Returns: boolean
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -229,6 +256,7 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "oga" | "visitante"
+      classificacao_tipo: "chamada" | "elevacao" | "sustentacao"
       ponto_status: "pending" | "approved" | "rejected"
       toque_tipo: "ijexa" | "nago" | "congo" | "barravento" | "samba"
     }
@@ -359,6 +387,7 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "oga", "visitante"],
+      classificacao_tipo: ["chamada", "elevacao", "sustentacao"],
       ponto_status: ["pending", "approved", "rejected"],
       toque_tipo: ["ijexa", "nago", "congo", "barravento", "samba"],
     },
