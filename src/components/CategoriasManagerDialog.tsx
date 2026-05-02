@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Plus, Pencil, Trash2, Check, X, ChevronDown, ChevronRight, FolderTree } from "lucide-react";
+import { Plus, Pencil, Trash2, Check, X, ChevronDown, ChevronRight, FolderTree, ArrowUp, ArrowDown } from "lucide-react";
 import { useCategorias, type CategoriaNode } from "@/contexts/CategoriasContext";
 import { toast } from "sonner";
 
@@ -38,7 +38,7 @@ function EmojiPicker({ value, onChange }: { value: string; onChange: (v: string)
 }
 
 export function CategoriasManagerDialog({ open, onClose }: Props) {
-  const { categorias, addCategoria, addSubcategoria, renameCategoria, deleteCategoria } = useCategorias();
+  const { categorias, addCategoria, addSubcategoria, renameCategoria, deleteCategoria, moveCategoria } = useCategorias();
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
   const [newCatNome, setNewCatNome] = useState("");
   const [newCatEmoji, setNewCatEmoji] = useState("✨");
