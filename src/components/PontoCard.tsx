@@ -1,8 +1,8 @@
 import { Heart, Pencil, Trash2, Mic2, ArrowUp, ArrowDown, Volume2, Pause, Drum } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { getEmbedInfo, type EmbedKind } from "@/lib/embed";
-import { type Ponto, TOQUE_OPTIONS } from "@/contexts/PontosContext";
-import { YoutubeGlyph, SpotifyGlyph } from "@/components/MediaIcons";
+import { type Ponto, TOQUE_OPTIONS, CLASSIFICACAO_OPTIONS } from "@/contexts/PontosContext";
+import { YoutubeGlyph, SpotifyGlyph, TikTokGlyph } from "@/components/MediaIcons";
 
 interface PontoCardProps {
   ponto: Ponto;
@@ -19,11 +19,19 @@ interface PontoCardProps {
 }
 
 const PontoCard = ({ ponto, isPlaying, isFavorite, onTogglePlay, onToggleFavorite, onEdit, onDelete, onMoveUp, onMoveDown, canMoveUp, canMoveDown }: PontoCardProps) => {
-  const { isAdmin } = useAuth();
+  const { isAdmin, can } = useAuth();
   const embed = getEmbedInfo(ponto.audio);
   const hasMedia = embed.kind !== "none";
   const subs = ponto.subcategorias;
   const toqueLabel = TOQUE_OPTIONS.find((t) => t.value === ponto.toque)?.label;
+  const classifLabels = ponto.classificacoes
+    .map((c) => CLASSIFICACAO_OPTIONS.find((o) => o.value === c))
+    .filter(Boolean) as { value: string; label: string; emoji: string }[];
+
+  const canEdit = !!onEdit && (isAdmin || can("edit_pontos"));
+  const canDelete = !!onDelete && (isAdmin || can("delete_pontos"));
+  const canFavorite = isAdmin || can("favorite");
+  const canPlay = isAdmin || can("play_audio");
 
   return (
     <div className={`bg-card rounded-2xl border border-border shadow-sm overflow-hidden transition-all duration-200 ${isPlaying ? "ring-2 ring-accent/40 shadow-lg" : "hover:shadow-md"}`}>
@@ -52,8 +60,21 @@ const PontoCard = ({ ponto, isPlaying, isFavorite, onTogglePlay, onToggleFavorit
                 </div>
               )}
             </div>
+            {classifLabels.length > 0 && (
+              <div className="flex flex-wrap gap-1 mt-2">
+                {classifLabels.map((c) => (
+                  <span
+                    key={c.value}
+                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-accent/15 text-accent border border-accent/30"
+                  >
+                    <span>{c.emoji}</span>
+                    {c.label}
+                  </span>
+                ))}
+              </div>
+            )}
           </div>
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1 shrink-0">
             {isAdmin && onMoveUp && (
               <button
                 onClick={() => onMoveUp(ponto.id)}
@@ -74,37 +95,39 @@ const PontoCard = ({ ponto, isPlaying, isFavorite, onTogglePlay, onToggleFavorit
                 <ArrowDown size={16} className="text-muted-foreground" />
               </button>
             )}
-            {isAdmin && onEdit && (
+            {canEdit && (
               <button
-                onClick={() => onEdit(ponto)}
+                onClick={() => onEdit!(ponto)}
                 className="p-2 rounded-lg hover:bg-muted transition-all active:scale-90"
                 aria-label="Editar ponto"
               >
                 <Pencil size={16} className="text-muted-foreground" />
               </button>
             )}
-            {isAdmin && onDelete && (
+            {canDelete && (
               <button
-                onClick={() => onDelete(ponto.id)}
+                onClick={() => onDelete!(ponto.id)}
                 className="p-2 rounded-lg hover:bg-destructive/10 transition-all active:scale-90"
                 aria-label="Excluir ponto"
               >
                 <Trash2 size={16} className="text-destructive/70" />
               </button>
             )}
-            <button
-              onClick={() => onToggleFavorite(ponto.id)}
-              className={`p-2 rounded-lg transition-all active:scale-90 ${
-                isFavorite ? "bg-accent/15" : "hover:bg-muted"
-              }`}
-              aria-label={isFavorite ? "Remover dos favoritos" : "Adicionar aos favoritos"}
-            >
-              <Heart
-                size={18}
-                className={`transition-colors ${isFavorite ? "fill-accent text-accent" : "text-muted-foreground"}`}
-              />
-            </button>
-            {hasMedia && (
+            {canFavorite && (
+              <button
+                onClick={() => onToggleFavorite(ponto.id)}
+                className={`p-2 rounded-lg transition-all active:scale-90 ${
+                  isFavorite ? "bg-accent/15" : "hover:bg-muted"
+                }`}
+                aria-label={isFavorite ? "Remover dos favoritos" : "Adicionar aos favoritos"}
+              >
+                <Heart
+                  size={18}
+                  className={`transition-colors ${isFavorite ? "fill-accent text-accent" : "text-muted-foreground"}`}
+                />
+              </button>
+            )}
+            {hasMedia && canPlay && (
               <MediaIconButton
                 kind={embed.kind}
                 isPlaying={isPlaying}
@@ -131,6 +154,7 @@ function MediaIconButton({
   const labelMap: Record<EmbedKind, string> = {
     youtube: "YouTube",
     spotify: "Spotify",
+    tiktok: "TikTok",
     audio: "Áudio",
     none: "",
   };
@@ -153,6 +177,8 @@ function MediaIconButton({
         <YoutubeGlyph size={20} />
       ) : kind === "spotify" ? (
         <SpotifyGlyph size={20} />
+      ) : kind === "tiktok" ? (
+        <TikTokGlyph size={20} />
       ) : (
         <div className="w-5 h-5 rounded-md bg-primary text-primary-foreground flex items-center justify-center">
           <Volume2 size={12} />
