@@ -9,9 +9,11 @@ import { MediaPlayer } from "@/components/MediaPlayer";
 import { AutoScrollControl } from "@/components/AutoScrollControl";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { useAuth } from "@/contexts/AuthContext";
-import { usePontos, type Ponto } from "@/contexts/PontosContext";
+import { usePontos, type Ponto, type Classificacao, CLASSIFICACAO_OPTIONS } from "@/contexts/PontosContext";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { toast } from "sonner";
+
+type ClassifFilter = "all" | Classificacao;
 
 const Index = () => {
   const { isAdmin, logout, can } = useAuth();
@@ -22,12 +24,13 @@ const Index = () => {
   const { categoria, subcategoria } = useParams<{ categoria?: string; subcategoria?: string }>();
   const [search, setSearch] = useState("");
   const [showFavorites, setShowFavorites] = useState(false);
+  const [classifFilter, setClassifFilter] = useState<ClassifFilter>("all");
   const [playingId, setPlayingId] = useState<string | null>(null);
   const [formOpen, setFormOpen] = useState(false);
   const [editingPonto, setEditingPonto] = useState<Ponto | null>(null);
   const [adminOpen, setAdminOpen] = useState(false);
 
-  const { pontos, pendentes, favoritos, loading, savePonto, deletePonto, toggleFavorito, movePonto } = usePontos();
+  const { pontos, pendentes, favoritos, loading, savePonto, deletePonto, toggleFavorito, movePontoInList } = usePontos();
 
   const togglePlay = useCallback((id: string) => {
     setPlayingId((curr) => (curr === id ? null : id));
@@ -42,9 +45,14 @@ const Index = () => {
 
   const handleDeletePonto = useCallback(async (id: string) => {
     if (window.confirm("Tem certeza que deseja excluir este ponto?")) {
-      await deletePonto(id);
-      setPlayingId((curr) => (curr === id ? null : curr));
-      toast.success("Ponto excluído");
+      try {
+        await deletePonto(id);
+        setPlayingId((curr) => (curr === id ? null : curr));
+        toast.success("Ponto excluído");
+      } catch (e) {
+        const msg = (e as { message?: string })?.message ?? "erro";
+        toast.error("Não foi possível excluir: " + msg);
+      }
     }
   }, [deletePonto]);
 
@@ -66,6 +74,9 @@ const Index = () => {
     if (showFavorites) {
       list = list.filter((p) => favoritos.has(p.id));
     }
+    if (classifFilter !== "all") {
+      list = list.filter((p) => p.classificacoes.includes(classifFilter));
+    }
     if (!q) return list;
     return list.filter(
       (p) =>
@@ -73,7 +84,7 @@ const Index = () => {
         p.categoria.toLowerCase().includes(q) ||
         p.letra.toLowerCase().includes(q)
     );
-  }, [search, showFavorites, favoritos, categoria, subcategoria, pontos]);
+  }, [search, showFavorites, classifFilter, favoritos, categoria, subcategoria, pontos]);
 
   const playingPonto = playingId ? pontos.find((p) => p.id === playingId) : null;
 
@@ -93,10 +104,10 @@ const Index = () => {
               className="w-10 h-10 rounded-xl object-cover bg-primary-foreground/10 shrink-0 hidden sm:block"
             />
             <div className="flex-1 min-w-0">
-              <h1 className="font-display text-lg sm:text-xl font-bold text-primary-foreground tracking-tight uppercase truncate">
+              <h1 className="font-display text-base sm:text-xl font-bold text-primary-foreground tracking-tight uppercase truncate">
                 {pageTitle}
               </h1>
-              <p className="text-[10px] text-primary-foreground/45 font-medium uppercase">
+              <p className="text-[10px] text-primary-foreground/45 font-medium uppercase truncate">
                 {pageSubtitle}
               </p>
             </div>
@@ -104,42 +115,35 @@ const Index = () => {
             {isAdmin && pendentes.length > 0 && (
               <button
                 onClick={() => navigate("/pendentes")}
-                className="relative flex items-center gap-1.5 px-3 py-2 rounded-xl bg-amber-500 text-white text-xs font-bold transition-all active:scale-95 shadow-sm uppercase"
+                className="relative flex items-center gap-1.5 px-2.5 py-2 rounded-xl bg-amber-500 text-white text-xs font-bold transition-all active:scale-95 shadow-sm uppercase"
                 title="Pontos pendentes de aprovação"
               >
                 <Inbox size={14} />
-                <span className="hidden sm:inline">Pendentes</span>
+                <span className="hidden md:inline">Pendentes</span>
                 <span className="bg-white text-amber-600 rounded-full px-1.5 min-w-[20px] text-center">{pendentes.length}</span>
               </button>
             )}
 
             {showSettings && (
-              <>
-                <button
-                  onClick={() => setAdminOpen(true)}
-                  className="hidden sm:flex items-center gap-1.5 px-3 py-2 rounded-xl bg-primary-foreground/10 hover:bg-primary-foreground/20 text-primary-foreground text-xs font-bold transition-all active:scale-95 uppercase border border-primary-foreground/10"
-                  title="Configurações"
-                >
-                  <Settings size={14} />
-                  <span>Configurações</span>
-                </button>
-                <button
-                  onClick={() => setAdminOpen(true)}
-                  className="sm:hidden p-2 rounded-xl text-primary-foreground hover:bg-primary-foreground/10 transition-all active:scale-95"
-                  aria-label="Configurações"
-                >
-                  <Settings size={18} />
-                </button>
-              </>
+              <button
+                onClick={() => setAdminOpen(true)}
+                className="p-2 sm:px-3 rounded-xl bg-primary-foreground/10 hover:bg-primary-foreground/20 text-primary-foreground text-xs font-bold transition-all active:scale-95 uppercase border border-primary-foreground/10 flex items-center gap-1.5"
+                title="Configurações"
+                aria-label="Configurações"
+              >
+                <Settings size={16} />
+                <span className="hidden md:inline">Configurações</span>
+              </button>
             )}
             {canAdd && (
               <button
                 onClick={() => { setEditingPonto(null); setFormOpen(true); }}
-                className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-accent text-accent-foreground text-xs font-bold transition-all active:scale-95 shadow-sm uppercase"
+                className="flex items-center gap-1.5 px-2.5 sm:px-3 py-2 rounded-xl bg-accent text-accent-foreground text-xs font-bold transition-all active:scale-95 shadow-sm uppercase"
                 title="Adicionar novo ponto"
+                aria-label="Adicionar novo ponto"
               >
                 <Plus size={16} />
-                <span className="hidden sm:inline">Novo Ponto</span>
+                <span className="hidden md:inline">Novo Ponto</span>
               </button>
             )}
             <ThemeToggle />
@@ -168,11 +172,11 @@ const Index = () => {
 
       {/* Content */}
       <main className="flex-1 px-3 sm:px-4 py-4 sm:py-5 pb-32">
-        {/* Favorites toggle + count */}
-        <div className="flex items-center justify-between mb-4">
+        {/* Toolbar: favoritos + classificações + count */}
+        <div className="flex flex-wrap items-center gap-2 mb-4">
           <button
             onClick={() => setShowFavorites(!showFavorites)}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-full text-xs font-bold transition-all active:scale-95 shadow-sm uppercase ${
+            className={`flex items-center gap-2 px-3.5 py-2 rounded-full text-xs font-bold transition-all active:scale-95 shadow-sm uppercase ${
               showFavorites
                 ? "bg-accent text-accent-foreground shadow-md"
                 : "bg-card text-muted-foreground border border-border hover:border-accent/30"
@@ -181,7 +185,22 @@ const Index = () => {
             <Star size={14} className={showFavorites ? "fill-accent-foreground" : ""} />
             Favoritos {favoritos.size > 0 && `(${favoritos.size})`}
           </button>
-          <p className="text-xs text-muted-foreground font-medium">
+
+          <ClassifChip
+            label="Todos"
+            active={classifFilter === "all"}
+            onClick={() => setClassifFilter("all")}
+          />
+          {CLASSIFICACAO_OPTIONS.map((c) => (
+            <ClassifChip
+              key={c.value}
+              label={`${c.emoji} ${c.label}`}
+              active={classifFilter === c.value}
+              onClick={() => setClassifFilter(c.value)}
+            />
+          ))}
+
+          <p className="ml-auto text-xs text-muted-foreground font-medium">
             {filtered.length} {filtered.length === 1 ? "ponto" : "pontos"}
           </p>
         </div>
@@ -219,8 +238,8 @@ const Index = () => {
                 onToggleFavorite={toggleFavorito}
                 onEdit={handleEditPonto}
                 onDelete={handleDeletePonto}
-                onMoveUp={(id) => movePonto(id, -1)}
-                onMoveDown={(id) => movePonto(id, 1)}
+                onMoveUp={(id) => movePontoInList(id, -1, filtered)}
+                onMoveDown={(id) => movePontoInList(id, 1, filtered)}
                 canMoveUp={i > 0}
                 canMoveDown={i < filtered.length - 1}
               />
@@ -278,5 +297,20 @@ const Index = () => {
     </div>
   );
 };
+
+function ClassifChip({ label, active, onClick }: { label: string; active: boolean; onClick: () => void }) {
+  return (
+    <button
+      onClick={onClick}
+      className={`px-3 py-1.5 rounded-full text-[11px] font-bold uppercase transition-all active:scale-95 ${
+        active
+          ? "bg-primary text-primary-foreground shadow-sm"
+          : "bg-card text-muted-foreground border border-border hover:border-accent/30"
+      }`}
+    >
+      {label}
+    </button>
+  );
+}
 
 export default Index;

@@ -58,9 +58,12 @@ export function AutoScrollControl() {
   }, [prefs.enabled, prefs.speed]);
 
   return (
-    <div className="fixed bottom-24 right-4 z-40 flex flex-col items-end gap-2">
+    <div
+      className="fixed right-3 sm:right-4 z-40 flex flex-col items-end gap-2 max-w-[calc(100vw-1.5rem)]"
+      style={{ bottom: "calc(env(safe-area-inset-bottom, 0px) + 88px)" }}
+    >
       {open && (
-        <div className="bg-card border border-border rounded-2xl shadow-2xl p-4 w-64 space-y-3">
+        <div className="bg-card border border-border rounded-2xl shadow-2xl p-4 w-[min(16rem,calc(100vw-1.5rem))] space-y-3">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
               Auto-scroll
@@ -104,6 +107,7 @@ export function AutoScrollControl() {
         }}
         onDoubleClick={() => setOpen((o) => !o)}
         title={open ? (prefs.enabled ? "Pausar rolagem" : "Iniciar rolagem") : "Abrir auto-scroll"}
+        aria-label="Auto-scroll"
         className={`w-12 h-12 rounded-full shadow-2xl border-2 flex items-center justify-center transition-all active:scale-95 ${
           prefs.enabled
             ? "bg-accent text-accent-foreground border-accent animate-pulse"

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Plus, Pencil, Trash2, Check, X, ChevronDown, ChevronRight, FolderTree } from "lucide-react";
+import { Plus, Pencil, Trash2, Check, X, ChevronDown, ChevronRight, FolderTree, ArrowUp, ArrowDown } from "lucide-react";
 import { useCategorias, type CategoriaNode } from "@/contexts/CategoriasContext";
 import { toast } from "sonner";
 
@@ -38,7 +38,7 @@ function EmojiPicker({ value, onChange }: { value: string; onChange: (v: string)
 }
 
 export function CategoriasManagerDialog({ open, onClose }: Props) {
-  const { categorias, addCategoria, addSubcategoria, renameCategoria, deleteCategoria } = useCategorias();
+  const { categorias, addCategoria, addSubcategoria, renameCategoria, deleteCategoria, moveCategoria } = useCategorias();
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
   const [newCatNome, setNewCatNome] = useState("");
   const [newCatEmoji, setNewCatEmoji] = useState("✨");
@@ -141,7 +141,7 @@ export function CategoriasManagerDialog({ open, onClose }: Props) {
 
         {/* Tree */}
         <div className="space-y-2 mt-2">
-          {categorias.map((cat) => {
+          {categorias.map((cat, ci) => {
             const isOpen = expanded.has(cat.id);
             const isEditing = editing && editing.id === cat.id;
             return (
@@ -172,7 +172,25 @@ export function CategoriasManagerDialog({ open, onClose }: Props) {
                   ) : (
                     <>
                       <span className="text-lg">{cat.emoji}</span>
-                      <span className="flex-1 font-bold text-sm uppercase">{cat.nome}</span>
+                      <span className="flex-1 font-bold text-sm uppercase truncate">{cat.nome}</span>
+                      <button
+                        onClick={() => moveCategoria(cat.id, -1, null)}
+                        disabled={ci === 0}
+                        className="p-1.5 rounded-lg hover:bg-muted text-muted-foreground disabled:opacity-30 disabled:cursor-not-allowed"
+                        aria-label="Mover para cima"
+                        title="Mover para cima"
+                      >
+                        <ArrowUp size={14} />
+                      </button>
+                      <button
+                        onClick={() => moveCategoria(cat.id, 1, null)}
+                        disabled={ci === categorias.length - 1}
+                        className="p-1.5 rounded-lg hover:bg-muted text-muted-foreground disabled:opacity-30 disabled:cursor-not-allowed"
+                        aria-label="Mover para baixo"
+                        title="Mover para baixo"
+                      >
+                        <ArrowDown size={14} />
+                      </button>
                       <button
                         onClick={() => { setAddSubFor(addSubFor === cat.id ? null : cat.id); if (!isOpen) toggle(cat.id); }}
                         className="p-2 rounded-lg hover:bg-muted text-muted-foreground"
@@ -199,7 +217,7 @@ export function CategoriasManagerDialog({ open, onClose }: Props) {
 
                 {isOpen && (
                   <div className="px-3 pb-3 space-y-2">
-                    {cat.filhos.map((sub) => {
+                    {cat.filhos.map((sub, si) => {
                       const isSubEditing = editing && editing.id === sub.id;
                       return (
                         <div key={sub.id} className="flex items-center gap-2 pl-6 py-1.5">
@@ -224,7 +242,23 @@ export function CategoriasManagerDialog({ open, onClose }: Props) {
                           ) : (
                             <>
                               <span className="text-base">{sub.emoji}</span>
-                              <span className="flex-1 text-sm">{sub.nome}</span>
+                              <span className="flex-1 text-sm truncate">{sub.nome}</span>
+                              <button
+                                onClick={() => moveCategoria(sub.id, -1, cat.id)}
+                                disabled={si === 0}
+                                className="p-1.5 rounded-lg hover:bg-muted text-muted-foreground disabled:opacity-30 disabled:cursor-not-allowed"
+                                aria-label="Mover para cima"
+                              >
+                                <ArrowUp size={12} />
+                              </button>
+                              <button
+                                onClick={() => moveCategoria(sub.id, 1, cat.id)}
+                                disabled={si === cat.filhos.length - 1}
+                                className="p-1.5 rounded-lg hover:bg-muted text-muted-foreground disabled:opacity-30 disabled:cursor-not-allowed"
+                                aria-label="Mover para baixo"
+                              >
+                                <ArrowDown size={12} />
+                              </button>
                               <button
                                 onClick={() => startEdit(sub)}
                                 className="p-1.5 rounded-lg hover:bg-muted text-muted-foreground"

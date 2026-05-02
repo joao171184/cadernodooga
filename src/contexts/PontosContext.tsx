@@ -5,6 +5,7 @@ import type { Database } from "@/integrations/supabase/types";
 
 export type ToqueTipo = Database["public"]["Enums"]["toque_tipo"];
 export type PontoStatus = Database["public"]["Enums"]["ponto_status"];
+export type Classificacao = Database["public"]["Enums"]["classificacao_tipo"];
 
 export const TOQUE_OPTIONS: { value: ToqueTipo; label: string }[] = [
   { value: "ijexa", label: "Ijexá" },
@@ -14,11 +15,18 @@ export const TOQUE_OPTIONS: { value: ToqueTipo; label: string }[] = [
   { value: "samba", label: "Samba" },
 ];
 
+export const CLASSIFICACAO_OPTIONS: { value: Classificacao; label: string; emoji: string }[] = [
+  { value: "chamada", label: "Chamada", emoji: "📣" },
+  { value: "elevacao", label: "Elevação", emoji: "🔺" },
+  { value: "sustentacao", label: "Sustentação", emoji: "🌀" },
+];
+
 export interface Ponto {
   id: string;
   nome: string;
   categoria: string;
   subcategorias: string[];
+  classificacoes: Classificacao[];
   letra: string;
   audio: string;
   puxador: string;
@@ -33,6 +41,7 @@ export type PontoInput = {
   nome: string;
   categoria: string;
   subcategorias: string[];
+  classificacoes: Classificacao[];
   letra: string;
   audio: string;
   puxador: string;
@@ -50,7 +59,7 @@ interface Ctx {
   approvePonto: (id: string) => Promise<void>;
   rejectPonto: (id: string) => Promise<void>;
   toggleFavorito: (id: string) => Promise<void>;
-  movePonto: (id: string, dir: -1 | 1) => Promise<void>;
+  movePontoInList: (id: string, dir: -1 | 1, scopedList: Ponto[]) => Promise<void>;
 }
 
 const PontosContext = createContext<Ctx | null>(null);
@@ -69,9 +78,10 @@ export function PontosProvider({ children }: { children: ReactNode }) {
     }
     setLoading(true);
 
-    const [{ data: rawPontos }, { data: subs }, { data: favs }] = await Promise.all([
+    const [{ data: rawPontos }, { data: subs }, { data: classes }, { data: favs }] = await Promise.all([
       supabase.from("pontos").select("*").order("ordem", { ascending: true }).order("created_at", { ascending: true }),
       supabase.from("ponto_subcategorias").select("*"),
+      supabase.from("ponto_classificacoes").select("*"),
       supabase.from("favoritos").select("ponto_id").eq("user_id", user.id),
     ]);
 
@@ -82,11 +92,19 @@ export function PontosProvider({ children }: { children: ReactNode }) {
       subMap.set(s.ponto_id, arr);
     });
 
+    const classMap = new Map<string, Classificacao[]>();
+    (classes ?? []).forEach((c) => {
+      const arr = classMap.get(c.ponto_id) ?? [];
+      arr.push(c.classificacao as Classificacao);
+      classMap.set(c.ponto_id, arr);
+    });
+
     const all: Ponto[] = (rawPontos ?? []).map((p) => ({
       id: p.id,
       nome: p.nome,
       categoria: p.categoria,
       subcategorias: subMap.get(p.id) ?? [],
+      classificacoes: classMap.get(p.id) ?? [],
       letra: p.letra,
       audio: p.audio,
       puxador: p.puxador,
@@ -111,6 +129,7 @@ export function PontosProvider({ children }: { children: ReactNode }) {
       .channel("pontos-sync")
       .on("postgres_changes", { event: "*", schema: "public", table: "pontos" }, () => { refresh(); })
       .on("postgres_changes", { event: "*", schema: "public", table: "ponto_subcategorias" }, () => { refresh(); })
+      .on("postgres_changes", { event: "*", schema: "public", table: "ponto_classificacoes" }, () => { refresh(); })
       .subscribe();
     return () => { supabase.removeChannel(ch); };
   }, [user, refresh]);
@@ -138,6 +157,7 @@ export function PontosProvider({ children }: { children: ReactNode }) {
       if (error) return { error: error.message, pending: false };
       pontoId = data.id;
       await supabase.from("ponto_subcategorias").delete().eq("ponto_id", pontoId);
+      await supabase.from("ponto_classificacoes").delete().eq("ponto_id", pontoId);
     } else {
       const { data: ins, error } = await supabase.from("pontos").insert(payload).select("id").single();
       if (error || !ins) return { error: error?.message ?? "Erro", pending: false };
@@ -148,13 +168,18 @@ export function PontosProvider({ children }: { children: ReactNode }) {
       const rows = data.subcategorias.map((s) => ({ ponto_id: pontoId, subcategoria: s }));
       await supabase.from("ponto_subcategorias").insert(rows);
     }
+    if (data.classificacoes.length > 0) {
+      const rows = data.classificacoes.map((c) => ({ ponto_id: pontoId, classificacao: c }));
+      await supabase.from("ponto_classificacoes").insert(rows);
+    }
 
     await refresh();
     return { error: null, pending: goesPending };
   }, [user, isAdmin, refresh]);
 
   const deletePonto = useCallback(async (id: string) => {
-    await supabase.from("pontos").delete().eq("id", id);
+    const { error } = await supabase.from("pontos").delete().eq("id", id);
+    if (error) throw error;
     await refresh();
   }, [refresh]);
 
@@ -184,26 +209,29 @@ export function PontosProvider({ children }: { children: ReactNode }) {
     }
   }, [user, favoritos]);
 
-  const movePonto = useCallback(async (id: string, dir: -1 | 1) => {
-    // Reordena dentro do mesmo conjunto (todos aprovados ordenados por `ordem`)
-    const list = [...pontos];
-    const idx = list.findIndex((p) => p.id === id);
+  // Move within current visible scope. Renumera ordem usando o scopedList
+  // recebido (já filtrado por categoria/subcategoria/classificação).
+  const movePontoInList = useCallback<Ctx["movePontoInList"]>(async (id, dir, scopedList) => {
+    const idx = scopedList.findIndex((p) => p.id === id);
     if (idx < 0) return;
     const target = idx + dir;
-    if (target < 0 || target >= list.length) return;
-    const a = list[idx], b = list[target];
-    // troca os campos de ordem
-    await Promise.all([
-      supabase.from("pontos").update({ ordem: b.ordem }).eq("id", a.id),
-      supabase.from("pontos").update({ ordem: a.ordem }).eq("id", b.id),
-    ]);
+    if (target < 0 || target >= scopedList.length) return;
+    const reordered = [...scopedList];
+    const [moved] = reordered.splice(idx, 1);
+    reordered.splice(target, 0, moved);
+    // Atribui novas ordens sequenciais (10, 20, 30…) baseadas no menor ordem
+    // existente da categoria, para não colidir com pontos fora do escopo.
+    const updates = reordered.map((p, i) => ({ id: p.id, ordem: (i + 1) * 10 }));
+    await Promise.all(
+      updates.map((u) => supabase.from("pontos").update({ ordem: u.ordem }).eq("id", u.id))
+    );
     await refresh();
-  }, [pontos, refresh]);
+  }, [refresh]);
 
   return (
     <PontosContext.Provider value={{
       pontos, pendentes, favoritos, loading,
-      refresh, savePonto, deletePonto, approvePonto, rejectPonto, toggleFavorito, movePonto,
+      refresh, savePonto, deletePonto, approvePonto, rejectPonto, toggleFavorito, movePontoInList,
     }}>
       {children}
     </PontosContext.Provider>

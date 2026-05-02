@@ -106,6 +106,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => subscription.unsubscribe();
   }, [loadRoleAndPerms]);
 
+  // Realtime: quando admin muda a matriz, recarrega permissões na hora.
+  useEffect(() => {
+    if (!user) return;
+    const ch = supabase
+      .channel("perms-sync")
+      .on("postgres_changes", { event: "*", schema: "public", table: "role_permissions" }, () => {
+        loadRoleAndPerms(user.id, user.email);
+      })
+      .on("postgres_changes", { event: "*", schema: "public", table: "user_roles", filter: `user_id=eq.${user.id}` }, () => {
+        loadRoleAndPerms(user.id, user.email);
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
+  }, [user, loadRoleAndPerms]);
+
   const translateError = (msg?: string | null) => {
     if (!msg) return null;
     const m = msg.toLowerCase();

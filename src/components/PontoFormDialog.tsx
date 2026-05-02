@@ -1,7 +1,14 @@
 import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useCategorias } from "@/contexts/CategoriasContext";
-import { TOQUE_OPTIONS, type Ponto, type PontoInput, type ToqueTipo } from "@/contexts/PontosContext";
+import {
+  TOQUE_OPTIONS,
+  CLASSIFICACAO_OPTIONS,
+  type Ponto,
+  type PontoInput,
+  type ToqueTipo,
+  type Classificacao,
+} from "@/contexts/PontosContext";
 import { X, Check } from "lucide-react";
 
 interface PontoFormDialogProps {
@@ -18,6 +25,7 @@ export function PontoFormDialog({ open, onClose, onSave, ponto, defaultCategoria
   const [nome, setNome] = useState("");
   const [categoria, setCategoria] = useState("");
   const [subcategorias, setSubcategorias] = useState<string[]>([]);
+  const [classificacoes, setClassificacoes] = useState<Classificacao[]>([]);
   const [letra, setLetra] = useState("");
   const [audio, setAudio] = useState("");
   const [puxador, setPuxador] = useState("");
@@ -28,6 +36,7 @@ export function PontoFormDialog({ open, onClose, onSave, ponto, defaultCategoria
       setNome(ponto.nome);
       setCategoria(ponto.categoria);
       setSubcategorias(ponto.subcategorias);
+      setClassificacoes(ponto.classificacoes);
       setLetra(ponto.letra);
       setAudio(ponto.audio);
       setPuxador(ponto.puxador);
@@ -36,6 +45,7 @@ export function PontoFormDialog({ open, onClose, onSave, ponto, defaultCategoria
       setNome("");
       setCategoria(defaultCategoria || "");
       setSubcategorias(defaultSubcategoria ? [defaultSubcategoria] : []);
+      setClassificacoes([]);
       setLetra("");
       setAudio("");
       setPuxador("");
@@ -51,6 +61,12 @@ export function PontoFormDialog({ open, onClose, onSave, ponto, defaultCategoria
     );
   };
 
+  const toggleClassif = (c: Classificacao) => {
+    setClassificacoes((prev) =>
+      prev.includes(c) ? prev.filter((x) => x !== c) : [...prev, c]
+    );
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!nome.trim() || !letra.trim() || !categoria) return;
@@ -59,6 +75,7 @@ export function PontoFormDialog({ open, onClose, onSave, ponto, defaultCategoria
       nome: nome.trim(),
       categoria,
       subcategorias,
+      classificacoes,
       letra: letra.toUpperCase(),
       audio: audio.trim(),
       puxador: puxador.trim(),
@@ -137,6 +154,32 @@ export function PontoFormDialog({ open, onClose, onSave, ponto, defaultCategoria
 
           <div>
             <label className="block text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1.5">
+              Classificação <span className="normal-case text-muted-foreground/70 font-normal">(opcional, pode escolher mais de uma)</span>
+            </label>
+            <div className="flex flex-wrap gap-2 p-2 rounded-xl bg-muted/40 border border-border">
+              {CLASSIFICACAO_OPTIONS.map((c) => {
+                const active = classificacoes.includes(c.value);
+                return (
+                  <button
+                    key={c.value}
+                    type="button"
+                    onClick={() => toggleClassif(c.value)}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all active:scale-95 ${
+                      active
+                        ? "bg-accent text-accent-foreground shadow-sm"
+                        : "bg-background text-foreground/70 border border-border hover:border-accent/50"
+                    }`}
+                  >
+                    {active && <Check size={12} />}
+                    <span>{c.emoji} {c.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1.5">
               Tipo de Toque
             </label>
             <div className="flex flex-wrap gap-2 p-2 rounded-xl bg-muted/40 border border-border">
@@ -201,14 +244,14 @@ export function PontoFormDialog({ open, onClose, onSave, ponto, defaultCategoria
 
           <div>
             <label className="block text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1.5">
-              Link do YouTube ou Spotify (opcional)
+              Link do YouTube, Spotify ou TikTok (opcional)
             </label>
             <input
               type="text"
               value={audio}
               onChange={(e) => setAudio(e.target.value)}
               className="w-full px-4 py-3 rounded-xl bg-muted text-foreground text-sm outline-none focus:ring-2 focus:ring-accent/50 border border-border"
-              placeholder="https://youtube.com/... ou https://open.spotify.com/track/..."
+              placeholder="https://youtu.be/... · https://open.spotify.com/track/... · https://tiktok.com/@user/video/..."
             />
           </div>
 

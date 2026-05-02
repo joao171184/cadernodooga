@@ -218,31 +218,49 @@ function AcessosPanel() {
     admin: {}, oga: {}, visitante: {},
   });
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
-    const [{ data: profiles }, { data: roles }, { data: rolePerms }] = await Promise.all([
-      supabase.from("profiles").select("id, email").order("created_at", { ascending: true }),
-      supabase.from("user_roles").select("user_id, role"),
-      supabase.from("role_permissions").select("role, permission, allowed"),
-    ]);
-    const roleMap = new Map((roles ?? []).map((r) => [r.user_id, r.role as AppRole]));
-    setUsers(
-      (profiles ?? []).map((p) => ({
+    setLoadError(null);
+    try {
+      const [profilesRes, rolesRes, permsRes] = await Promise.all([
+        supabase.from("profiles").select("id, email").order("created_at", { ascending: true }),
+        supabase.from("user_roles").select("user_id, role"),
+        supabase.from("role_permissions").select("role, permission, allowed"),
+      ]);
+
+      if (permsRes.error) throw permsRes.error;
+      const profiles = profilesRes.data ?? [];
+      const roles = rolesRes.data ?? [];
+      const rolePerms = permsRes.data ?? [];
+
+      const roleMap = new Map(roles.map((r) => [r.user_id, r.role as AppRole]));
+      const list: ProfileRow[] = profiles.map((p) => ({
         id: p.id,
         email: p.email,
         role: roleMap.get(p.id) ?? "visitante",
-      }))
-    );
-    const next: Record<AppRole, Record<string, boolean>> = { admin: {}, oga: {}, visitante: {} };
-    (rolePerms ?? []).forEach((rp) => {
-      const r = rp.role as AppRole;
-      next[r][rp.permission] = rp.allowed;
-    });
-    setPerms(next);
-    setLoading(false);
-  }, []);
+      }));
+      // Garante que o próprio super admin sempre apareça
+      if (user && !list.some((u) => u.id === user.id)) {
+        list.unshift({ id: user.id, email: user.email ?? "(você)", role: "admin" });
+      }
+      setUsers(list);
+
+      const next: Record<AppRole, Record<string, boolean>> = { admin: {}, oga: {}, visitante: {} };
+      rolePerms.forEach((rp) => {
+        const r = rp.role as AppRole;
+        next[r][rp.permission] = rp.allowed;
+      });
+      setPerms(next);
+    } catch (e) {
+      const msg = (e as { message?: string })?.message ?? "Erro ao carregar";
+      setLoadError(msg);
+    } finally {
+      setLoading(false);
+    }
+  }, [user]);
 
   useEffect(() => {
     load();
@@ -301,6 +319,16 @@ function AcessosPanel() {
     return (
       <div className="py-12 flex items-center justify-center text-muted-foreground">
         <Loader2 className="animate-spin mr-2" size={18} /> Carregando...
+      </div>
+    );
+  }
+  if (loadError) {
+    return (
+      <div className="py-8 text-center space-y-3">
+        <p className="text-sm text-destructive">Erro ao carregar: {loadError}</p>
+        <button onClick={load} className="px-4 py-2 rounded-lg bg-primary text-primary-foreground text-xs font-bold uppercase">
+          Tentar de novo
+        </button>
       </div>
     );
   }

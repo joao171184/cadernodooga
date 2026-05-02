@@ -1,10 +1,12 @@
-// Detecta YouTube/Spotify URLs e gera URL de embed para iframe.
+// Detecta YouTube/Spotify/TikTok URLs e gera URL de embed para iframe.
 
-export type EmbedKind = "youtube" | "spotify" | "audio" | "none";
+export type EmbedKind = "youtube" | "spotify" | "tiktok" | "audio" | "none";
 
 export interface EmbedInfo {
   kind: EmbedKind;
-  src: string; // src de iframe (yt/spotify) ou URL direta de áudio
+  src: string; // src de iframe (yt/spotify/tiktok) ou URL direta de áudio
+  externalUrl?: string; // p/ TikTok: link original
+  videoId?: string; // p/ TikTok: id usado no embed
 }
 
 export function getEmbedInfo(url: string): EmbedInfo {
@@ -27,6 +29,21 @@ export function getEmbedInfo(url: string): EmbedInfo {
       kind: "spotify",
       src: `https://open.spotify.com/embed/${sp[2]}/${sp[3]}`,
     };
+  }
+
+  // TikTok (video direto: /video/<id> ou /@user/video/<id>)
+  const tt = u.match(/tiktok\.com\/(?:@[\w.\-]+\/)?video\/(\d+)/);
+  if (tt) {
+    return {
+      kind: "tiktok",
+      src: `https://www.tiktok.com/embed/v2/${tt[1]}`,
+      externalUrl: u,
+      videoId: tt[1],
+    };
+  }
+  // TikTok shortlink (vm.tiktok.com / vt.tiktok.com): não dá pra extrair id sem fetch
+  if (/(?:vm|vt)\.tiktok\.com\//.test(u)) {
+    return { kind: "tiktok", src: "", externalUrl: u };
   }
 
   // URL de áudio direta (mp3/ogg/wav)
