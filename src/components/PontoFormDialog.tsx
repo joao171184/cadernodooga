@@ -244,14 +244,14 @@ export function PontoFormDialog({ open, onClose, onSave, ponto, defaultCategoria
 
           <div>
             <label className="block text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1.5">
-              Link do YouTube ou Spotify (opcional)
+              Link do YouTube, Spotify ou TikTok (opcional)
             </label>
             <input
               type="text"
               value={audio}
               onChange={(e) => setAudio(e.target.value)}
               className="w-full px-4 py-3 rounded-xl bg-muted text-foreground text-sm outline-none focus:ring-2 focus:ring-accent/50 border border-border"
-              placeholder="https://youtube.com/... ou https://open.spotify.com/track/..."
+              placeholder="https://youtu.be/... · https://open.spotify.com/track/... · https://tiktok.com/@user/video/..."
             />
           </div>
 
