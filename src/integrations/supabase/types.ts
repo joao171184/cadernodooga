@@ -19,6 +19,7 @@ export type Database = {
           created_at: string
           emoji: string
           id: string
+          mostrar_filtros_classificacao: boolean
           nome: string
           ordem: number
           parent_id: string | null
@@ -27,6 +28,7 @@ export type Database = {
           created_at?: string
           emoji?: string
           id?: string
+          mostrar_filtros_classificacao?: boolean
           nome: string
           ordem?: number
           parent_id?: string | null
@@ -35,6 +37,7 @@ export type Database = {
           created_at?: string
           emoji?: string
           id?: string
+          mostrar_filtros_classificacao?: boolean
           nome?: string
           ordem?: number
           parent_id?: string | null
