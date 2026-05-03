@@ -6,6 +6,7 @@ export interface CategoriaNode {
   id: string;
   nome: string;
   emoji: string;
+  mostrarFiltrosClassificacao: boolean;
   filhos: CategoriaNode[];
 }
 
@@ -16,6 +17,7 @@ interface Ctx {
   addCategoria: (nome: string, emoji: string) => Promise<{ error: string | null }>;
   addSubcategoria: (parentId: string, nome: string, emoji: string) => Promise<{ error: string | null }>;
   renameCategoria: (id: string, nome: string, emoji: string) => Promise<void>;
+  setMostrarFiltrosClassificacao: (id: string, value: boolean) => Promise<void>;
   deleteCategoria: (id: string) => Promise<void>;
   moveCategoria: (id: string, dir: -1 | 1, parentId: string | null) => Promise<void>;
 }
@@ -37,7 +39,16 @@ export function CategoriasProvider({ children }: { children: ReactNode }) {
 
     const rows = data ?? [];
     const byId = new Map<string, CategoriaNode>();
-    rows.forEach((r) => byId.set(r.id, { id: r.id, nome: r.nome, emoji: r.emoji, filhos: [] }));
+    rows.forEach((r) => {
+      const row = r as typeof r & { mostrar_filtros_classificacao?: boolean };
+      byId.set(r.id, {
+        id: r.id,
+        nome: r.nome,
+        emoji: r.emoji,
+        mostrarFiltrosClassificacao: row.mostrar_filtros_classificacao ?? true,
+        filhos: [],
+      });
+    });
     const roots: CategoriaNode[] = [];
     rows.forEach((r) => {
       const node = byId.get(r.id)!;
@@ -82,6 +93,12 @@ export function CategoriasProvider({ children }: { children: ReactNode }) {
     await refresh();
   }, [refresh]);
 
+  const setMostrarFiltrosClassificacao = useCallback(async (id: string, value: boolean) => {
+    const payload: { mostrar_filtros_classificacao: boolean } = { mostrar_filtros_classificacao: value };
+    await supabase.from("categorias").update(payload).eq("id", id);
+    await refresh();
+  }, [refresh]);
+
   const deleteCategoria = useCallback(async (id: string) => {
     await supabase.from("categorias").delete().eq("id", id);
     await refresh();
@@ -111,7 +128,7 @@ export function CategoriasProvider({ children }: { children: ReactNode }) {
   return (
     <CategoriasContext.Provider value={{
       categorias, loading, refresh,
-      addCategoria, addSubcategoria, renameCategoria, deleteCategoria, moveCategoria,
+      addCategoria, addSubcategoria, renameCategoria, setMostrarFiltrosClassificacao, deleteCategoria, moveCategoria,
     }}>
       {children}
     </CategoriasContext.Provider>
