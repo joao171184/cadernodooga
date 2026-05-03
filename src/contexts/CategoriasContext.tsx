@@ -6,6 +6,7 @@ export interface CategoriaNode {
   id: string;
   nome: string;
   emoji: string;
+  mostrarFiltrosClassificacao: boolean;
   filhos: CategoriaNode[];
 }
 
@@ -16,6 +17,7 @@ interface Ctx {
   addCategoria: (nome: string, emoji: string) => Promise<{ error: string | null }>;
   addSubcategoria: (parentId: string, nome: string, emoji: string) => Promise<{ error: string | null }>;
   renameCategoria: (id: string, nome: string, emoji: string) => Promise<void>;
+  setMostrarFiltrosClassificacao: (id: string, value: boolean) => Promise<void>;
   deleteCategoria: (id: string) => Promise<void>;
   moveCategoria: (id: string, dir: -1 | 1, parentId: string | null) => Promise<void>;
 }
@@ -23,21 +25,43 @@ interface Ctx {
 const CategoriasContext = createContext<Ctx | null>(null);
 
 export function CategoriasProvider({ children }: { children: ReactNode }) {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const [categorias, setCategorias] = useState<CategoriaNode[]>([]);
   const [loading, setLoading] = useState(true);
 
   const refresh = useCallback(async () => {
+    if (authLoading) return;
+    if (!user) {
+      setCategorias([]);
+      setLoading(false);
+      return;
+    }
     setLoading(true);
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("categorias")
       .select("*")
       .order("ordem", { ascending: true })
       .order("nome", { ascending: true });
 
+    if (error) {
+      console.error("Erro ao carregar categorias", error);
+      setCategorias([]);
+      setLoading(false);
+      return;
+    }
+
     const rows = data ?? [];
     const byId = new Map<string, CategoriaNode>();
-    rows.forEach((r) => byId.set(r.id, { id: r.id, nome: r.nome, emoji: r.emoji, filhos: [] }));
+    rows.forEach((r) => {
+      const row = r as typeof r & { mostrar_filtros_classificacao?: boolean };
+      byId.set(r.id, {
+        id: r.id,
+        nome: r.nome,
+        emoji: r.emoji,
+        mostrarFiltrosClassificacao: row.mostrar_filtros_classificacao ?? true,
+        filhos: [],
+      });
+    });
     const roots: CategoriaNode[] = [];
     rows.forEach((r) => {
       const node = byId.get(r.id)!;
@@ -50,18 +74,19 @@ export function CategoriasProvider({ children }: { children: ReactNode }) {
     });
     setCategorias(roots);
     setLoading(false);
-  }, []);
+  }, [authLoading, user]);
 
   useEffect(() => { refresh(); }, [refresh, user]);
 
   // Realtime
   useEffect(() => {
+    if (!user) return;
     const ch = supabase
       .channel("cats-sync")
       .on("postgres_changes", { event: "*", schema: "public", table: "categorias" }, () => { refresh(); })
       .subscribe();
     return () => { supabase.removeChannel(ch); };
-  }, [refresh]);
+  }, [user, refresh]);
 
   const addCategoria = useCallback(async (nome: string, emoji: string) => {
     const { error } = await supabase.from("categorias").insert({ nome, emoji, ordem: categorias.length + 1 });
@@ -79,6 +104,12 @@ export function CategoriasProvider({ children }: { children: ReactNode }) {
 
   const renameCategoria = useCallback(async (id: string, nome: string, emoji: string) => {
     await supabase.from("categorias").update({ nome, emoji }).eq("id", id);
+    await refresh();
+  }, [refresh]);
+
+  const setMostrarFiltrosClassificacao = useCallback(async (id: string, value: boolean) => {
+    const payload: { mostrar_filtros_classificacao: boolean } = { mostrar_filtros_classificacao: value };
+    await (supabase.from("categorias") as any).update(payload).eq("id", id);
     await refresh();
   }, [refresh]);
 
@@ -111,7 +142,7 @@ export function CategoriasProvider({ children }: { children: ReactNode }) {
   return (
     <CategoriasContext.Provider value={{
       categorias, loading, refresh,
-      addCategoria, addSubcategoria, renameCategoria, deleteCategoria, moveCategoria,
+      addCategoria, addSubcategoria, renameCategoria, setMostrarFiltrosClassificacao, deleteCategoria, moveCategoria,
     }}>
       {children}
     </CategoriasContext.Provider>

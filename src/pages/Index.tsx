@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useRef } from "react";
 import { Search, Star, Music, Plus, Settings, LogOut, Instagram, Heart, Inbox, Loader2 } from "lucide-react";
 import logoImg from "@/assets/logo.png";
 import { useParams, useNavigate } from "react-router-dom";
@@ -10,6 +10,7 @@ import { AutoScrollControl } from "@/components/AutoScrollControl";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { useAuth } from "@/contexts/AuthContext";
 import { usePontos, type Ponto, type Classificacao, CLASSIFICACAO_OPTIONS } from "@/contexts/PontosContext";
+import { useCategorias } from "@/contexts/CategoriasContext";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { toast } from "sonner";
 
@@ -29,8 +30,13 @@ const Index = () => {
   const [formOpen, setFormOpen] = useState(false);
   const [editingPonto, setEditingPonto] = useState<Ponto | null>(null);
   const [adminOpen, setAdminOpen] = useState(false);
+  const dragId = useRef<string | null>(null);
+  const [dragList, setDragList] = useState<Ponto[] | null>(null);
 
-  const { pontos, pendentes, favoritos, loading, savePonto, deletePonto, toggleFavorito, movePontoInList } = usePontos();
+  const { pontos, pendentes, favoritos, loading, savePonto, deletePonto, toggleFavorito, movePontoInList, reorderPontosInList } = usePontos();
+  const { categorias } = useCategorias();
+  const activeCategoria = categorias.find((c) => c.nome === categoria);
+  const showClassifFilters = !categoria || (activeCategoria?.mostrarFiltrosClassificacao ?? true);
 
   const togglePlay = useCallback((id: string) => {
     setPlayingId((curr) => (curr === id ? null : id));
@@ -74,7 +80,7 @@ const Index = () => {
     if (showFavorites) {
       list = list.filter((p) => favoritos.has(p.id));
     }
-    if (classifFilter !== "all") {
+    if (showClassifFilters && classifFilter !== "all") {
       list = list.filter((p) => p.classificacoes.includes(classifFilter));
     }
     if (!q) return list;
@@ -84,7 +90,36 @@ const Index = () => {
         p.categoria.toLowerCase().includes(q) ||
         p.letra.toLowerCase().includes(q)
     );
-  }, [search, showFavorites, classifFilter, favoritos, categoria, subcategoria, pontos]);
+  }, [search, showFavorites, showClassifFilters, classifFilter, favoritos, categoria, subcategoria, pontos]);
+
+  const visibleList = dragList ?? filtered;
+
+  const handleDragStart = useCallback((id: string) => {
+    dragId.current = id;
+    setDragList(filtered);
+  }, [filtered]);
+
+  const handleDragOver = useCallback((overId: string) => {
+    const activeId = dragId.current;
+    if (!activeId || activeId === overId) return;
+    setDragList((current) => {
+      const list = current ?? filtered;
+      const from = list.findIndex((p) => p.id === activeId);
+      const to = list.findIndex((p) => p.id === overId);
+      if (from < 0 || to < 0) return list;
+      const next = [...list];
+      const [moved] = next.splice(from, 1);
+      next.splice(to, 0, moved);
+      return next;
+    });
+  }, [filtered]);
+
+  const handleDrop = useCallback(async () => {
+    const list = dragList;
+    dragId.current = null;
+    setDragList(null);
+    if (list) await reorderPontosInList(list);
+  }, [dragList, reorderPontosInList]);
 
   const playingPonto = playingId ? pontos.find((p) => p.id === playingId) : null;
 
@@ -94,7 +129,7 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       {/* Header */}
-      <header className="sticky top-0 z-10 bg-primary shadow-xl">
+      <header className="bg-primary shadow-xl">
         <div className="px-3 sm:px-4 pt-3 pb-3 sm:pt-4 sm:pb-4">
           <div className="flex items-center gap-2 sm:gap-3 mb-3">
             <SidebarTrigger className="text-primary-foreground hover:bg-primary-foreground/10 rounded-lg p-2 -ml-1" />
@@ -176,7 +211,7 @@ const Index = () => {
         <div className="flex flex-wrap items-center gap-2 mb-4">
           <button
             onClick={() => setShowFavorites(!showFavorites)}
-            className={`flex items-center gap-2 px-3.5 py-2 rounded-full text-xs font-bold transition-all active:scale-95 shadow-sm uppercase ${
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold transition-all active:scale-95 shadow-sm uppercase ${
               showFavorites
                 ? "bg-accent text-accent-foreground shadow-md"
                 : "bg-card text-muted-foreground border border-border hover:border-accent/30"
@@ -186,19 +221,14 @@ const Index = () => {
             Favoritos {favoritos.size > 0 && `(${favoritos.size})`}
           </button>
 
-          <ClassifChip
-            label="Todos"
-            active={classifFilter === "all"}
-            onClick={() => setClassifFilter("all")}
-          />
-          {CLASSIFICACAO_OPTIONS.map((c) => (
-            <ClassifChip
-              key={c.value}
-              label={`${c.emoji} ${c.label}`}
-              active={classifFilter === c.value}
-              onClick={() => setClassifFilter(c.value)}
-            />
-          ))}
+          {showClassifFilters && (
+            <>
+              <ClassifChip label="Todos" active={classifFilter === "all"} onClick={() => setClassifFilter("all")} />
+              {CLASSIFICACAO_OPTIONS.map((c) => (
+                <ClassifChip key={c.value} label={c.label} active={classifFilter === c.value} onClick={() => setClassifFilter(c.value)} />
+              ))}
+            </>
+          )}
 
           <p className="ml-auto text-xs text-muted-foreground font-medium">
             {filtered.length} {filtered.length === 1 ? "ponto" : "pontos"}
@@ -215,8 +245,8 @@ const Index = () => {
           ) : filtered.length === 0 ? (
             <div className="text-center py-16 text-muted-foreground">
               <Music size={44} className="mx-auto mb-4 opacity-20" />
-              <p className="text-base font-medium uppercase">Nenhum ponto encontrado</p>
-              <p className="text-sm mt-1 opacity-70">Tente outra busca ou adicione um novo ponto</p>
+              <p className="text-base font-medium uppercase">Nenhum ponto nesta pasta</p>
+              <p className="text-sm mt-1 opacity-70 uppercase">Tente outra busca ou outro filtro</p>
               {canAdd && (
                 <button
                   onClick={() => { setEditingPonto(null); setFormOpen(true); }}
@@ -228,7 +258,7 @@ const Index = () => {
               )}
             </div>
           ) : (
-            filtered.map((ponto, i) => (
+            visibleList.map((ponto, i) => (
               <PontoCard
                 key={ponto.id}
                 ponto={ponto}
@@ -238,10 +268,13 @@ const Index = () => {
                 onToggleFavorite={toggleFavorito}
                 onEdit={handleEditPonto}
                 onDelete={handleDeletePonto}
-                onMoveUp={(id) => movePontoInList(id, -1, filtered)}
-                onMoveDown={(id) => movePontoInList(id, 1, filtered)}
+                onMoveUp={(id) => movePontoInList(id, -1, visibleList)}
+                onMoveDown={(id) => movePontoInList(id, 1, visibleList)}
+                onDragStart={isAdmin ? handleDragStart : undefined}
+                onDragOver={isAdmin ? handleDragOver : undefined}
+                onDrop={isAdmin ? handleDrop : undefined}
                 canMoveUp={i > 0}
-                canMoveDown={i < filtered.length - 1}
+                canMoveDown={i < visibleList.length - 1}
               />
             ))
           )}

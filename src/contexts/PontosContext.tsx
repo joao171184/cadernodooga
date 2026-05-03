@@ -15,10 +15,10 @@ export const TOQUE_OPTIONS: { value: ToqueTipo; label: string }[] = [
   { value: "samba", label: "Samba" },
 ];
 
-export const CLASSIFICACAO_OPTIONS: { value: Classificacao; label: string; emoji: string }[] = [
-  { value: "chamada", label: "Chamada", emoji: "📣" },
-  { value: "elevacao", label: "Elevação", emoji: "🔺" },
-  { value: "sustentacao", label: "Sustentação", emoji: "🌀" },
+export const CLASSIFICACAO_OPTIONS: { value: Classificacao; label: string }[] = [
+  { value: "chamada", label: "Chamada" },
+  { value: "elevacao", label: "Subida" },
+  { value: "sustentacao", label: "Sustentação" },
 ];
 
 export interface Ponto {
@@ -60,18 +60,20 @@ interface Ctx {
   rejectPonto: (id: string) => Promise<void>;
   toggleFavorito: (id: string) => Promise<void>;
   movePontoInList: (id: string, dir: -1 | 1, scopedList: Ponto[]) => Promise<void>;
+  reorderPontosInList: (orderedList: Ponto[]) => Promise<void>;
 }
 
 const PontosContext = createContext<Ctx | null>(null);
 
 export function PontosProvider({ children }: { children: ReactNode }) {
-  const { user, isAdmin } = useAuth();
+  const { user, isAdmin, loading: authLoading } = useAuth();
   const [pontos, setPontos] = useState<Ponto[]>([]);
   const [pendentes, setPendentes] = useState<Ponto[]>([]);
   const [favoritos, setFavoritos] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
 
   const refresh = useCallback(async () => {
+    if (authLoading) return;
     if (!user) {
       setPontos([]); setPendentes([]); setFavoritos(new Set()); setLoading(false);
       return;
@@ -118,7 +120,7 @@ export function PontosProvider({ children }: { children: ReactNode }) {
     setPendentes(all.filter((p) => p.status === "pending"));
     setFavoritos(new Set((favs ?? []).map((f) => f.ponto_id)));
     setLoading(false);
-  }, [user]);
+  }, [user, authLoading]);
 
   useEffect(() => { refresh(); }, [refresh]);
 
@@ -159,7 +161,9 @@ export function PontosProvider({ children }: { children: ReactNode }) {
       await supabase.from("ponto_subcategorias").delete().eq("ponto_id", pontoId);
       await supabase.from("ponto_classificacoes").delete().eq("ponto_id", pontoId);
     } else {
-      const { data: ins, error } = await supabase.from("pontos").insert(payload).select("id").single();
+      const sameCategory = pontos.filter((p) => p.categoria === data.categoria);
+      const ordem = sameCategory.length ? Math.max(...sameCategory.map((p) => p.ordem)) + 10 : 10;
+      const { data: ins, error } = await supabase.from("pontos").insert({ ...payload, ordem }).select("id").single();
       if (error || !ins) return { error: error?.message ?? "Erro", pending: false };
       pontoId = ins.id;
     }
@@ -211,6 +215,14 @@ export function PontosProvider({ children }: { children: ReactNode }) {
 
   // Move within current visible scope. Renumera ordem usando o scopedList
   // recebido (já filtrado por categoria/subcategoria/classificação).
+  const reorderPontosInList = useCallback<Ctx["reorderPontosInList"]>(async (orderedList) => {
+    const orderSlots = [...orderedList].map((p) => p.ordem).sort((a, b) => a - b);
+    await Promise.all(
+      orderedList.map((p, i) => supabase.from("pontos").update({ ordem: orderSlots[i] ?? (i + 1) * 10 }).eq("id", p.id))
+    );
+    await refresh();
+  }, [refresh]);
+
   const movePontoInList = useCallback<Ctx["movePontoInList"]>(async (id, dir, scopedList) => {
     const idx = scopedList.findIndex((p) => p.id === id);
     if (idx < 0) return;
@@ -219,19 +231,13 @@ export function PontosProvider({ children }: { children: ReactNode }) {
     const reordered = [...scopedList];
     const [moved] = reordered.splice(idx, 1);
     reordered.splice(target, 0, moved);
-    // Atribui novas ordens sequenciais (10, 20, 30…) baseadas no menor ordem
-    // existente da categoria, para não colidir com pontos fora do escopo.
-    const updates = reordered.map((p, i) => ({ id: p.id, ordem: (i + 1) * 10 }));
-    await Promise.all(
-      updates.map((u) => supabase.from("pontos").update({ ordem: u.ordem }).eq("id", u.id))
-    );
-    await refresh();
-  }, [refresh]);
+    await reorderPontosInList(reordered);
+  }, [reorderPontosInList]);
 
   return (
     <PontosContext.Provider value={{
       pontos, pendentes, favoritos, loading,
-      refresh, savePonto, deletePonto, approvePonto, rejectPonto, toggleFavorito, movePontoInList,
+      refresh, savePonto, deletePonto, approvePonto, rejectPonto, toggleFavorito, movePontoInList, reorderPontosInList,
     }}>
       {children}
     </PontosContext.Provider>

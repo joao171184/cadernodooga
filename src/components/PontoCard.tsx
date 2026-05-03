@@ -14,11 +14,14 @@ interface PontoCardProps {
   onDelete?: (id: string) => void;
   onMoveUp?: (id: string) => void;
   onMoveDown?: (id: string) => void;
+  onDragStart?: (id: string) => void;
+  onDragOver?: (id: string) => void;
+  onDrop?: () => void;
   canMoveUp?: boolean;
   canMoveDown?: boolean;
 }
 
-const PontoCard = ({ ponto, isPlaying, isFavorite, onTogglePlay, onToggleFavorite, onEdit, onDelete, onMoveUp, onMoveDown, canMoveUp, canMoveDown }: PontoCardProps) => {
+const PontoCard = ({ ponto, isPlaying, isFavorite, onTogglePlay, onToggleFavorite, onEdit, onDelete, onMoveUp, onMoveDown, onDragStart, onDragOver, onDrop, canMoveUp, canMoveDown }: PontoCardProps) => {
   const { isAdmin, can } = useAuth();
   const embed = getEmbedInfo(ponto.audio);
   const hasMedia = embed.kind !== "none";
@@ -26,7 +29,7 @@ const PontoCard = ({ ponto, isPlaying, isFavorite, onTogglePlay, onToggleFavorit
   const toqueLabel = TOQUE_OPTIONS.find((t) => t.value === ponto.toque)?.label;
   const classifLabels = ponto.classificacoes
     .map((c) => CLASSIFICACAO_OPTIONS.find((o) => o.value === c))
-    .filter(Boolean) as { value: string; label: string; emoji: string }[];
+    .filter(Boolean) as { value: string; label: string }[];
 
   const canEdit = !!onEdit && (isAdmin || can("edit_pontos"));
   const canDelete = !!onDelete && (isAdmin || can("delete_pontos"));
@@ -34,7 +37,13 @@ const PontoCard = ({ ponto, isPlaying, isFavorite, onTogglePlay, onToggleFavorit
   const canPlay = isAdmin || can("play_audio");
 
   return (
-    <div className={`bg-card rounded-2xl border border-border shadow-sm overflow-hidden transition-all duration-200 ${isPlaying ? "ring-2 ring-accent/40 shadow-lg" : "hover:shadow-md"}`}>
+    <div
+      draggable={!!onDragStart}
+      onDragStart={() => onDragStart?.(ponto.id)}
+      onDragOver={(e) => { e.preventDefault(); onDragOver?.(ponto.id); }}
+      onDrop={onDrop}
+      className={`bg-card rounded-2xl border border-border shadow-sm overflow-hidden transition-all duration-200 ${onDragStart ? "cursor-grab active:cursor-grabbing" : ""} ${isPlaying ? "ring-2 ring-accent/40 shadow-lg" : "hover:shadow-md"}`}
+    >
       <div className="p-4 sm:p-5">
         <div className="flex items-start justify-between gap-2 mb-3">
           <div className="flex-1 min-w-0">
@@ -67,7 +76,6 @@ const PontoCard = ({ ponto, isPlaying, isFavorite, onTogglePlay, onToggleFavorit
                     key={c.value}
                     className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-accent/15 text-accent border border-accent/30"
                   >
-                    <span>{c.emoji}</span>
                     {c.label}
                   </span>
                 ))}
