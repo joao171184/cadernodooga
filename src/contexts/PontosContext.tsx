@@ -15,10 +15,10 @@ export const TOQUE_OPTIONS: { value: ToqueTipo; label: string }[] = [
   { value: "samba", label: "Samba" },
 ];
 
-export const CLASSIFICACAO_OPTIONS: { value: Classificacao; label: string; emoji: string }[] = [
-  { value: "chamada", label: "Chamada", emoji: "📣" },
-  { value: "elevacao", label: "Elevação", emoji: "🔺" },
-  { value: "sustentacao", label: "Sustentação", emoji: "🌀" },
+export const CLASSIFICACAO_OPTIONS: { value: Classificacao; label: string }[] = [
+  { value: "chamada", label: "Chamada" },
+  { value: "elevacao", label: "Subida" },
+  { value: "sustentacao", label: "Sustentação" },
 ];
 
 export interface Ponto {
@@ -159,7 +159,9 @@ export function PontosProvider({ children }: { children: ReactNode }) {
       await supabase.from("ponto_subcategorias").delete().eq("ponto_id", pontoId);
       await supabase.from("ponto_classificacoes").delete().eq("ponto_id", pontoId);
     } else {
-      const { data: ins, error } = await supabase.from("pontos").insert(payload).select("id").single();
+      const sameCategory = pontos.filter((p) => p.categoria === data.categoria);
+      const ordem = sameCategory.length ? Math.max(...sameCategory.map((p) => p.ordem)) + 10 : 10;
+      const { data: ins, error } = await supabase.from("pontos").insert({ ...payload, ordem }).select("id").single();
       if (error || !ins) return { error: error?.message ?? "Erro", pending: false };
       pontoId = ins.id;
     }
