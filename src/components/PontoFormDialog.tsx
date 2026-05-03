@@ -171,7 +171,7 @@ export function PontoFormDialog({ open, onClose, onSave, ponto, defaultCategoria
                     }`}
                   >
                     {active && <Check size={12} />}
-                    <span>{c.emoji} {c.label}</span>
+                    <span>{c.label}</span>
                   </button>
                 );
               })}
@@ -208,7 +208,7 @@ export function PontoFormDialog({ open, onClose, onSave, ponto, defaultCategoria
                     }`}
                   >
                     {active && <Check size={12} />}
-                    <span>🪘 {t.label}</span>
+                    <span>{t.label}</span>
                   </button>
                 );
               })}
