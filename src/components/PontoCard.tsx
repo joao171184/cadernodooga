@@ -14,11 +14,14 @@ interface PontoCardProps {
   onDelete?: (id: string) => void;
   onMoveUp?: (id: string) => void;
   onMoveDown?: (id: string) => void;
+  onDragStart?: (id: string) => void;
+  onDragOver?: (id: string) => void;
+  onDrop?: () => void;
   canMoveUp?: boolean;
   canMoveDown?: boolean;
 }
 
-const PontoCard = ({ ponto, isPlaying, isFavorite, onTogglePlay, onToggleFavorite, onEdit, onDelete, onMoveUp, onMoveDown, canMoveUp, canMoveDown }: PontoCardProps) => {
+const PontoCard = ({ ponto, isPlaying, isFavorite, onTogglePlay, onToggleFavorite, onEdit, onDelete, onMoveUp, onMoveDown, onDragStart, onDragOver, onDrop, canMoveUp, canMoveDown }: PontoCardProps) => {
   const { isAdmin, can } = useAuth();
   const embed = getEmbedInfo(ponto.audio);
   const hasMedia = embed.kind !== "none";
@@ -34,7 +37,13 @@ const PontoCard = ({ ponto, isPlaying, isFavorite, onTogglePlay, onToggleFavorit
   const canPlay = isAdmin || can("play_audio");
 
   return (
-    <div className={`bg-card rounded-2xl border border-border shadow-sm overflow-hidden transition-all duration-200 ${isPlaying ? "ring-2 ring-accent/40 shadow-lg" : "hover:shadow-md"}`}>
+    <div
+      draggable={!!onDragStart}
+      onDragStart={() => onDragStart?.(ponto.id)}
+      onDragOver={(e) => { e.preventDefault(); onDragOver?.(ponto.id); }}
+      onDrop={onDrop}
+      className={`bg-card rounded-2xl border border-border shadow-sm overflow-hidden transition-all duration-200 ${onDragStart ? "cursor-grab active:cursor-grabbing" : ""} ${isPlaying ? "ring-2 ring-accent/40 shadow-lg" : "hover:shadow-md"}`}
+    >
       <div className="p-4 sm:p-5">
         <div className="flex items-start justify-between gap-2 mb-3">
           <div className="flex-1 min-w-0">
