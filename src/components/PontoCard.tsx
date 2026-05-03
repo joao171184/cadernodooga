@@ -26,7 +26,7 @@ const PontoCard = ({ ponto, isPlaying, isFavorite, onTogglePlay, onToggleFavorit
   const toqueLabel = TOQUE_OPTIONS.find((t) => t.value === ponto.toque)?.label;
   const classifLabels = ponto.classificacoes
     .map((c) => CLASSIFICACAO_OPTIONS.find((o) => o.value === c))
-    .filter(Boolean) as { value: string; label: string; emoji: string }[];
+    .filter(Boolean) as { value: string; label: string }[];
 
   const canEdit = !!onEdit && (isAdmin || can("edit_pontos"));
   const canDelete = !!onDelete && (isAdmin || can("delete_pontos"));
@@ -67,7 +67,6 @@ const PontoCard = ({ ponto, isPlaying, isFavorite, onTogglePlay, onToggleFavorit
                     key={c.value}
                     className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-accent/15 text-accent border border-accent/30"
                   >
-                    <span>{c.emoji}</span>
                     {c.label}
                   </span>
                 ))}
