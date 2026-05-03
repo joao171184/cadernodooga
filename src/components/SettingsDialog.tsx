@@ -150,11 +150,11 @@ function VisibilidadePanel() {
               <span>{c.emoji}</span>
               {c.nome}
             </span>
-            <Check
+            <ToggleButton
               checked={vis.hideCategoriesForOga.includes(c.nome)}
               onChange={() => toggleCat("oga", c.nome)}
             />
-            <Check
+            <ToggleButton
               checked={vis.hideCategoriesForVisitante.includes(c.nome)}
               onChange={() => toggleCat("visitante", c.nome)}
             />
@@ -185,13 +185,13 @@ function FlagRow({
   return (
     <div className="grid grid-cols-[1fr,auto,auto] gap-2 items-center py-1.5">
       <span className="text-sm">{label}</span>
-      <Check checked={vis[section].oga} onChange={() => toggle(section, "oga")} labelHint="Ogã" />
-      <Check checked={vis[section].visitante} onChange={() => toggle(section, "visitante")} labelHint="Visitante" />
+      <ToggleButton checked={vis[section].oga} onChange={() => toggle(section, "oga")} labelHint="Ogã" />
+      <ToggleButton checked={vis[section].visitante} onChange={() => toggle(section, "visitante")} labelHint="Visitante" />
     </div>
   );
 }
 
-function Check({ checked, onChange, labelHint }: { checked: boolean; onChange: () => void; labelHint?: string }) {
+function ToggleButton({ checked, onChange, labelHint }: { checked: boolean; onChange: () => void; labelHint?: string }) {
   return (
     <button
       type="button"
