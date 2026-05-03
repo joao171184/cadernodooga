@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useRef } from "react";
 import { Search, Star, Music, Plus, Settings, LogOut, Instagram, Heart, Inbox, Loader2 } from "lucide-react";
 import logoImg from "@/assets/logo.png";
 import { useParams, useNavigate } from "react-router-dom";
@@ -30,8 +30,10 @@ const Index = () => {
   const [formOpen, setFormOpen] = useState(false);
   const [editingPonto, setEditingPonto] = useState<Ponto | null>(null);
   const [adminOpen, setAdminOpen] = useState(false);
+  const dragId = useRef<string | null>(null);
+  const [dragList, setDragList] = useState<Ponto[] | null>(null);
 
-  const { pontos, pendentes, favoritos, loading, savePonto, deletePonto, toggleFavorito, movePontoInList } = usePontos();
+  const { pontos, pendentes, favoritos, loading, savePonto, deletePonto, toggleFavorito, movePontoInList, reorderPontosInList } = usePontos();
   const { categorias } = useCategorias();
   const activeCategoria = categorias.find((c) => c.nome === categoria);
   const showClassifFilters = !categoria || (activeCategoria?.mostrarFiltrosClassificacao ?? true);
@@ -89,6 +91,35 @@ const Index = () => {
         p.letra.toLowerCase().includes(q)
     );
   }, [search, showFavorites, showClassifFilters, classifFilter, favoritos, categoria, subcategoria, pontos]);
+
+  const visibleList = dragList ?? filtered;
+
+  const handleDragStart = useCallback((id: string) => {
+    dragId.current = id;
+    setDragList(filtered);
+  }, [filtered]);
+
+  const handleDragOver = useCallback((overId: string) => {
+    const activeId = dragId.current;
+    if (!activeId || activeId === overId) return;
+    setDragList((current) => {
+      const list = current ?? filtered;
+      const from = list.findIndex((p) => p.id === activeId);
+      const to = list.findIndex((p) => p.id === overId);
+      if (from < 0 || to < 0) return list;
+      const next = [...list];
+      const [moved] = next.splice(from, 1);
+      next.splice(to, 0, moved);
+      return next;
+    });
+  }, [filtered]);
+
+  const handleDrop = useCallback(async () => {
+    const list = dragList;
+    dragId.current = null;
+    setDragList(null);
+    if (list) await reorderPontosInList(list);
+  }, [dragList, reorderPontosInList]);
 
   const playingPonto = playingId ? pontos.find((p) => p.id === playingId) : null;
 
@@ -227,7 +258,7 @@ const Index = () => {
               )}
             </div>
           ) : (
-            filtered.map((ponto, i) => (
+            visibleList.map((ponto, i) => (
               <PontoCard
                 key={ponto.id}
                 ponto={ponto}
@@ -237,10 +268,13 @@ const Index = () => {
                 onToggleFavorite={toggleFavorito}
                 onEdit={handleEditPonto}
                 onDelete={handleDeletePonto}
-                onMoveUp={(id) => movePontoInList(id, -1, filtered)}
-                onMoveDown={(id) => movePontoInList(id, 1, filtered)}
+                onMoveUp={(id) => movePontoInList(id, -1, visibleList)}
+                onMoveDown={(id) => movePontoInList(id, 1, visibleList)}
+                onDragStart={isAdmin ? handleDragStart : undefined}
+                onDragOver={isAdmin ? handleDragOver : undefined}
+                onDrop={isAdmin ? handleDrop : undefined}
                 canMoveUp={i > 0}
-                canMoveDown={i < filtered.length - 1}
+                canMoveDown={i < visibleList.length - 1}
               />
             ))
           )}
