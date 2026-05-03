@@ -392,10 +392,10 @@ function AcessosPanel() {
                     </span>
                   </td>
                   <td className="text-center py-2">
-                    <Check checked={!!perms.oga[p.key]} onChange={() => togglePerm("oga", p.key)} />
+                    <ToggleButton checked={!!perms.oga[p.key]} onChange={() => togglePerm("oga", p.key)} />
                   </td>
                   <td className="text-center py-2">
-                    <Check checked={!!perms.visitante[p.key]} onChange={() => togglePerm("visitante", p.key)} />
+                    <ToggleButton checked={!!perms.visitante[p.key]} onChange={() => togglePerm("visitante", p.key)} />
                   </td>
                 </tr>
               ))}
