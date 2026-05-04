@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Plus, Pencil, Trash2, Check, X, ChevronDown, ChevronRight, FolderTree, ArrowUp, ArrowDown, ListFilter } from "lucide-react";
 import { useCategorias, type CategoriaNode } from "@/contexts/CategoriasContext";
+import { ICON_CATALOG, resolveIcon } from "@/lib/categoryIcons";
 import { toast } from "sonner";
 
 interface Props {
@@ -9,27 +10,25 @@ interface Props {
   onClose: () => void;
 }
 
-const EMOJI_SUGGESTIONS = ["🔱","⚔️","🏹","⚡","🌪️","🌊","🪞","🌙","🩹","☀️","🪶","🕯️","🧸","🤠","⚓","🎶","🌹","😈","🔥","🕊️","🙏","✨","🌿","🦅","🐍","🌟","💫","🪘"];
-
-function EmojiPicker({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+function IconPicker({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  const Selected = resolveIcon(value, "");
   return (
     <div className="space-y-2">
-      <input
-        type="text"
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className="w-16 px-2 py-2 rounded-lg bg-muted text-center text-lg outline-none focus:ring-2 focus:ring-accent/50 border border-border"
-        maxLength={4}
-      />
-      <div className="flex flex-wrap gap-1">
-        {EMOJI_SUGGESTIONS.map((e) => (
+      <div className="w-14 h-14 rounded-xl bg-muted border border-border flex items-center justify-center">
+        <Selected size={26} className="text-accent" strokeWidth={2} />
+      </div>
+      <div className="grid grid-cols-7 gap-1 max-h-32 overflow-y-auto p-1 rounded-lg bg-muted/50 border border-border">
+        {ICON_CATALOG.map(({ key, Icon, label }) => (
           <button
-            key={e}
+            key={key}
             type="button"
-            onClick={() => onChange(e)}
-            className="w-8 h-8 rounded-lg hover:bg-muted transition-all text-base"
+            title={label}
+            onClick={() => onChange(key)}
+            className={`w-7 h-7 rounded-md flex items-center justify-center transition-all ${
+              value === key ? "bg-accent text-accent-foreground" : "hover:bg-muted text-foreground/70"
+            }`}
           >
-            {e}
+            <Icon size={14} strokeWidth={2} />
           </button>
         ))}
       </div>
