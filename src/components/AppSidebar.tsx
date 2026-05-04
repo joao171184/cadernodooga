@@ -17,7 +17,7 @@ import type { CategoriaNode } from "@/contexts/CategoriasContext";
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCategorias } from "@/contexts/CategoriasContext";
-import { getCategoryIcon } from "@/lib/categoryIcons";
+import { resolveIcon } from "@/lib/categoryIcons";
 import logoImg from "@/assets/logo.png";
 
 export function AppSidebar() {
