@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Plus, Pencil, Trash2, Check, X, ChevronDown, ChevronRight, FolderTree, ArrowUp, ArrowDown, ListFilter } from "lucide-react";
 import { useCategorias, type CategoriaNode } from "@/contexts/CategoriasContext";
+import { ICON_CATALOG, resolveIcon } from "@/lib/categoryIcons";
 import { toast } from "sonner";
 
 interface Props {
@@ -9,27 +10,25 @@ interface Props {
   onClose: () => void;
 }
 
-const EMOJI_SUGGESTIONS = ["🔱","⚔️","🏹","⚡","🌪️","🌊","🪞","🌙","🩹","☀️","🪶","🕯️","🧸","🤠","⚓","🎶","🌹","😈","🔥","🕊️","🙏","✨","🌿","🦅","🐍","🌟","💫","🪘"];
-
-function EmojiPicker({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+function IconPicker({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  const Selected = resolveIcon(value, "");
   return (
     <div className="space-y-2">
-      <input
-        type="text"
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className="w-16 px-2 py-2 rounded-lg bg-muted text-center text-lg outline-none focus:ring-2 focus:ring-accent/50 border border-border"
-        maxLength={4}
-      />
-      <div className="flex flex-wrap gap-1">
-        {EMOJI_SUGGESTIONS.map((e) => (
+      <div className="w-14 h-14 rounded-xl bg-muted border border-border flex items-center justify-center">
+        <Selected size={26} className="text-accent" strokeWidth={2} />
+      </div>
+      <div className="grid grid-cols-7 gap-1 max-h-32 overflow-y-auto p-1 rounded-lg bg-muted/50 border border-border">
+        {ICON_CATALOG.map(({ key, Icon, label }) => (
           <button
-            key={e}
+            key={key}
             type="button"
-            onClick={() => onChange(e)}
-            className="w-8 h-8 rounded-lg hover:bg-muted transition-all text-base"
+            title={label}
+            onClick={() => onChange(key)}
+            className={`w-7 h-7 rounded-md flex items-center justify-center transition-all ${
+              value === key ? "bg-accent text-accent-foreground" : "hover:bg-muted text-foreground/70"
+            }`}
           >
-            {e}
+            <Icon size={14} strokeWidth={2} />
           </button>
         ))}
       </div>
@@ -41,10 +40,10 @@ export function CategoriasManagerDialog({ open, onClose }: Props) {
   const { categorias, addCategoria, addSubcategoria, renameCategoria, setMostrarFiltrosClassificacao, deleteCategoria, moveCategoria } = useCategorias();
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
   const [newCatNome, setNewCatNome] = useState("");
-  const [newCatEmoji, setNewCatEmoji] = useState("✨");
+  const [newCatEmoji, setNewCatEmoji] = useState("crown");
   const [addSubFor, setAddSubFor] = useState<string | null>(null); // parent id
   const [newSubNome, setNewSubNome] = useState("");
-  const [newSubEmoji, setNewSubEmoji] = useState("🪶");
+  const [newSubEmoji, setNewSubEmoji] = useState("feather");
   const [editing, setEditing] = useState<{ id: string } | null>(null);
   const [editNome, setEditNome] = useState("");
   const [editEmoji, setEditEmoji] = useState("");
@@ -80,7 +79,7 @@ export function CategoriasManagerDialog({ open, onClose }: Props) {
     const { error } = await addCategoria(n, newCatEmoji || "•");
     if (error) return toast.error("Erro: " + error);
     setNewCatNome("");
-    setNewCatEmoji("✨");
+    setNewCatEmoji("crown");
     toast.success("Categoria criada");
   };
 
@@ -90,7 +89,7 @@ export function CategoriasManagerDialog({ open, onClose }: Props) {
     const { error } = await addSubcategoria(parentId, n, newSubEmoji || "•");
     if (error) return toast.error("Erro: " + error);
     setNewSubNome("");
-    setNewSubEmoji("🪶");
+    setNewSubEmoji("feather");
     setAddSubFor(null);
     toast.success("Subcategoria criada");
   };
@@ -119,7 +118,7 @@ export function CategoriasManagerDialog({ open, onClose }: Props) {
           <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Nova categoria</p>
           <div className="flex gap-2 items-start">
             <div>
-              <EmojiPicker value={newCatEmoji} onChange={setNewCatEmoji} />
+              <IconPicker value={newCatEmoji} onChange={setNewCatEmoji} />
             </div>
             <div className="flex-1 space-y-2">
               <input
@@ -152,26 +151,22 @@ export function CategoriasManagerDialog({ open, onClose }: Props) {
                   </button>
 
                   {isEditing ? (
-                    <>
-                      <input
-                        type="text"
-                        value={editEmoji}
-                        onChange={(e) => setEditEmoji(e.target.value)}
-                        className="w-12 px-1 py-1.5 rounded-lg bg-muted text-center text-base border border-border"
-                        maxLength={4}
-                      />
+                    <div className="flex-1 space-y-2">
                       <input
                         type="text"
                         value={editNome}
                         onChange={(e) => setEditNome(e.target.value)}
-                        className="flex-1 px-3 py-1.5 rounded-lg bg-muted text-sm border border-border"
+                        className="w-full px-3 py-1.5 rounded-lg bg-muted text-sm border border-border"
                       />
-                      <button onClick={saveEdit} className="p-2 rounded-lg hover:bg-accent/20 text-accent"><Check size={16} /></button>
-                      <button onClick={() => setEditing(null)} className="p-2 rounded-lg hover:bg-muted"><X size={16} /></button>
-                    </>
+                      <IconPicker value={editEmoji} onChange={setEditEmoji} />
+                      <div className="flex gap-2">
+                        <button onClick={saveEdit} className="flex-1 py-2 rounded-lg bg-accent text-accent-foreground text-xs font-bold uppercase flex items-center justify-center gap-1.5"><Check size={14} /> Salvar</button>
+                        <button onClick={() => setEditing(null)} className="flex-1 py-2 rounded-lg bg-muted text-muted-foreground text-xs font-bold uppercase flex items-center justify-center gap-1.5"><X size={14} /> Cancelar</button>
+                      </div>
+                    </div>
                   ) : (
                     <>
-                      <span className="text-lg">{cat.emoji}</span>
+                      {(() => { const I = resolveIcon(cat.emoji, cat.nome); return <I size={20} className="text-accent shrink-0" strokeWidth={2} />; })()}
                       <span className="flex-1 font-bold text-sm uppercase truncate">{cat.nome}</span>
                       <button
                         onClick={() => setMostrarFiltrosClassificacao(cat.id, !cat.mostrarFiltrosClassificacao)}
@@ -230,29 +225,25 @@ export function CategoriasManagerDialog({ open, onClose }: Props) {
                     {cat.filhos.map((sub, si) => {
                       const isSubEditing = editing && editing.id === sub.id;
                       return (
-                        <div key={sub.id} className="flex items-center gap-2 pl-6 py-1.5">
+                        <div key={sub.id} className="flex items-start gap-2 pl-6 py-1.5">
                           {isSubEditing ? (
-                            <>
-                              <input
-                                type="text"
-                                value={editEmoji}
-                                onChange={(e) => setEditEmoji(e.target.value)}
-                                className="w-12 px-1 py-1.5 rounded-lg bg-muted text-center text-base border border-border"
-                                maxLength={4}
-                              />
+                            <div className="flex-1 space-y-2">
                               <input
                                 type="text"
                                 value={editNome}
                                 onChange={(e) => setEditNome(e.target.value)}
-                                className="flex-1 px-3 py-1.5 rounded-lg bg-muted text-sm border border-border"
+                                className="w-full px-3 py-1.5 rounded-lg bg-muted text-sm border border-border"
                               />
-                              <button onClick={saveEdit} className="p-2 rounded-lg hover:bg-accent/20 text-accent"><Check size={16} /></button>
-                              <button onClick={() => setEditing(null)} className="p-2 rounded-lg hover:bg-muted"><X size={16} /></button>
-                            </>
+                              <IconPicker value={editEmoji} onChange={setEditEmoji} />
+                              <div className="flex gap-2">
+                                <button onClick={saveEdit} className="flex-1 py-2 rounded-lg bg-accent text-accent-foreground text-xs font-bold uppercase flex items-center justify-center gap-1.5"><Check size={14} /> Salvar</button>
+                                <button onClick={() => setEditing(null)} className="flex-1 py-2 rounded-lg bg-muted text-muted-foreground text-xs font-bold uppercase flex items-center justify-center gap-1.5"><X size={14} /> Cancelar</button>
+                              </div>
+                            </div>
                           ) : (
                             <>
-                              <span className="text-base">{sub.emoji}</span>
-                              <span className="flex-1 text-sm truncate">{sub.nome}</span>
+                              {(() => { const I = resolveIcon(sub.emoji, sub.nome); return <I size={16} className="text-accent shrink-0 mt-1" strokeWidth={2} />; })()}
+                              <span className="flex-1 text-sm truncate mt-0.5">{sub.nome}</span>
                               <button
                                 onClick={() => moveCategoria(sub.id, -1, cat.id)}
                                 disabled={si === 0}
@@ -291,7 +282,7 @@ export function CategoriasManagerDialog({ open, onClose }: Props) {
                       <div className="rounded-lg border border-dashed border-border p-3 ml-6 space-y-2">
                         <div className="flex gap-2 items-start">
                           <div>
-                            <EmojiPicker value={newSubEmoji} onChange={setNewSubEmoji} />
+                            <IconPicker value={newSubEmoji} onChange={setNewSubEmoji} />
                           </div>
                           <div className="flex-1 space-y-2">
                             <input

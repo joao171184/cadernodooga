@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo, useRef } from "react";
+import { useState, useCallback, useMemo, useRef, useEffect } from "react";
 import { Search, Star, Music, Plus, Settings, LogOut, Instagram, Heart, Inbox, Loader2 } from "lucide-react";
 import logoImg from "@/assets/logo.png";
 import { useParams, useNavigate } from "react-router-dom";
@@ -37,6 +37,11 @@ const Index = () => {
   const { categorias } = useCategorias();
   const activeCategoria = categorias.find((c) => c.nome === categoria);
   const showClassifFilters = !categoria || (activeCategoria?.mostrarFiltrosClassificacao ?? true);
+
+  // Ao trocar de categoria/subcategoria, volta para "Todos"
+  useEffect(() => {
+    setClassifFilter("all");
+  }, [categoria, subcategoria]);
 
   const togglePlay = useCallback((id: string) => {
     setPlayingId((curr) => (curr === id ? null : id));

@@ -1,4 +1,4 @@
-import { Heart, Pencil, Trash2, Mic2, ArrowUp, ArrowDown, Volume2, Pause, Drum } from "lucide-react";
+import { Heart, Pencil, Trash2, Mic2, ArrowUp, ArrowDown, Volume2, Pause, Drum, Share2 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { getEmbedInfo, type EmbedKind } from "@/lib/embed";
 import { type Ponto, TOQUE_OPTIONS, CLASSIFICACAO_OPTIONS } from "@/contexts/PontosContext";
@@ -22,6 +22,24 @@ interface PontoCardProps {
 }
 
 const PontoCard = ({ ponto, isPlaying, isFavorite, onTogglePlay, onToggleFavorite, onEdit, onDelete, onMoveUp, onMoveDown, onDragStart, onDragOver, onDrop, canMoveUp, canMoveDown }: PontoCardProps) => {
+  const handleShare = async () => {
+    const subs = ponto.subcategorias;
+    const header = `🪘 ${ponto.nome}\n${ponto.categoria}${subs.length ? " › " + subs.join(" • ") : ""}\n\n`;
+    const body = ponto.letra;
+    const link = ponto.audio ? `\n\n🎧 ${ponto.audio}` : "";
+    const text = header + body + link;
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: ponto.nome, text });
+      } else {
+        const wa = `https://wa.me/?text=${encodeURIComponent(text)}`;
+        window.open(wa, "_blank", "noopener,noreferrer");
+      }
+    } catch {
+      // usuário cancelou
+    }
+  };
+
   const { isAdmin, can } = useAuth();
   const embed = getEmbedInfo(ponto.audio);
   const hasMedia = embed.kind !== "none";
@@ -135,6 +153,14 @@ const PontoCard = ({ ponto, isPlaying, isFavorite, onTogglePlay, onToggleFavorit
                 />
               </button>
             )}
+            <button
+              onClick={handleShare}
+              className="p-2 rounded-lg hover:bg-muted transition-all active:scale-90"
+              aria-label="Compartilhar ponto"
+              title="Compartilhar"
+            >
+              <Share2 size={16} className="text-muted-foreground" />
+            </button>
             {hasMedia && canPlay && (
               <MediaIconButton
                 kind={embed.kind}

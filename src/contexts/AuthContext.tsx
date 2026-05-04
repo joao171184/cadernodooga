@@ -87,21 +87,35 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, sess) => {
       setSession(sess);
       setUser(sess?.user ?? null);
-      // defer DB calls
       if (sess?.user) {
         setTimeout(() => { loadRoleAndPerms(sess.user.id, sess.user.email); }, 0);
       } else {
         setRole(null);
         setPermissions(new Set());
       }
-    });
-
-    supabase.auth.getSession().then(async ({ data: { session: sess } }) => {
-      setSession(sess);
-      setUser(sess?.user ?? null);
-      if (sess?.user) await loadRoleAndPerms(sess.user.id, sess.user.email);
       setLoading(false);
     });
+
+    supabase.auth.getSession()
+      .then(async ({ data: { session: sess }, error }) => {
+        if (error) {
+          // Token corrompido/expirado: limpa e segue
+          console.warn("Sessão inválida, limpando:", error.message);
+          await supabase.auth.signOut().catch(() => {});
+        }
+        setSession(sess ?? null);
+        setUser(sess?.user ?? null);
+        if (sess?.user) {
+          try { await loadRoleAndPerms(sess.user.id, sess.user.email); } catch (e) { console.error(e); }
+        }
+      })
+      .catch(async (e) => {
+        console.warn("Falha em getSession, limpando storage:", e);
+        try { await supabase.auth.signOut(); } catch {}
+      })
+      .finally(() => {
+        setLoading(false);
+      });
 
     return () => subscription.unsubscribe();
   }, [loadRoleAndPerms]);
