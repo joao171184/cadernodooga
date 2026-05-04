@@ -40,10 +40,10 @@ export function CategoriasManagerDialog({ open, onClose }: Props) {
   const { categorias, addCategoria, addSubcategoria, renameCategoria, setMostrarFiltrosClassificacao, deleteCategoria, moveCategoria } = useCategorias();
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
   const [newCatNome, setNewCatNome] = useState("");
-  const [newCatEmoji, setNewCatEmoji] = useState("✨");
+  const [newCatEmoji, setNewCatEmoji] = useState("crown");
   const [addSubFor, setAddSubFor] = useState<string | null>(null); // parent id
   const [newSubNome, setNewSubNome] = useState("");
-  const [newSubEmoji, setNewSubEmoji] = useState("🪶");
+  const [newSubEmoji, setNewSubEmoji] = useState("feather");
   const [editing, setEditing] = useState<{ id: string } | null>(null);
   const [editNome, setEditNome] = useState("");
   const [editEmoji, setEditEmoji] = useState("");
@@ -79,7 +79,7 @@ export function CategoriasManagerDialog({ open, onClose }: Props) {
     const { error } = await addCategoria(n, newCatEmoji || "•");
     if (error) return toast.error("Erro: " + error);
     setNewCatNome("");
-    setNewCatEmoji("✨");
+    setNewCatEmoji("crown");
     toast.success("Categoria criada");
   };
 
@@ -89,7 +89,7 @@ export function CategoriasManagerDialog({ open, onClose }: Props) {
     const { error } = await addSubcategoria(parentId, n, newSubEmoji || "•");
     if (error) return toast.error("Erro: " + error);
     setNewSubNome("");
-    setNewSubEmoji("🪶");
+    setNewSubEmoji("feather");
     setAddSubFor(null);
     toast.success("Subcategoria criada");
   };
@@ -118,7 +118,7 @@ export function CategoriasManagerDialog({ open, onClose }: Props) {
           <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Nova categoria</p>
           <div className="flex gap-2 items-start">
             <div>
-              <EmojiPicker value={newCatEmoji} onChange={setNewCatEmoji} />
+              <IconPicker value={newCatEmoji} onChange={setNewCatEmoji} />
             </div>
             <div className="flex-1 space-y-2">
               <input
@@ -290,7 +290,7 @@ export function CategoriasManagerDialog({ open, onClose }: Props) {
                       <div className="rounded-lg border border-dashed border-border p-3 ml-6 space-y-2">
                         <div className="flex gap-2 items-start">
                           <div>
-                            <EmojiPicker value={newSubEmoji} onChange={setNewSubEmoji} />
+                            <IconPicker value={newSubEmoji} onChange={setNewSubEmoji} />
                           </div>
                           <div className="flex-1 space-y-2">
                             <input
