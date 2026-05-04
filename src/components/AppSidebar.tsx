@@ -44,7 +44,7 @@ export function AppSidebar() {
   const renderNode = (node: CategoriaNode) => {
     const hasChildren = node.filhos && node.filhos.length > 0;
     const isOpen = openFolders.has(node.nome);
-    const Icon = getCategoryIcon(node.nome);
+    const Icon = resolveIcon(node.emoji, node.nome);
 
     if (hasChildren) {
       return (
@@ -63,7 +63,7 @@ export function AppSidebar() {
               {node.filhos.map((child) => {
                 const url = `/guia/${encodeURIComponent(node.nome)}/${encodeURIComponent(child.nome)}`;
                 const isActive = currentPath === `/guia/${node.nome}/${child.nome}`;
-                const ChildIcon = getCategoryIcon(child.nome);
+                const ChildIcon = resolveIcon(child.emoji, child.nome);
                 return (
                   <SidebarMenuItem key={child.id}>
                     <SidebarMenuButton asChild>
