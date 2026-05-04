@@ -88,7 +88,7 @@ function EstruturaPanel() {
   return (
     <div className="space-y-3">
       <p className="text-sm text-muted-foreground">
-        Gerencie categorias, subcategorias e pontos. Os emojis ficam mantidos.
+        Gerencie categorias, subcategorias e seus ícones.
       </p>
       <button
         onClick={() => setOpenInner(true)}
