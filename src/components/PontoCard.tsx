@@ -153,6 +153,14 @@ const PontoCard = ({ ponto, isPlaying, isFavorite, onTogglePlay, onToggleFavorit
                 />
               </button>
             )}
+            <button
+              onClick={handleShare}
+              className="p-2 rounded-lg hover:bg-muted transition-all active:scale-90"
+              aria-label="Compartilhar ponto"
+              title="Compartilhar"
+            >
+              <Share2 size={16} className="text-muted-foreground" />
+            </button>
             {hasMedia && canPlay && (
               <MediaIconButton
                 kind={embed.kind}
