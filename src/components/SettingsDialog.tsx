@@ -6,6 +6,7 @@ import { useAuth, ALL_PERMISSIONS, type AppRole, type PermissionKey } from "@/co
 import { useCategorias } from "@/contexts/CategoriasContext";
 import { CategoriasManagerDialog } from "@/components/CategoriasManagerDialog";
 import { supabase } from "@/integrations/supabase/client";
+import { resolveIcon } from "@/lib/categoryIcons";
 import { toast } from "sonner";
 
 interface Props {
@@ -144,22 +145,25 @@ function VisibilidadePanel() {
           <span className="w-12 text-center">Ogã</span>
           <span className="w-12 text-center">Visit.</span>
         </div>
-        {categorias.map((c) => (
-          <div key={c.nome} className="grid grid-cols-[1fr,auto,auto] gap-2 items-center py-1.5">
-            <span className="text-sm flex items-center gap-2">
-              <span>{c.emoji}</span>
-              {c.nome}
-            </span>
-            <ToggleButton
-              checked={vis.hideCategoriesForOga.includes(c.nome)}
-              onChange={() => toggleCat("oga", c.nome)}
-            />
-            <ToggleButton
-              checked={vis.hideCategoriesForVisitante.includes(c.nome)}
-              onChange={() => toggleCat("visitante", c.nome)}
-            />
-          </div>
-        ))}
+        {categorias.map((c) => {
+          const I = resolveIcon(c.emoji, c.nome);
+          return (
+            <div key={c.nome} className="grid grid-cols-[1fr,auto,auto] gap-2 items-center py-1.5">
+              <span className="text-sm flex items-center gap-2">
+                <I size={14} className="text-accent" strokeWidth={2} />
+                {c.nome}
+              </span>
+              <ToggleButton
+                checked={vis.hideCategoriesForOga.includes(c.nome)}
+                onChange={() => toggleCat("oga", c.nome)}
+              />
+              <ToggleButton
+                checked={vis.hideCategoriesForVisitante.includes(c.nome)}
+                onChange={() => toggleCat("visitante", c.nome)}
+              />
+            </div>
+          );
+        })}
       </Section>
     </div>
   );

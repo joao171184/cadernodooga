@@ -119,7 +119,7 @@ export function PontoFormDialog({ open, onClose, onSave, ponto, defaultCategoria
             >
               <option value="">Selecione...</option>
               {categorias.map((c) => (
-                <option key={c.id} value={c.nome}>{c.emoji} {c.nome}</option>
+                <option key={c.id} value={c.nome}>{c.nome}</option>
               ))}
             </select>
           </div>
@@ -144,7 +144,7 @@ export function PontoFormDialog({ open, onClose, onSave, ponto, defaultCategoria
                       }`}
                     >
                       {active ? <Check size={12} /> : null}
-                      <span>{s.emoji} {s.nome}</span>
+                      <span>{s.nome}</span>
                     </button>
                   );
                 })}
