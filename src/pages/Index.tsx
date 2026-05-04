@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo, useRef } from "react";
+import { useState, useCallback, useMemo, useRef, useEffect } from "react";
 import { Search, Star, Music, Plus, Settings, LogOut, Instagram, Heart, Inbox, Loader2 } from "lucide-react";
 import logoImg from "@/assets/logo.png";
 import { useParams, useNavigate } from "react-router-dom";
