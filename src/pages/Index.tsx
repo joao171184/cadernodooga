@@ -38,6 +38,11 @@ const Index = () => {
   const activeCategoria = categorias.find((c) => c.nome === categoria);
   const showClassifFilters = !categoria || (activeCategoria?.mostrarFiltrosClassificacao ?? true);
 
+  // Ao trocar de categoria/subcategoria, volta para "Todos"
+  useEffect(() => {
+    setClassifFilter("all");
+  }, [categoria, subcategoria]);
+
   const togglePlay = useCallback((id: string) => {
     setPlayingId((curr) => (curr === id ? null : id));
   }, []);
