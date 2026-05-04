@@ -225,29 +225,25 @@ export function CategoriasManagerDialog({ open, onClose }: Props) {
                     {cat.filhos.map((sub, si) => {
                       const isSubEditing = editing && editing.id === sub.id;
                       return (
-                        <div key={sub.id} className="flex items-center gap-2 pl-6 py-1.5">
+                        <div key={sub.id} className="flex items-start gap-2 pl-6 py-1.5">
                           {isSubEditing ? (
-                            <>
-                              <input
-                                type="text"
-                                value={editEmoji}
-                                onChange={(e) => setEditEmoji(e.target.value)}
-                                className="w-12 px-1 py-1.5 rounded-lg bg-muted text-center text-base border border-border"
-                                maxLength={4}
-                              />
+                            <div className="flex-1 space-y-2">
                               <input
                                 type="text"
                                 value={editNome}
                                 onChange={(e) => setEditNome(e.target.value)}
-                                className="flex-1 px-3 py-1.5 rounded-lg bg-muted text-sm border border-border"
+                                className="w-full px-3 py-1.5 rounded-lg bg-muted text-sm border border-border"
                               />
-                              <button onClick={saveEdit} className="p-2 rounded-lg hover:bg-accent/20 text-accent"><Check size={16} /></button>
-                              <button onClick={() => setEditing(null)} className="p-2 rounded-lg hover:bg-muted"><X size={16} /></button>
-                            </>
+                              <IconPicker value={editEmoji} onChange={setEditEmoji} />
+                              <div className="flex gap-2">
+                                <button onClick={saveEdit} className="flex-1 py-2 rounded-lg bg-accent text-accent-foreground text-xs font-bold uppercase flex items-center justify-center gap-1.5"><Check size={14} /> Salvar</button>
+                                <button onClick={() => setEditing(null)} className="flex-1 py-2 rounded-lg bg-muted text-muted-foreground text-xs font-bold uppercase flex items-center justify-center gap-1.5"><X size={14} /> Cancelar</button>
+                              </div>
+                            </div>
                           ) : (
                             <>
-                              <span className="text-base">{sub.emoji}</span>
-                              <span className="flex-1 text-sm truncate">{sub.nome}</span>
+                              {(() => { const I = resolveIcon(sub.emoji, sub.nome); return <I size={16} className="text-accent shrink-0 mt-1" strokeWidth={2} />; })()}
+                              <span className="flex-1 text-sm truncate mt-0.5">{sub.nome}</span>
                               <button
                                 onClick={() => moveCategoria(sub.id, -1, cat.id)}
                                 disabled={si === 0}
