@@ -22,6 +22,24 @@ interface PontoCardProps {
 }
 
 const PontoCard = ({ ponto, isPlaying, isFavorite, onTogglePlay, onToggleFavorite, onEdit, onDelete, onMoveUp, onMoveDown, onDragStart, onDragOver, onDrop, canMoveUp, canMoveDown }: PontoCardProps) => {
+  const handleShare = async () => {
+    const subs = ponto.subcategorias;
+    const header = `🪘 ${ponto.nome}\n${ponto.categoria}${subs.length ? " › " + subs.join(" • ") : ""}\n\n`;
+    const body = ponto.letra;
+    const link = ponto.audio ? `\n\n🎧 ${ponto.audio}` : "";
+    const text = header + body + link;
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: ponto.nome, text });
+      } else {
+        const wa = `https://wa.me/?text=${encodeURIComponent(text)}`;
+        window.open(wa, "_blank", "noopener,noreferrer");
+      }
+    } catch {
+      // usuário cancelou
+    }
+  };
+
   const { isAdmin, can } = useAuth();
   const embed = getEmbedInfo(ponto.audio);
   const hasMedia = embed.kind !== "none";
