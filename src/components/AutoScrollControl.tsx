@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { ChevronsDown, Pause, Play } from "lucide-react";
+import { ChevronsDown, Pause, Play, ArrowUp } from "lucide-react";
 
 const STORAGE_KEY = "auto-scroll-prefs";
 
