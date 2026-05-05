@@ -76,6 +76,16 @@ export function AutoScrollControl() {
       className="fixed right-3 sm:right-4 z-40 flex flex-col items-end gap-2 max-w-[calc(100vw-1.5rem)]"
       style={{ bottom: "calc(env(safe-area-inset-bottom, 0px) + 88px)" }}
     >
+      {showTop && (
+        <button
+          onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+          aria-label="Voltar ao topo"
+          title="Voltar ao topo"
+          className="w-12 h-12 rounded-full shadow-2xl border-2 border-border bg-card text-foreground hover:border-accent/50 flex items-center justify-center transition-all active:scale-95"
+        >
+          <ArrowUp size={20} />
+        </button>
+      )}
       {open && (
         <div className="bg-card border border-border rounded-2xl shadow-2xl p-4 w-[min(16rem,calc(100vw-1.5rem))] space-y-3">
           <div className="flex items-center justify-between">
