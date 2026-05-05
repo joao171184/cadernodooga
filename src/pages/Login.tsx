@@ -138,6 +138,22 @@ const Login = () => {
             <form onSubmit={handleSignIn} className="space-y-4">
               <Field icon={<Mail size={16} />} label="E-mail" type="email" value={email} onChange={setEmail} placeholder="seu@email.com" autoFocus />
               <PasswordField label="Senha" value={password} onChange={setPassword} show={showPwd} onToggle={() => setShowPwd((s) => !s)} placeholder="••••••••" />
+              <button
+                type="button"
+                onClick={async () => {
+                  if (!email.trim()) { toast.error("Digite seu e-mail acima"); return; }
+                  const { error } = await import("@/integrations/supabase/client").then(m =>
+                    m.supabase.auth.resetPasswordForEmail(email.trim(), {
+                      redirectTo: `${window.location.origin}/reset-password`,
+                    })
+                  );
+                  if (error) toast.error(error.message);
+                  else toast.success("Enviamos um e-mail para redefinir sua senha");
+                }}
+                className="text-xs text-accent hover:underline font-bold uppercase tracking-wider w-full text-right -mt-1"
+              >
+                Esqueci minha senha
+              </button>
               <SubmitButton label="Entrar" busy={busy} icon={<LogIn size={16} />} />
             </form>
           ) : (
