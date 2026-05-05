@@ -204,6 +204,10 @@ const Index = () => {
               placeholder="BUSCAR PONTO OU TRECHO DA LETRA..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
+              autoComplete="off"
+              autoCorrect="off"
+              autoCapitalize="off"
+              spellCheck={false}
               className="w-full pl-10 pr-4 py-3 rounded-xl bg-primary-foreground/10 text-primary-foreground placeholder:text-primary-foreground/35 text-sm outline-none focus:ring-2 focus:ring-accent/50 backdrop-blur-sm transition-all border border-primary-foreground/10 uppercase"
             />
           </div>
