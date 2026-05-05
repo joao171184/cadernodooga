@@ -26,21 +26,22 @@ export function SpotifyGlyph({ size = 18 }: { size?: number }) {
 }
 
 export function TikTokGlyph({ size = 18 }: { size?: number }) {
-  // Logo TikTok com shift cyan/magenta característico.
+  // Logo TikTok oficial — sem fundo preto. Nota musical em três camadas
+  // (ciano, magenta e branco/preto adaptativo) usando currentColor para o
+  // glifo principal, igual aos demais ícones.
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-      <rect width="24" height="24" rx="5" fill="#000000" />
+    <svg width={size} height={size} viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
       <path
         fill="#25F4EE"
-        d="M14.6 5.5h-1.7v10.4a2.1 2.1 0 1 1-2.1-2.1c.18 0 .36.02.53.07v-1.74a3.85 3.85 0 1 0 3.27 3.81V9.7a5.18 5.18 0 0 0 3.04.98V8.94a3.43 3.43 0 0 1-3.04-3.44Z"
+        d="M22.4 9.3v3.4a8.6 8.6 0 0 1-5.1-1.6v7.4a6.7 6.7 0 1 1-6.7-6.7c.3 0 .7 0 1 .1v3.5a3.3 3.3 0 1 0 2.3 3.1V4h3.4a5.3 5.3 0 0 0 5.1 5.3Z"
       />
       <path
         fill="#FE2C55"
-        d="M15.4 4.7h-1.7v10.4a2.1 2.1 0 1 1-2.1-2.1c.18 0 .36.02.53.07V11.3a3.85 3.85 0 1 0 3.27 3.81V8.9a5.18 5.18 0 0 0 3.04.98V8.14a3.43 3.43 0 0 1-3.04-3.44Z"
+        d="M24 10.7v3.4a8.6 8.6 0 0 1-5.1-1.6V20a6.7 6.7 0 1 1-6.7-6.7c.3 0 .7 0 1 .1v3.5a3.3 3.3 0 1 0 2.3 3.1V5.4H19a5.3 5.3 0 0 0 5 5.3Z"
       />
       <path
-        fill="#FFFFFF"
-        d="M15 5.1h-1.7v10.4a2.1 2.1 0 1 1-2.1-2.1c.18 0 .36.02.53.07v-1.74a3.85 3.85 0 1 0 3.27 3.81V9.3a5.18 5.18 0 0 0 3.04.98V8.54A3.43 3.43 0 0 1 15 5.1Z"
+        fill="currentColor"
+        d="M23.2 10v3.4a8.6 8.6 0 0 1-5.1-1.6v7.4a6.7 6.7 0 1 1-6.7-6.7c.3 0 .7 0 1 .1v3.5a3.3 3.3 0 1 0 2.3 3.1V4.7h3.4A5.3 5.3 0 0 0 23.2 10Z"
       />
     </svg>
   );
