@@ -201,7 +201,8 @@ function ToggleButton({ checked, onChange, labelHint }: { checked: boolean; onCh
       type="button"
       onClick={onChange}
       title={labelHint}
-      className={`w-12 h-7 rounded-md border text-xs font-bold transition-all ${
+      translate="no"
+      className={`notranslate w-12 h-7 rounded-md border text-xs font-bold transition-all ${
         checked
           ? "bg-accent text-accent-foreground border-accent"
           : "bg-muted text-muted-foreground border-border hover:border-accent/40"
