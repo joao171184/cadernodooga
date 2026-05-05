@@ -16,9 +16,23 @@ const loadPrefs = (): Prefs => {
 export function AutoScrollControl() {
   const [prefs, setPrefs] = useState<Prefs>(loadPrefs);
   const [open, setOpen] = useState(false);
+  const [showTop, setShowTop] = useState(false);
   const rafRef = useRef<number | null>(null);
   const lastTsRef = useRef<number>(0);
   const accRef = useRef<number>(0);
+
+  useEffect(() => {
+    let lastY = window.scrollY;
+    const onScroll = () => {
+      const y = window.scrollY;
+      // Aparece quando o usuário sobe (scroll up) e já desceu o suficiente.
+      if (y < lastY && y > 200) setShowTop(true);
+      else if (y <= 80) setShowTop(false);
+      lastY = y;
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(prefs));
