@@ -13,6 +13,7 @@ import Index from "./pages/Index.tsx";
 import Login from "./pages/Login.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import Pendentes from "./pages/Pendentes.tsx";
+import ResetPassword from "./pages/ResetPassword.tsx";
 import type { ReactNode } from "react";
 import { Loader2 } from "lucide-react";
 
