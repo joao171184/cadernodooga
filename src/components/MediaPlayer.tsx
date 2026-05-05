@@ -47,13 +47,17 @@ export function MediaPlayer({ url, title, onClose }: Props) {
         )}
         {info.kind === "tiktok" && (
           info.src ? (
-            <div className="relative w-full mx-auto rounded-xl overflow-hidden bg-black" style={{ maxWidth: 360, aspectRatio: "9 / 16" }}>
+            <div
+              className="relative w-full mx-auto rounded-xl overflow-hidden bg-black"
+              style={{ maxWidth: 325, height: "min(75vh, 740px)" }}
+            >
               <iframe
                 src={info.src}
                 title={title}
-                className="w-full h-full"
+                className="w-full h-full border-0"
                 allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
                 allowFullScreen
+                scrolling="no"
               />
               {info.externalUrl && (
                 <a
