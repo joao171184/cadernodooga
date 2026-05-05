@@ -51,6 +51,7 @@ const App = () => (
               <PontosProvider>
                 <Routes>
                   <Route path="/login" element={<Login />} />
+                  <Route path="/reset-password" element={<ResetPassword />} />
                   <Route path="/" element={<ProtectedLayout><Index /></ProtectedLayout>} />
                   <Route path="/pendentes" element={<ProtectedLayout><Pendentes /></ProtectedLayout>} />
                   <Route path="/guia/:categoria" element={<ProtectedLayout><Index /></ProtectedLayout>} />
