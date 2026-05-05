@@ -212,7 +212,7 @@ function MediaIconButton({
       ) : kind === "spotify" ? (
         <SpotifyGlyph size={20} />
       ) : kind === "tiktok" ? (
-        <TikTokGlyph size={20} />
+        <span className="text-foreground"><TikTokGlyph size={20} /></span>
       ) : (
         <div className="w-5 h-5 rounded-md bg-primary text-primary-foreground flex items-center justify-center">
           <Volume2 size={12} />
