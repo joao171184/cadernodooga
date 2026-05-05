@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { ChevronsDown, Pause, Play } from "lucide-react";
+import { ChevronsDown, Pause, Play, ArrowUp } from "lucide-react";
 
 const STORAGE_KEY = "auto-scroll-prefs";
 
@@ -16,9 +16,23 @@ const loadPrefs = (): Prefs => {
 export function AutoScrollControl() {
   const [prefs, setPrefs] = useState<Prefs>(loadPrefs);
   const [open, setOpen] = useState(false);
+  const [showTop, setShowTop] = useState(false);
   const rafRef = useRef<number | null>(null);
   const lastTsRef = useRef<number>(0);
   const accRef = useRef<number>(0);
+
+  useEffect(() => {
+    let lastY = window.scrollY;
+    const onScroll = () => {
+      const y = window.scrollY;
+      // Aparece quando o usuário sobe (scroll up) e já desceu o suficiente.
+      if (y < lastY && y > 200) setShowTop(true);
+      else if (y <= 80) setShowTop(false);
+      lastY = y;
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(prefs));
@@ -62,6 +76,16 @@ export function AutoScrollControl() {
       className="fixed right-3 sm:right-4 z-40 flex flex-col items-end gap-2 max-w-[calc(100vw-1.5rem)]"
       style={{ bottom: "calc(env(safe-area-inset-bottom, 0px) + 88px)" }}
     >
+      {showTop && (
+        <button
+          onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+          aria-label="Voltar ao topo"
+          title="Voltar ao topo"
+          className="w-12 h-12 rounded-full shadow-2xl border-2 border-border bg-card text-foreground hover:border-accent/50 flex items-center justify-center transition-all active:scale-95"
+        >
+          <ArrowUp size={20} />
+        </button>
+      )}
       {open && (
         <div className="bg-card border border-border rounded-2xl shadow-2xl p-4 w-[min(16rem,calc(100vw-1.5rem))] space-y-3">
           <div className="flex items-center justify-between">
