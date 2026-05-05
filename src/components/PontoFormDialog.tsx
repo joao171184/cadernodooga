@@ -227,6 +227,10 @@ export function PontoFormDialog({ open, onClose, onSave, ponto, defaultCategoria
               value={letra}
               onChange={(e) => setLetra(e.target.value.toUpperCase())}
               rows={8}
+              autoComplete="off"
+              autoCorrect="off"
+              autoCapitalize="characters"
+              spellCheck={false}
               className="w-full px-4 py-3 rounded-xl bg-muted text-foreground text-sm outline-none focus:ring-2 focus:ring-accent/50 border border-border font-mono leading-relaxed uppercase"
               placeholder="DIGITE A LETRA DO PONTO AQUI..."
               required
