@@ -72,8 +72,11 @@ const Index = () => {
     setFormOpen(true);
   }, []);
 
+  const norm = (s: string) =>
+    (s || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+
   const filtered = useMemo(() => {
-    const q = search.toLowerCase().trim();
+    const q = norm(search.trim());
     let list = pontos;
 
     if (categoria && subcategoria) {
@@ -91,9 +94,10 @@ const Index = () => {
     if (!q) return list;
     return list.filter(
       (p) =>
-        p.nome.toLowerCase().includes(q) ||
-        p.categoria.toLowerCase().includes(q) ||
-        p.letra.toLowerCase().includes(q)
+        norm(p.nome).includes(q) ||
+        norm(p.categoria).includes(q) ||
+        norm(p.letra).includes(q) ||
+        (p.subcategorias || []).some((s) => norm(s).includes(q))
     );
   }, [search, showFavorites, showClassifFilters, classifFilter, favoritos, categoria, subcategoria, pontos]);
 
