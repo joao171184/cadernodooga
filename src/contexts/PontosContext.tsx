@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, useCallback, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useRef, useState, useCallback, type ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import type { Database } from "@/integrations/supabase/types";
@@ -72,13 +72,14 @@ export function PontosProvider({ children }: { children: ReactNode }) {
   const [favoritos, setFavoritos] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
 
+  const hasLoadedRef = useRef(false);
   const refresh = useCallback(async () => {
     if (authLoading) return;
     if (!user) {
       setPontos([]); setPendentes([]); setFavoritos(new Set()); setLoading(false);
       return;
     }
-    setLoading(true);
+    if (!hasLoadedRef.current) setLoading(true);
 
     const [{ data: rawPontos }, { data: subs }, { data: classes }, { data: favs }] = await Promise.all([
       supabase.from("pontos").select("*").order("ordem", { ascending: true }).order("created_at", { ascending: true }),
@@ -119,6 +120,7 @@ export function PontosProvider({ children }: { children: ReactNode }) {
     setPontos(all.filter((p) => p.status === "approved"));
     setPendentes(all.filter((p) => p.status === "pending"));
     setFavoritos(new Set((favs ?? []).map((f) => f.ponto_id)));
+    hasLoadedRef.current = true;
     setLoading(false);
   }, [user, authLoading]);
 
@@ -161,8 +163,7 @@ export function PontosProvider({ children }: { children: ReactNode }) {
       await supabase.from("ponto_subcategorias").delete().eq("ponto_id", pontoId);
       await supabase.from("ponto_classificacoes").delete().eq("ponto_id", pontoId);
     } else {
-      const sameCategory = pontos.filter((p) => p.categoria === data.categoria);
-      const ordem = sameCategory.length ? Math.max(...sameCategory.map((p) => p.ordem)) + 10 : 10;
+      const ordem = pontos.length ? Math.max(...pontos.map((p) => p.ordem)) + 10 : 10;
       const { data: ins, error } = await supabase.from("pontos").insert({ ...payload, ordem }).select("id").single();
       if (error || !ins) return { error: error?.message ?? "Erro", pending: false };
       pontoId = ins.id;
@@ -217,11 +218,19 @@ export function PontosProvider({ children }: { children: ReactNode }) {
   // recebido (já filtrado por categoria/subcategoria/classificação).
   const reorderPontosInList = useCallback<Ctx["reorderPontosInList"]>(async (orderedList) => {
     const orderSlots = [...orderedList].map((p) => p.ordem).sort((a, b) => a - b);
+    const idToNewOrdem = new Map<string, number>();
+    orderedList.forEach((p, i) => idToNewOrdem.set(p.id, orderSlots[i] ?? (i + 1) * 10));
+    // Optimistic local update — evita "voltar pro topo" causado por refresh
+    setPontos((prev) => {
+      const updated = prev.map((p) =>
+        idToNewOrdem.has(p.id) ? { ...p, ordem: idToNewOrdem.get(p.id)! } : p
+      );
+      return updated.sort((a, b) => a.ordem - b.ordem);
+    });
     await Promise.all(
       orderedList.map((p, i) => supabase.from("pontos").update({ ordem: orderSlots[i] ?? (i + 1) * 10 }).eq("id", p.id))
     );
-    await refresh();
-  }, [refresh]);
+  }, []);
 
   const movePontoInList = useCallback<Ctx["movePontoInList"]>(async (id, dir, scopedList) => {
     const idx = scopedList.findIndex((p) => p.id === id);

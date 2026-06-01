@@ -6,6 +6,7 @@ import PontoCard from "@/components/PontoCard";
 import { PontoFormDialog } from "@/components/PontoFormDialog";
 import { SettingsDialog } from "@/components/SettingsDialog";
 import { MediaPlayer } from "@/components/MediaPlayer";
+import { PontoFullscreen } from "@/components/PontoFullscreen";
 import { AutoScrollControl } from "@/components/AutoScrollControl";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { useAuth } from "@/contexts/AuthContext";
@@ -30,6 +31,7 @@ const Index = () => {
   const [formOpen, setFormOpen] = useState(false);
   const [editingPonto, setEditingPonto] = useState<Ponto | null>(null);
   const [adminOpen, setAdminOpen] = useState(false);
+  const [fullscreenPonto, setFullscreenPonto] = useState<Ponto | null>(null);
   const dragId = useRef<string | null>(null);
   const [dragList, setDragList] = useState<Ponto[] | null>(null);
 
@@ -286,6 +288,7 @@ const Index = () => {
                 onDragStart={isAdmin ? handleDragStart : undefined}
                 onDragOver={isAdmin ? handleDragOver : undefined}
                 onDrop={isAdmin ? handleDrop : undefined}
+                onOpenFullscreen={(p) => setFullscreenPonto(p)}
                 canMoveUp={i > 0}
                 canMoveDown={i < visibleList.length - 1}
               />
@@ -303,6 +306,16 @@ const Index = () => {
           url={playingPonto.audio}
           title={playingPonto.nome}
           onClose={() => setPlayingId(null)}
+        />
+      )}
+
+      {fullscreenPonto && (
+        <PontoFullscreen
+          ponto={fullscreenPonto}
+          isFavorite={favoritos.has(fullscreenPonto.id)}
+          onToggleFavorite={toggleFavorito}
+          canFavorite={isAdmin || can("favorite")}
+          onClose={() => setFullscreenPonto(null)}
         />
       )}
 
