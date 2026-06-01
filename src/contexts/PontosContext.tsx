@@ -218,11 +218,19 @@ export function PontosProvider({ children }: { children: ReactNode }) {
   // recebido (já filtrado por categoria/subcategoria/classificação).
   const reorderPontosInList = useCallback<Ctx["reorderPontosInList"]>(async (orderedList) => {
     const orderSlots = [...orderedList].map((p) => p.ordem).sort((a, b) => a - b);
+    const idToNewOrdem = new Map<string, number>();
+    orderedList.forEach((p, i) => idToNewOrdem.set(p.id, orderSlots[i] ?? (i + 1) * 10));
+    // Optimistic local update — evita "voltar pro topo" causado por refresh
+    setPontos((prev) => {
+      const updated = prev.map((p) =>
+        idToNewOrdem.has(p.id) ? { ...p, ordem: idToNewOrdem.get(p.id)! } : p
+      );
+      return updated.sort((a, b) => a.ordem - b.ordem);
+    });
     await Promise.all(
       orderedList.map((p, i) => supabase.from("pontos").update({ ordem: orderSlots[i] ?? (i + 1) * 10 }).eq("id", p.id))
     );
-    await refresh();
-  }, [refresh]);
+  }, []);
 
   const movePontoInList = useCallback<Ctx["movePontoInList"]>(async (id, dir, scopedList) => {
     const idx = scopedList.findIndex((p) => p.id === id);
