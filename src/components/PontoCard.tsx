@@ -172,7 +172,12 @@ const PontoCard = ({ ponto, isPlaying, isFavorite, onTogglePlay, onToggleFavorit
           </div>
         </div>
 
-        <div className="relative">
+        <div
+          className={`relative ${onOpenFullscreen ? "cursor-zoom-in" : ""}`}
+          onClick={onOpenFullscreen ? () => onOpenFullscreen(ponto) : undefined}
+          role={onOpenFullscreen ? "button" : undefined}
+          title={onOpenFullscreen ? "Abrir em tela cheia" : undefined}
+        >
           <div className="absolute left-0 top-0 bottom-0 w-1 rounded-full bg-accent/30" />
           <pre className="text-sm sm:text-base text-card-foreground/80 whitespace-pre-wrap font-[inherit] leading-relaxed pl-4 py-1 uppercase">
             {ponto.letra}
