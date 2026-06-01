@@ -163,8 +163,7 @@ export function PontosProvider({ children }: { children: ReactNode }) {
       await supabase.from("ponto_subcategorias").delete().eq("ponto_id", pontoId);
       await supabase.from("ponto_classificacoes").delete().eq("ponto_id", pontoId);
     } else {
-      const sameCategory = pontos.filter((p) => p.categoria === data.categoria);
-      const ordem = sameCategory.length ? Math.max(...sameCategory.map((p) => p.ordem)) + 10 : 10;
+      const ordem = pontos.length ? Math.max(...pontos.map((p) => p.ordem)) + 10 : 10;
       const { data: ins, error } = await supabase.from("pontos").insert({ ...payload, ordem }).select("id").single();
       if (error || !ins) return { error: error?.message ?? "Erro", pending: false };
       pontoId = ins.id;
