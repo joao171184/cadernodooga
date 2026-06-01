@@ -288,6 +288,7 @@ const Index = () => {
                 onDragStart={isAdmin ? handleDragStart : undefined}
                 onDragOver={isAdmin ? handleDragOver : undefined}
                 onDrop={isAdmin ? handleDrop : undefined}
+                onOpenFullscreen={(p) => setFullscreenPonto(p)}
                 canMoveUp={i > 0}
                 canMoveDown={i < visibleList.length - 1}
               />
