@@ -127,14 +127,18 @@ export function PontosProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => { refresh(); }, [refresh]);
 
-  // Realtime: re-fetch on any change
+  // Realtime: re-fetch on any change (com janela de supressão pós-reorder)
   useEffect(() => {
     if (!user) return;
+    const maybeRefresh = () => {
+      if (Date.now() < suppressRefreshUntilRef.current) return;
+      refresh();
+    };
     const ch = supabase
       .channel("pontos-sync")
-      .on("postgres_changes", { event: "*", schema: "public", table: "pontos" }, () => { refresh(); })
-      .on("postgres_changes", { event: "*", schema: "public", table: "ponto_subcategorias" }, () => { refresh(); })
-      .on("postgres_changes", { event: "*", schema: "public", table: "ponto_classificacoes" }, () => { refresh(); })
+      .on("postgres_changes", { event: "*", schema: "public", table: "pontos" }, maybeRefresh)
+      .on("postgres_changes", { event: "*", schema: "public", table: "ponto_subcategorias" }, maybeRefresh)
+      .on("postgres_changes", { event: "*", schema: "public", table: "ponto_classificacoes" }, maybeRefresh)
       .subscribe();
     return () => { supabase.removeChannel(ch); };
   }, [user, refresh]);
