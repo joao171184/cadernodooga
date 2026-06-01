@@ -17,6 +17,7 @@ interface PontoCardProps {
   onDragStart?: (id: string) => void;
   onDragOver?: (id: string) => void;
   onDrop?: () => void;
+  onOpenFullscreen?: (ponto: Ponto) => void;
   canMoveUp?: boolean;
   canMoveDown?: boolean;
 }
