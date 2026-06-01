@@ -309,6 +309,16 @@ const Index = () => {
         />
       )}
 
+      {fullscreenPonto && (
+        <PontoFullscreen
+          ponto={fullscreenPonto}
+          isFavorite={favoritos.has(fullscreenPonto.id)}
+          onToggleFavorite={toggleFavorito}
+          canFavorite={isAdmin || can("favorite")}
+          onClose={() => setFullscreenPonto(null)}
+        />
+      )}
+
       {/* Form Dialog */}
       <PontoFormDialog
         open={formOpen}
