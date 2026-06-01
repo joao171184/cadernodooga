@@ -72,13 +72,14 @@ export function PontosProvider({ children }: { children: ReactNode }) {
   const [favoritos, setFavoritos] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
 
+  const hasLoadedRef = useState({ done: false })[0];
   const refresh = useCallback(async () => {
     if (authLoading) return;
     if (!user) {
       setPontos([]); setPendentes([]); setFavoritos(new Set()); setLoading(false);
       return;
     }
-    setLoading(true);
+    if (!hasLoadedRef.done) setLoading(true);
 
     const [{ data: rawPontos }, { data: subs }, { data: classes }, { data: favs }] = await Promise.all([
       supabase.from("pontos").select("*").order("ordem", { ascending: true }).order("created_at", { ascending: true }),
