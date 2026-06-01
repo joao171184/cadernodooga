@@ -31,6 +31,7 @@ const Index = () => {
   const [formOpen, setFormOpen] = useState(false);
   const [editingPonto, setEditingPonto] = useState<Ponto | null>(null);
   const [adminOpen, setAdminOpen] = useState(false);
+  const [fullscreenPonto, setFullscreenPonto] = useState<Ponto | null>(null);
   const dragId = useRef<string | null>(null);
   const [dragList, setDragList] = useState<Ponto[] | null>(null);
 
