@@ -120,7 +120,7 @@ export function PontosProvider({ children }: { children: ReactNode }) {
     setPontos(all.filter((p) => p.status === "approved"));
     setPendentes(all.filter((p) => p.status === "pending"));
     setFavoritos(new Set((favs ?? []).map((f) => f.ponto_id)));
-    hasLoadedRef.done = true;
+    hasLoadedRef.current = true;
     setLoading(false);
   }, [user, authLoading]);
 
