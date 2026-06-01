@@ -237,6 +237,8 @@ export function PontosProvider({ children }: { children: ReactNode }) {
     await Promise.all(
       orderedList.map((p, i) => supabase.from("pontos").update({ ordem: orderSlots[i] ?? (i + 1) * 10 }).eq("id", p.id))
     );
+    // Estende após os writes para cobrir eventos atrasados do realtime
+    suppressRefreshUntilRef.current = Date.now() + 1500;
   }, []);
 
   const movePontoInList = useCallback<Ctx["movePontoInList"]>(async (id, dir, scopedList) => {
