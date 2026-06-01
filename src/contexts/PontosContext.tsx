@@ -73,6 +73,7 @@ export function PontosProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   const hasLoadedRef = useRef(false);
+  const suppressRefreshUntilRef = useRef<number>(0);
   const refresh = useCallback(async () => {
     if (authLoading) return;
     if (!user) {
@@ -126,14 +127,18 @@ export function PontosProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => { refresh(); }, [refresh]);
 
-  // Realtime: re-fetch on any change
+  // Realtime: re-fetch on any change (com janela de supressão pós-reorder)
   useEffect(() => {
     if (!user) return;
+    const maybeRefresh = () => {
+      if (Date.now() < suppressRefreshUntilRef.current) return;
+      refresh();
+    };
     const ch = supabase
       .channel("pontos-sync")
-      .on("postgres_changes", { event: "*", schema: "public", table: "pontos" }, () => { refresh(); })
-      .on("postgres_changes", { event: "*", schema: "public", table: "ponto_subcategorias" }, () => { refresh(); })
-      .on("postgres_changes", { event: "*", schema: "public", table: "ponto_classificacoes" }, () => { refresh(); })
+      .on("postgres_changes", { event: "*", schema: "public", table: "pontos" }, maybeRefresh)
+      .on("postgres_changes", { event: "*", schema: "public", table: "ponto_subcategorias" }, maybeRefresh)
+      .on("postgres_changes", { event: "*", schema: "public", table: "ponto_classificacoes" }, maybeRefresh)
       .subscribe();
     return () => { supabase.removeChannel(ch); };
   }, [user, refresh]);
@@ -220,6 +225,8 @@ export function PontosProvider({ children }: { children: ReactNode }) {
     const orderSlots = [...orderedList].map((p) => p.ordem).sort((a, b) => a - b);
     const idToNewOrdem = new Map<string, number>();
     orderedList.forEach((p, i) => idToNewOrdem.set(p.id, orderSlots[i] ?? (i + 1) * 10));
+    // Suprime refresh do realtime por 2s para não sobrescrever o estado otimista
+    suppressRefreshUntilRef.current = Date.now() + 2000;
     // Optimistic local update — evita "voltar pro topo" causado por refresh
     setPontos((prev) => {
       const updated = prev.map((p) =>
@@ -230,6 +237,8 @@ export function PontosProvider({ children }: { children: ReactNode }) {
     await Promise.all(
       orderedList.map((p, i) => supabase.from("pontos").update({ ordem: orderSlots[i] ?? (i + 1) * 10 }).eq("id", p.id))
     );
+    // Estende após os writes para cobrir eventos atrasados do realtime
+    suppressRefreshUntilRef.current = Date.now() + 1500;
   }, []);
 
   const movePontoInList = useCallback<Ctx["movePontoInList"]>(async (id, dir, scopedList) => {
