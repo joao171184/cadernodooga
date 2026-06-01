@@ -6,6 +6,7 @@ import PontoCard from "@/components/PontoCard";
 import { PontoFormDialog } from "@/components/PontoFormDialog";
 import { SettingsDialog } from "@/components/SettingsDialog";
 import { MediaPlayer } from "@/components/MediaPlayer";
+import { PontoFullscreen } from "@/components/PontoFullscreen";
 import { AutoScrollControl } from "@/components/AutoScrollControl";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { useAuth } from "@/contexts/AuthContext";
