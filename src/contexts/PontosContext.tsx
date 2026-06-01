@@ -73,6 +73,7 @@ export function PontosProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   const hasLoadedRef = useRef(false);
+  const suppressRefreshUntilRef = useRef<number>(0);
   const refresh = useCallback(async () => {
     if (authLoading) return;
     if (!user) {
