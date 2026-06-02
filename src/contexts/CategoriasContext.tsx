@@ -103,9 +103,35 @@ export function CategoriasProvider({ children }: { children: ReactNode }) {
   }, [categorias, refresh]);
 
   const renameCategoria = useCallback(async (id: string, nome: string, emoji: string) => {
+    // Encontrar nome antigo e se é raiz ou subcategoria
+    let oldName: string | null = null;
+    let parentName: string | null = null;
+    for (const root of categorias) {
+      if (root.id === id) { oldName = root.nome; break; }
+      const child = root.filhos.find((f) => f.id === id);
+      if (child) { oldName = child.nome; parentName = root.nome; break; }
+    }
     await supabase.from("categorias").update({ nome, emoji }).eq("id", id);
+    // Propagar rename para os pontos vinculados
+    if (oldName && oldName !== nome) {
+      if (parentName) {
+        // Subcategoria: atualizar ponto_subcategorias dos pontos cuja categoria = parentName
+        const { data: pts } = await supabase.from("pontos").select("id").eq("categoria", parentName);
+        const ids = (pts ?? []).map((p) => p.id);
+        if (ids.length > 0) {
+          await supabase
+            .from("ponto_subcategorias")
+            .update({ subcategoria: nome })
+            .in("ponto_id", ids)
+            .eq("subcategoria", oldName);
+        }
+      } else {
+        // Categoria raiz: atualizar pontos.categoria
+        await supabase.from("pontos").update({ categoria: nome }).eq("categoria", oldName);
+      }
+    }
     await refresh();
-  }, [refresh]);
+  }, [categorias, refresh]);
 
   const setMostrarFiltrosClassificacao = useCallback(async (id: string, value: boolean) => {
     const payload: { mostrar_filtros_classificacao: boolean } = { mostrar_filtros_classificacao: value };
