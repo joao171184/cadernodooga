@@ -85,14 +85,16 @@ const Index = () => {
   const norm = (s: string) =>
     (s || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 
+  const sameText = (a?: string | null, b?: string | null) => norm(a || "") === norm(b || "");
+
   const filtered = useMemo(() => {
     const q = norm(search.trim());
     let list = pontos;
 
     if (categoria && subcategoria) {
-      list = list.filter((p) => p.categoria === categoria && p.subcategorias.includes(subcategoria));
+      list = list.filter((p) => sameText(p.categoria, categoria) && p.subcategorias.some((s) => sameText(s, subcategoria)));
     } else if (categoria) {
-      list = list.filter((p) => p.categoria === categoria);
+      list = list.filter((p) => sameText(p.categoria, categoria));
     }
 
     if (showFavorites) {
