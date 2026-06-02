@@ -277,12 +277,12 @@ const Index = () => {
               <DropdownMenuContent align="end" className="w-52">
                 <DropdownMenuItem onClick={() => setToqueFilter("all")} className="gap-2 text-xs font-bold uppercase">
                   <Check size={14} className={toqueFilter === "all" ? "opacity-100" : "opacity-0"} />
-                  Todos os toques
+                  TODOS OS TOQUES
                 </DropdownMenuItem>
                 {TOQUE_OPTIONS.map((t) => (
                   <DropdownMenuItem key={t.value} onClick={() => setToqueFilter(t.value)} className="gap-2 text-xs font-bold uppercase">
                     <Check size={14} className={toqueFilter === t.value ? "opacity-100" : "opacity-0"} />
-                    {t.label}
+                    {t.label.toUpperCase()}
                   </DropdownMenuItem>
                 ))}
               </DropdownMenuContent>
