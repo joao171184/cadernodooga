@@ -1,5 +1,5 @@
 import { useState, useCallback, useMemo, useRef, useEffect } from "react";
-import { Search, Star, Music, Plus, Settings, LogOut, Instagram, Heart, Inbox, Loader2 } from "lucide-react";
+import { Search, Star, Music, Plus, Settings, LogOut, Instagram, Heart, Inbox, Loader2, Drum, Check } from "lucide-react";
 import logoImg from "@/assets/logo.png";
 import { useParams, useNavigate } from "react-router-dom";
 import PontoCard from "@/components/PontoCard";
@@ -9,13 +9,20 @@ import { MediaPlayer } from "@/components/MediaPlayer";
 import { PontoFullscreen } from "@/components/PontoFullscreen";
 import { AutoScrollControl } from "@/components/AutoScrollControl";
 import { SidebarTrigger } from "@/components/ui/sidebar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/contexts/AuthContext";
-import { usePontos, type Ponto, type Classificacao, CLASSIFICACAO_OPTIONS } from "@/contexts/PontosContext";
+import { usePontos, type Ponto, type Classificacao, type ToqueTipo, CLASSIFICACAO_OPTIONS, TOQUE_OPTIONS } from "@/contexts/PontosContext";
 import { useCategorias } from "@/contexts/CategoriasContext";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { toast } from "sonner";
 
 type ClassifFilter = "all" | Classificacao;
+type ToqueFilter = "all" | ToqueTipo;
 
 const Index = () => {
   const { isAdmin, logout, can } = useAuth();
@@ -27,6 +34,7 @@ const Index = () => {
   const [search, setSearch] = useState("");
   const [showFavorites, setShowFavorites] = useState(false);
   const [classifFilter, setClassifFilter] = useState<ClassifFilter>("all");
+  const [toqueFilter, setToqueFilter] = useState<ToqueFilter>("all");
   const [playingId, setPlayingId] = useState<string | null>(null);
   const [formOpen, setFormOpen] = useState(false);
   const [editingPonto, setEditingPonto] = useState<Ponto | null>(null);
@@ -93,6 +101,9 @@ const Index = () => {
     if (showClassifFilters && classifFilter !== "all") {
       list = list.filter((p) => p.classificacoes.includes(classifFilter));
     }
+    if (toqueFilter !== "all") {
+      list = list.filter((p) => p.toque === toqueFilter);
+    }
     if (!q) return list;
     return list.filter(
       (p) =>
@@ -101,7 +112,7 @@ const Index = () => {
         norm(p.letra).includes(q) ||
         (p.subcategorias || []).some((s) => norm(s).includes(q))
     );
-  }, [search, showFavorites, showClassifFilters, classifFilter, favoritos, categoria, subcategoria, pontos]);
+  }, [search, showFavorites, showClassifFilters, classifFilter, toqueFilter, favoritos, categoria, subcategoria, pontos]);
 
   const visibleList = dragList ?? filtered;
 
@@ -129,8 +140,8 @@ const Index = () => {
     const list = dragList;
     dragId.current = null;
     setDragList(null);
-    if (list) await reorderPontosInList(list);
-  }, [dragList, reorderPontosInList]);
+    if (list) await reorderPontosInList(list, { categoria, subcategoria });
+  }, [dragList, reorderPontosInList, categoria, subcategoria]);
 
   const playingPonto = playingId ? pontos.find((p) => p.id === playingId) : null;
 
@@ -245,9 +256,38 @@ const Index = () => {
             </>
           )}
 
-          <p className="ml-auto text-xs text-muted-foreground font-medium">
-            {filtered.length} {filtered.length === 1 ? "ponto" : "pontos"}
-          </p>
+          <div className="ml-auto flex items-center gap-2">
+            <p className="text-xs text-muted-foreground font-medium whitespace-nowrap">
+              {filtered.length} {filtered.length === 1 ? "ponto" : "pontos"}
+            </p>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button
+                  className={`p-2 rounded-full border transition-all active:scale-95 ${
+                    toqueFilter !== "all"
+                      ? "bg-accent text-accent-foreground border-accent shadow-sm"
+                      : "bg-card text-muted-foreground border-border hover:border-accent/40"
+                  }`}
+                  aria-label="Filtrar por toque"
+                  title="Filtrar por toque"
+                >
+                  <Drum size={16} />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-52">
+                <DropdownMenuItem onClick={() => setToqueFilter("all")} className="gap-2 text-xs font-bold uppercase">
+                  <Check size={14} className={toqueFilter === "all" ? "opacity-100" : "opacity-0"} />
+                  TODOS OS TOQUES
+                </DropdownMenuItem>
+                {TOQUE_OPTIONS.map((t) => (
+                  <DropdownMenuItem key={t.value} onClick={() => setToqueFilter(t.value)} className="gap-2 text-xs font-bold uppercase">
+                    <Check size={14} className={toqueFilter === t.value ? "opacity-100" : "opacity-0"} />
+                    {t.label.toUpperCase()}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </div>
 
         {/* Cards */}
@@ -283,8 +323,8 @@ const Index = () => {
                 onToggleFavorite={toggleFavorito}
                 onEdit={handleEditPonto}
                 onDelete={handleDeletePonto}
-                onMoveUp={(id) => movePontoInList(id, -1, visibleList)}
-                onMoveDown={(id) => movePontoInList(id, 1, visibleList)}
+                onMoveUp={(id) => movePontoInList(id, -1, visibleList, { categoria, subcategoria })}
+                onMoveDown={(id) => movePontoInList(id, 1, visibleList, { categoria, subcategoria })}
                 onDragStart={isAdmin ? handleDragStart : undefined}
                 onDragOver={isAdmin ? handleDragOver : undefined}
                 onDrop={isAdmin ? handleDrop : undefined}
