@@ -219,12 +219,24 @@ export function PontosProvider({ children }: { children: ReactNode }) {
     }
   }, [user, favoritos]);
 
-  // Move within current visible scope. Renumera ordem usando o scopedList
-  // recebido (já filtrado por categoria/subcategoria/classificação).
   const reorderPontosInList = useCallback<Ctx["reorderPontosInList"]>(async (orderedList) => {
-    const orderSlots = [...orderedList].map((p) => p.ordem).sort((a, b) => a - b);
     const idToNewOrdem = new Map<string, number>();
-    orderedList.forEach((p, i) => idToNewOrdem.set(p.id, orderSlots[i] ?? (i + 1) * 10));
+    orderedList.forEach((p, i) => idToNewOrdem.set(p.id, (i + 1) * 10));
+
+    const scopedIds = new Set(orderedList.map((p) => p.id));
+    const first = orderedList[0];
+    const sameFolder = (p: Ponto) => {
+      if (!first || p.categoria !== first.categoria) return false;
+      if (first.subcategorias.length === 0) return p.subcategorias.length === 0;
+      return first.subcategorias.every((s) => p.subcategorias.includes(s));
+    };
+
+    pontos
+      .filter((p) => sameFolder(p) && !scopedIds.has(p.id))
+      .sort((a, b) => a.ordem - b.ordem)
+      .forEach((p, i) => idToNewOrdem.set(p.id, (orderedList.length + i + 1) * 10));
+
+    const idToNewOrdem = new Map<string, number>();
     // Suprime refresh do realtime por 2s para não sobrescrever o estado otimista
     suppressRefreshUntilRef.current = Date.now() + 2000;
     // Optimistic local update — evita "voltar pro topo" causado por refresh
@@ -234,12 +246,12 @@ export function PontosProvider({ children }: { children: ReactNode }) {
       );
       return updated.sort((a, b) => a.ordem - b.ordem);
     });
-    await Promise.all(
-      orderedList.map((p, i) => supabase.from("pontos").update({ ordem: orderSlots[i] ?? (i + 1) * 10 }).eq("id", p.id))
-    );
+    await Promise.all(Array.from(idToNewOrdem.entries()).map(([id, ordem]) =>
+      supabase.from("pontos").update({ ordem }).eq("id", id)
+    ));
     // Estende após os writes para cobrir eventos atrasados do realtime
     suppressRefreshUntilRef.current = Date.now() + 1500;
-  }, []);
+  }, [pontos]);
 
   const movePontoInList = useCallback<Ctx["movePontoInList"]>(async (id, dir, scopedList) => {
     const idx = scopedList.findIndex((p) => p.id === id);
