@@ -59,8 +59,8 @@ interface Ctx {
   approvePonto: (id: string) => Promise<void>;
   rejectPonto: (id: string) => Promise<void>;
   toggleFavorito: (id: string) => Promise<void>;
-  movePontoInList: (id: string, dir: -1 | 1, scopedList: Ponto[]) => Promise<void>;
-  reorderPontosInList: (orderedList: Ponto[]) => Promise<void>;
+  movePontoInList: (id: string, dir: -1 | 1, scopedList: Ponto[], scope?: { categoria?: string; subcategoria?: string }) => Promise<void>;
+  reorderPontosInList: (orderedList: Ponto[], scope?: { categoria?: string; subcategoria?: string }) => Promise<void>;
 }
 
 const PontosContext = createContext<Ctx | null>(null);
@@ -185,7 +185,7 @@ export function PontosProvider({ children }: { children: ReactNode }) {
 
     await refresh();
     return { error: null, pending: goesPending };
-  }, [user, isAdmin, refresh]);
+  }, [user, isAdmin, pontos, refresh]);
 
   const deletePonto = useCallback(async (id: string) => {
     const { error } = await supabase.from("pontos").delete().eq("id", id);
@@ -219,16 +219,15 @@ export function PontosProvider({ children }: { children: ReactNode }) {
     }
   }, [user, favoritos]);
 
-  const reorderPontosInList = useCallback<Ctx["reorderPontosInList"]>(async (orderedList) => {
+  const reorderPontosInList = useCallback<Ctx["reorderPontosInList"]>(async (orderedList, scope) => {
     const idToNewOrdem = new Map<string, number>();
     orderedList.forEach((p, i) => idToNewOrdem.set(p.id, (i + 1) * 10));
 
     const scopedIds = new Set(orderedList.map((p) => p.id));
-    const first = orderedList[0];
     const sameFolder = (p: Ponto) => {
-      if (!first || p.categoria !== first.categoria) return false;
-      if (first.subcategorias.length === 0) return p.subcategorias.length === 0;
-      return first.subcategorias.every((s) => p.subcategorias.includes(s));
+      if (!scope?.categoria) return true;
+      if (p.categoria !== scope.categoria) return false;
+      return scope.subcategoria ? p.subcategorias.includes(scope.subcategoria) : true;
     };
 
     pontos
@@ -252,7 +251,7 @@ export function PontosProvider({ children }: { children: ReactNode }) {
     suppressRefreshUntilRef.current = Date.now() + 1500;
   }, [pontos]);
 
-  const movePontoInList = useCallback<Ctx["movePontoInList"]>(async (id, dir, scopedList) => {
+  const movePontoInList = useCallback<Ctx["movePontoInList"]>(async (id, dir, scopedList, scope) => {
     const idx = scopedList.findIndex((p) => p.id === id);
     if (idx < 0) return;
     const target = idx + dir;
@@ -260,7 +259,7 @@ export function PontosProvider({ children }: { children: ReactNode }) {
     const reordered = [...scopedList];
     const [moved] = reordered.splice(idx, 1);
     reordered.splice(target, 0, moved);
-    await reorderPontosInList(reordered);
+    await reorderPontosInList(reordered, scope);
   }, [reorderPontosInList]);
 
   return (
