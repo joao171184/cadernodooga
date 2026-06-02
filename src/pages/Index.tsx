@@ -140,8 +140,8 @@ const Index = () => {
     const list = dragList;
     dragId.current = null;
     setDragList(null);
-    if (list) await reorderPontosInList(list);
-  }, [dragList, reorderPontosInList]);
+    if (list) await reorderPontosInList(list, { categoria, subcategoria });
+  }, [dragList, reorderPontosInList, categoria, subcategoria]);
 
   const playingPonto = playingId ? pontos.find((p) => p.id === playingId) : null;
 
@@ -323,8 +323,8 @@ const Index = () => {
                 onToggleFavorite={toggleFavorito}
                 onEdit={handleEditPonto}
                 onDelete={handleDeletePonto}
-                onMoveUp={(id) => movePontoInList(id, -1, visibleList)}
-                onMoveDown={(id) => movePontoInList(id, 1, visibleList)}
+                onMoveUp={(id) => movePontoInList(id, -1, visibleList, { categoria, subcategoria })}
+                onMoveDown={(id) => movePontoInList(id, 1, visibleList, { categoria, subcategoria })}
                 onDragStart={isAdmin ? handleDragStart : undefined}
                 onDragOver={isAdmin ? handleDragOver : undefined}
                 onDrop={isAdmin ? handleDrop : undefined}
