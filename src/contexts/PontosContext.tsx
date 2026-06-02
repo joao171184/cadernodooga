@@ -236,7 +236,6 @@ export function PontosProvider({ children }: { children: ReactNode }) {
       .sort((a, b) => a.ordem - b.ordem)
       .forEach((p, i) => idToNewOrdem.set(p.id, (orderedList.length + i + 1) * 10));
 
-    const idToNewOrdem = new Map<string, number>();
     // Suprime refresh do realtime por 2s para não sobrescrever o estado otimista
     suppressRefreshUntilRef.current = Date.now() + 2000;
     // Optimistic local update — evita "voltar pro topo" causado por refresh
