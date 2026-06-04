@@ -71,6 +71,7 @@ export function PontosProvider({ children }: { children: ReactNode }) {
   const [pontos, setPontos] = useState<Ponto[]>([]);
   const [pendentes, setPendentes] = useState<Ponto[]>([]);
   const [favoritos, setFavoritos] = useState<Set<string>>(new Set());
+  const [toqueOrdens, setToqueOrdens] = useState<Map<string, Partial<Record<ToqueTipo, number>>>>(new Map());
   const [loading, setLoading] = useState(true);
 
   const hasLoadedRef = useRef(false);
