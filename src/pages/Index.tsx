@@ -106,6 +106,13 @@ const Index = () => {
     }
     if (toqueFilter !== "all") {
       list = list.filter((p) => p.toque === toqueFilter);
+      // Ordena pela ordem específica deste toque (sem ordem definida cai no fim)
+      list = [...list].sort((a, b) => {
+        const oa = toqueOrdens.get(a.id)?.[toqueFilter] ?? Number.POSITIVE_INFINITY;
+        const ob = toqueOrdens.get(b.id)?.[toqueFilter] ?? Number.POSITIVE_INFINITY;
+        if (oa !== ob) return oa - ob;
+        return a.ordem - b.ordem;
+      });
     }
     if (!q) return list;
     return list.filter(
@@ -115,7 +122,7 @@ const Index = () => {
         norm(p.letra).includes(q) ||
         (p.subcategorias || []).some((s) => norm(s).includes(q))
     );
-  }, [search, showFavorites, showClassifFilters, classifFilter, toqueFilter, favoritos, categoria, subcategoria, pontos]);
+  }, [search, showFavorites, showClassifFilters, classifFilter, toqueFilter, favoritos, categoria, subcategoria, pontos, toqueOrdens]);
 
   const visibleList = dragList ?? filtered;
 
