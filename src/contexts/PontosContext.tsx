@@ -281,7 +281,7 @@ export function PontosProvider({ children }: { children: ReactNode }) {
 
   return (
     <PontosContext.Provider value={{
-      pontos, pendentes, favoritos, loading,
+      pontos, pendentes, favoritos, toqueOrdens, loading,
       refresh, savePonto, deletePonto, approvePonto, rejectPonto, toggleFavorito, movePontoInList, reorderPontosInList,
     }}>
       {children}
