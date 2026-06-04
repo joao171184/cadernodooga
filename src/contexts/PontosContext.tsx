@@ -52,6 +52,7 @@ interface Ctx {
   pontos: Ponto[];
   pendentes: Ponto[];
   favoritos: Set<string>;
+  toqueOrdens: Map<string, Partial<Record<ToqueTipo, number>>>;
   loading: boolean;
   refresh: () => Promise<void>;
   savePonto: (data: PontoInput) => Promise<{ error: string | null; pending: boolean }>;
@@ -59,8 +60,8 @@ interface Ctx {
   approvePonto: (id: string) => Promise<void>;
   rejectPonto: (id: string) => Promise<void>;
   toggleFavorito: (id: string) => Promise<void>;
-  movePontoInList: (id: string, dir: -1 | 1, scopedList: Ponto[], scope?: { categoria?: string; subcategoria?: string }) => Promise<void>;
-  reorderPontosInList: (orderedList: Ponto[], scope?: { categoria?: string; subcategoria?: string }) => Promise<void>;
+  movePontoInList: (id: string, dir: -1 | 1, scopedList: Ponto[], scope?: { toque?: ToqueTipo | null }) => Promise<void>;
+  reorderPontosInList: (orderedList: Ponto[], scope?: { toque?: ToqueTipo | null }) => Promise<void>;
 }
 
 const PontosContext = createContext<Ctx | null>(null);
