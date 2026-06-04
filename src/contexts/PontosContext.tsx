@@ -124,6 +124,13 @@ export function PontosProvider({ children }: { children: ReactNode }) {
     setPontos(all.filter((p) => p.status === "approved"));
     setPendentes(all.filter((p) => p.status === "pending"));
     setFavoritos(new Set((favs ?? []).map((f) => f.ponto_id)));
+    const tMap = new Map<string, Partial<Record<ToqueTipo, number>>>();
+    (toqueOrds ?? []).forEach((r) => {
+      const entry = tMap.get(r.ponto_id) ?? {};
+      entry[r.toque as ToqueTipo] = r.ordem;
+      tMap.set(r.ponto_id, entry);
+    });
+    setToqueOrdens(tMap);
     hasLoadedRef.current = true;
     setLoading(false);
   }, [user, authLoading]);
