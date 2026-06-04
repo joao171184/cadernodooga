@@ -43,14 +43,15 @@ const Index = () => {
   const dragId = useRef<string | null>(null);
   const [dragList, setDragList] = useState<Ponto[] | null>(null);
 
-  const { pontos, pendentes, favoritos, loading, savePonto, deletePonto, toggleFavorito, movePontoInList, reorderPontosInList } = usePontos();
+  const { pontos, pendentes, favoritos, toqueOrdens, loading, savePonto, deletePonto, toggleFavorito, movePontoInList, reorderPontosInList } = usePontos();
   const { categorias } = useCategorias();
   const activeCategoria = categorias.find((c) => c.nome === categoria);
   const showClassifFilters = !categoria || (activeCategoria?.mostrarFiltrosClassificacao ?? true);
 
-  // Ao trocar de categoria/subcategoria, volta para "Todos"
+  // Ao trocar de categoria/subcategoria, volta para "Todos" (incluindo filtro de toque)
   useEffect(() => {
     setClassifFilter("all");
+    setToqueFilter("all");
   }, [categoria, subcategoria]);
 
   const togglePlay = useCallback((id: string) => {
