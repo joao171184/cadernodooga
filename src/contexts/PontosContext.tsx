@@ -149,6 +149,7 @@ export function PontosProvider({ children }: { children: ReactNode }) {
       .on("postgres_changes", { event: "*", schema: "public", table: "pontos" }, maybeRefresh)
       .on("postgres_changes", { event: "*", schema: "public", table: "ponto_subcategorias" }, maybeRefresh)
       .on("postgres_changes", { event: "*", schema: "public", table: "ponto_classificacoes" }, maybeRefresh)
+      .on("postgres_changes", { event: "*", schema: "public", table: "ponto_toque_ordem" }, maybeRefresh)
       .subscribe();
     return () => { supabase.removeChannel(ch); };
   }, [user, refresh]);
