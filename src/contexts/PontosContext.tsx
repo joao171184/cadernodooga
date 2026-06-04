@@ -52,6 +52,7 @@ interface Ctx {
   pontos: Ponto[];
   pendentes: Ponto[];
   favoritos: Set<string>;
+  toqueOrdens: Map<string, Partial<Record<ToqueTipo, number>>>;
   loading: boolean;
   refresh: () => Promise<void>;
   savePonto: (data: PontoInput) => Promise<{ error: string | null; pending: boolean }>;
@@ -59,8 +60,8 @@ interface Ctx {
   approvePonto: (id: string) => Promise<void>;
   rejectPonto: (id: string) => Promise<void>;
   toggleFavorito: (id: string) => Promise<void>;
-  movePontoInList: (id: string, dir: -1 | 1, scopedList: Ponto[], scope?: { categoria?: string; subcategoria?: string }) => Promise<void>;
-  reorderPontosInList: (orderedList: Ponto[], scope?: { categoria?: string; subcategoria?: string }) => Promise<void>;
+  movePontoInList: (id: string, dir: -1 | 1, scopedList: Ponto[], scope?: { toque?: ToqueTipo | null }) => Promise<void>;
+  reorderPontosInList: (orderedList: Ponto[], scope?: { toque?: ToqueTipo | null }) => Promise<void>;
 }
 
 const PontosContext = createContext<Ctx | null>(null);
@@ -70,6 +71,7 @@ export function PontosProvider({ children }: { children: ReactNode }) {
   const [pontos, setPontos] = useState<Ponto[]>([]);
   const [pendentes, setPendentes] = useState<Ponto[]>([]);
   const [favoritos, setFavoritos] = useState<Set<string>>(new Set());
+  const [toqueOrdens, setToqueOrdens] = useState<Map<string, Partial<Record<ToqueTipo, number>>>>(new Map());
   const [loading, setLoading] = useState(true);
 
   const hasLoadedRef = useRef(false);
@@ -82,11 +84,12 @@ export function PontosProvider({ children }: { children: ReactNode }) {
     }
     if (!hasLoadedRef.current) setLoading(true);
 
-    const [{ data: rawPontos }, { data: subs }, { data: classes }, { data: favs }] = await Promise.all([
+    const [{ data: rawPontos }, { data: subs }, { data: classes }, { data: favs }, { data: toqueOrds }] = await Promise.all([
       supabase.from("pontos").select("*").order("ordem", { ascending: true }).order("created_at", { ascending: true }),
       supabase.from("ponto_subcategorias").select("*"),
       supabase.from("ponto_classificacoes").select("*"),
       supabase.from("favoritos").select("ponto_id").eq("user_id", user.id),
+      supabase.from("ponto_toque_ordem").select("*"),
     ]);
 
     const subMap = new Map<string, string[]>();
@@ -121,6 +124,13 @@ export function PontosProvider({ children }: { children: ReactNode }) {
     setPontos(all.filter((p) => p.status === "approved"));
     setPendentes(all.filter((p) => p.status === "pending"));
     setFavoritos(new Set((favs ?? []).map((f) => f.ponto_id)));
+    const tMap = new Map<string, Partial<Record<ToqueTipo, number>>>();
+    (toqueOrds ?? []).forEach((r) => {
+      const entry = tMap.get(r.ponto_id) ?? {};
+      entry[r.toque as ToqueTipo] = r.ordem;
+      tMap.set(r.ponto_id, entry);
+    });
+    setToqueOrdens(tMap);
     hasLoadedRef.current = true;
     setLoading(false);
   }, [user, authLoading]);
@@ -139,6 +149,7 @@ export function PontosProvider({ children }: { children: ReactNode }) {
       .on("postgres_changes", { event: "*", schema: "public", table: "pontos" }, maybeRefresh)
       .on("postgres_changes", { event: "*", schema: "public", table: "ponto_subcategorias" }, maybeRefresh)
       .on("postgres_changes", { event: "*", schema: "public", table: "ponto_classificacoes" }, maybeRefresh)
+      .on("postgres_changes", { event: "*", schema: "public", table: "ponto_toque_ordem" }, maybeRefresh)
       .subscribe();
     return () => { supabase.removeChannel(ch); };
   }, [user, refresh]);
@@ -220,36 +231,43 @@ export function PontosProvider({ children }: { children: ReactNode }) {
   }, [user, favoritos]);
 
   const reorderPontosInList = useCallback<Ctx["reorderPontosInList"]>(async (orderedList, scope) => {
-    const idToNewOrdem = new Map<string, number>();
-    orderedList.forEach((p, i) => idToNewOrdem.set(p.id, (i + 1) * 10));
-
-    const scopedIds = new Set(orderedList.map((p) => p.id));
-    const sameFolder = (p: Ponto) => {
-      if (!scope?.categoria) return true;
-      if (p.categoria !== scope.categoria) return false;
-      return scope.subcategoria ? p.subcategorias.includes(scope.subcategoria) : true;
-    };
-
-    pontos
-      .filter((p) => sameFolder(p) && !scopedIds.has(p.id))
-      .sort((a, b) => a.ordem - b.ordem)
-      .forEach((p, i) => idToNewOrdem.set(p.id, (orderedList.length + i + 1) * 10));
-
-    // Suprime refresh do realtime por 2s para não sobrescrever o estado otimista
+    const toque = scope?.toque ?? null;
     suppressRefreshUntilRef.current = Date.now() + 2000;
-    // Optimistic local update — evita "voltar pro topo" causado por refresh
-    setPontos((prev) => {
-      const updated = prev.map((p) =>
-        idToNewOrdem.has(p.id) ? { ...p, ordem: idToNewOrdem.get(p.id)! } : p
-      );
-      return updated.sort((a, b) => a.ordem - b.ordem);
-    });
-    await Promise.all(Array.from(idToNewOrdem.entries()).map(([id, ordem]) =>
-      supabase.from("pontos").update({ ordem }).eq("id", id)
-    ));
-    // Estende após os writes para cobrir eventos atrasados do realtime
+
+    if (toque) {
+      // Salva ordem apenas para o toque ativo, sem mexer em nada mais
+      const updates = orderedList.map((p, i) => ({
+        ponto_id: p.id,
+        toque,
+        ordem: (i + 1) * 10,
+      }));
+      setToqueOrdens((prev) => {
+        const next = new Map(prev);
+        updates.forEach((u) => {
+          const entry = { ...(next.get(u.ponto_id) ?? {}) };
+          entry[toque] = u.ordem;
+          next.set(u.ponto_id, entry);
+        });
+        return next;
+      });
+      await supabase.from("ponto_toque_ordem").upsert(updates, { onConflict: "ponto_id,toque" });
+    } else {
+      // "Todos os toques" — atualiza apenas os itens movidos, sem renumerar os demais
+      const idToNewOrdem = new Map<string, number>();
+      orderedList.forEach((p, i) => idToNewOrdem.set(p.id, (i + 1) * 10));
+      setPontos((prev) => {
+        const updated = prev.map((p) =>
+          idToNewOrdem.has(p.id) ? { ...p, ordem: idToNewOrdem.get(p.id)! } : p
+        );
+        return updated.sort((a, b) => a.ordem - b.ordem);
+      });
+      await Promise.all(Array.from(idToNewOrdem.entries()).map(([id, ordem]) =>
+        supabase.from("pontos").update({ ordem }).eq("id", id)
+      ));
+    }
+
     suppressRefreshUntilRef.current = Date.now() + 1500;
-  }, [pontos]);
+  }, []);
 
   const movePontoInList = useCallback<Ctx["movePontoInList"]>(async (id, dir, scopedList, scope) => {
     const idx = scopedList.findIndex((p) => p.id === id);
@@ -264,7 +282,7 @@ export function PontosProvider({ children }: { children: ReactNode }) {
 
   return (
     <PontosContext.Provider value={{
-      pontos, pendentes, favoritos, loading,
+      pontos, pendentes, favoritos, toqueOrdens, loading,
       refresh, savePonto, deletePonto, approvePonto, rejectPonto, toggleFavorito, movePontoInList, reorderPontosInList,
     }}>
       {children}

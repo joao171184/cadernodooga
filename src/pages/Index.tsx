@@ -43,14 +43,15 @@ const Index = () => {
   const dragId = useRef<string | null>(null);
   const [dragList, setDragList] = useState<Ponto[] | null>(null);
 
-  const { pontos, pendentes, favoritos, loading, savePonto, deletePonto, toggleFavorito, movePontoInList, reorderPontosInList } = usePontos();
+  const { pontos, pendentes, favoritos, toqueOrdens, loading, savePonto, deletePonto, toggleFavorito, movePontoInList, reorderPontosInList } = usePontos();
   const { categorias } = useCategorias();
   const activeCategoria = categorias.find((c) => c.nome === categoria);
   const showClassifFilters = !categoria || (activeCategoria?.mostrarFiltrosClassificacao ?? true);
 
-  // Ao trocar de categoria/subcategoria, volta para "Todos"
+  // Ao trocar de categoria/subcategoria, volta para "Todos" (incluindo filtro de toque)
   useEffect(() => {
     setClassifFilter("all");
+    setToqueFilter("all");
   }, [categoria, subcategoria]);
 
   const togglePlay = useCallback((id: string) => {
@@ -105,6 +106,13 @@ const Index = () => {
     }
     if (toqueFilter !== "all") {
       list = list.filter((p) => p.toque === toqueFilter);
+      // Ordena pela ordem específica deste toque (sem ordem definida cai no fim)
+      list = [...list].sort((a, b) => {
+        const oa = toqueOrdens.get(a.id)?.[toqueFilter] ?? Number.POSITIVE_INFINITY;
+        const ob = toqueOrdens.get(b.id)?.[toqueFilter] ?? Number.POSITIVE_INFINITY;
+        if (oa !== ob) return oa - ob;
+        return a.ordem - b.ordem;
+      });
     }
     if (!q) return list;
     return list.filter(
@@ -114,7 +122,7 @@ const Index = () => {
         norm(p.letra).includes(q) ||
         (p.subcategorias || []).some((s) => norm(s).includes(q))
     );
-  }, [search, showFavorites, showClassifFilters, classifFilter, toqueFilter, favoritos, categoria, subcategoria, pontos]);
+  }, [search, showFavorites, showClassifFilters, classifFilter, toqueFilter, favoritos, categoria, subcategoria, pontos, toqueOrdens]);
 
   const visibleList = dragList ?? filtered;
 
@@ -142,8 +150,8 @@ const Index = () => {
     const list = dragList;
     dragId.current = null;
     setDragList(null);
-    if (list) await reorderPontosInList(list, { categoria, subcategoria });
-  }, [dragList, reorderPontosInList, categoria, subcategoria]);
+    if (list) await reorderPontosInList(list, { toque: toqueFilter === "all" ? null : toqueFilter });
+  }, [dragList, reorderPontosInList, toqueFilter]);
 
   const playingPonto = playingId ? pontos.find((p) => p.id === playingId) : null;
 
@@ -325,8 +333,8 @@ const Index = () => {
                 onToggleFavorite={toggleFavorito}
                 onEdit={handleEditPonto}
                 onDelete={handleDeletePonto}
-                onMoveUp={(id) => movePontoInList(id, -1, visibleList, { categoria, subcategoria })}
-                onMoveDown={(id) => movePontoInList(id, 1, visibleList, { categoria, subcategoria })}
+                onMoveUp={(id) => movePontoInList(id, -1, visibleList, { toque: toqueFilter === "all" ? null : toqueFilter })}
+                onMoveDown={(id) => movePontoInList(id, 1, visibleList, { toque: toqueFilter === "all" ? null : toqueFilter })}
                 onDragStart={isAdmin ? handleDragStart : undefined}
                 onDragOver={isAdmin ? handleDragOver : undefined}
                 onDrop={isAdmin ? handleDrop : undefined}
