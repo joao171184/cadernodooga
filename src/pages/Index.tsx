@@ -333,8 +333,8 @@ const Index = () => {
                 onToggleFavorite={toggleFavorito}
                 onEdit={handleEditPonto}
                 onDelete={handleDeletePonto}
-                onMoveUp={(id) => movePontoInList(id, -1, visibleList, { categoria, subcategoria })}
-                onMoveDown={(id) => movePontoInList(id, 1, visibleList, { categoria, subcategoria })}
+                onMoveUp={(id) => movePontoInList(id, -1, visibleList, { toque: toqueFilter === "all" ? null : toqueFilter })}
+                onMoveDown={(id) => movePontoInList(id, 1, visibleList, { toque: toqueFilter === "all" ? null : toqueFilter })}
                 onDragStart={isAdmin ? handleDragStart : undefined}
                 onDragOver={isAdmin ? handleDragOver : undefined}
                 onDrop={isAdmin ? handleDrop : undefined}
