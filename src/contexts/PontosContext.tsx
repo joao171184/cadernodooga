@@ -230,36 +230,43 @@ export function PontosProvider({ children }: { children: ReactNode }) {
   }, [user, favoritos]);
 
   const reorderPontosInList = useCallback<Ctx["reorderPontosInList"]>(async (orderedList, scope) => {
-    const idToNewOrdem = new Map<string, number>();
-    orderedList.forEach((p, i) => idToNewOrdem.set(p.id, (i + 1) * 10));
-
-    const scopedIds = new Set(orderedList.map((p) => p.id));
-    const sameFolder = (p: Ponto) => {
-      if (!scope?.categoria) return true;
-      if (p.categoria !== scope.categoria) return false;
-      return scope.subcategoria ? p.subcategorias.includes(scope.subcategoria) : true;
-    };
-
-    pontos
-      .filter((p) => sameFolder(p) && !scopedIds.has(p.id))
-      .sort((a, b) => a.ordem - b.ordem)
-      .forEach((p, i) => idToNewOrdem.set(p.id, (orderedList.length + i + 1) * 10));
-
-    // Suprime refresh do realtime por 2s para não sobrescrever o estado otimista
+    const toque = scope?.toque ?? null;
     suppressRefreshUntilRef.current = Date.now() + 2000;
-    // Optimistic local update — evita "voltar pro topo" causado por refresh
-    setPontos((prev) => {
-      const updated = prev.map((p) =>
-        idToNewOrdem.has(p.id) ? { ...p, ordem: idToNewOrdem.get(p.id)! } : p
-      );
-      return updated.sort((a, b) => a.ordem - b.ordem);
-    });
-    await Promise.all(Array.from(idToNewOrdem.entries()).map(([id, ordem]) =>
-      supabase.from("pontos").update({ ordem }).eq("id", id)
-    ));
-    // Estende após os writes para cobrir eventos atrasados do realtime
+
+    if (toque) {
+      // Salva ordem apenas para o toque ativo, sem mexer em nada mais
+      const updates = orderedList.map((p, i) => ({
+        ponto_id: p.id,
+        toque,
+        ordem: (i + 1) * 10,
+      }));
+      setToqueOrdens((prev) => {
+        const next = new Map(prev);
+        updates.forEach((u) => {
+          const entry = { ...(next.get(u.ponto_id) ?? {}) };
+          entry[toque] = u.ordem;
+          next.set(u.ponto_id, entry);
+        });
+        return next;
+      });
+      await supabase.from("ponto_toque_ordem").upsert(updates, { onConflict: "ponto_id,toque" });
+    } else {
+      // "Todos os toques" — atualiza apenas os itens movidos, sem renumerar os demais
+      const idToNewOrdem = new Map<string, number>();
+      orderedList.forEach((p, i) => idToNewOrdem.set(p.id, (i + 1) * 10));
+      setPontos((prev) => {
+        const updated = prev.map((p) =>
+          idToNewOrdem.has(p.id) ? { ...p, ordem: idToNewOrdem.get(p.id)! } : p
+        );
+        return updated.sort((a, b) => a.ordem - b.ordem);
+      });
+      await Promise.all(Array.from(idToNewOrdem.entries()).map(([id, ordem]) =>
+        supabase.from("pontos").update({ ordem }).eq("id", id)
+      ));
+    }
+
     suppressRefreshUntilRef.current = Date.now() + 1500;
-  }, [pontos]);
+  }, []);
 
   const movePontoInList = useCallback<Ctx["movePontoInList"]>(async (id, dir, scopedList, scope) => {
     const idx = scopedList.findIndex((p) => p.id === id);
