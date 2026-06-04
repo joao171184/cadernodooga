@@ -124,6 +124,35 @@ export type Database = {
           },
         ]
       }
+      ponto_toque_ordem: {
+        Row: {
+          ordem: number
+          ponto_id: string
+          toque: Database["public"]["Enums"]["toque_tipo"]
+          updated_at: string
+        }
+        Insert: {
+          ordem?: number
+          ponto_id: string
+          toque: Database["public"]["Enums"]["toque_tipo"]
+          updated_at?: string
+        }
+        Update: {
+          ordem?: number
+          ponto_id?: string
+          toque?: Database["public"]["Enums"]["toque_tipo"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ponto_toque_ordem_ponto_id_fkey"
+            columns: ["ponto_id"]
+            isOneToOne: false
+            referencedRelation: "pontos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pontos: {
         Row: {
           approved_at: string | null
