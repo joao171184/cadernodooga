@@ -84,11 +84,12 @@ export function PontosProvider({ children }: { children: ReactNode }) {
     }
     if (!hasLoadedRef.current) setLoading(true);
 
-    const [{ data: rawPontos }, { data: subs }, { data: classes }, { data: favs }] = await Promise.all([
+    const [{ data: rawPontos }, { data: subs }, { data: classes }, { data: favs }, { data: toqueOrds }] = await Promise.all([
       supabase.from("pontos").select("*").order("ordem", { ascending: true }).order("created_at", { ascending: true }),
       supabase.from("ponto_subcategorias").select("*"),
       supabase.from("ponto_classificacoes").select("*"),
       supabase.from("favoritos").select("ponto_id").eq("user_id", user.id),
+      supabase.from("ponto_toque_ordem").select("*"),
     ]);
 
     const subMap = new Map<string, string[]>();
