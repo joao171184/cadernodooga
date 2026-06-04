@@ -150,8 +150,8 @@ const Index = () => {
     const list = dragList;
     dragId.current = null;
     setDragList(null);
-    if (list) await reorderPontosInList(list, { categoria, subcategoria });
-  }, [dragList, reorderPontosInList, categoria, subcategoria]);
+    if (list) await reorderPontosInList(list, { toque: toqueFilter === "all" ? null : toqueFilter });
+  }, [dragList, reorderPontosInList, toqueFilter]);
 
   const playingPonto = playingId ? pontos.find((p) => p.id === playingId) : null;
 
