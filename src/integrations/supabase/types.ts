@@ -166,7 +166,6 @@ export type Database = {
           nome: string
           ordem: number
           puxador: string
-          slug: string
           status: Database["public"]["Enums"]["ponto_status"]
           toque: Database["public"]["Enums"]["toque_tipo"] | null
           updated_at: string
@@ -183,7 +182,6 @@ export type Database = {
           nome: string
           ordem?: number
           puxador?: string
-          slug?: string
           status?: Database["public"]["Enums"]["ponto_status"]
           toque?: Database["public"]["Enums"]["toque_tipo"] | null
           updated_at?: string
@@ -200,7 +198,6 @@ export type Database = {
           nome?: string
           ordem?: number
           puxador?: string
-          slug?: string
           status?: Database["public"]["Enums"]["ponto_status"]
           toque?: Database["public"]["Enums"]["toque_tipo"] | null
           updated_at?: string
@@ -288,7 +285,6 @@ export type Database = {
         Returns: boolean
       }
       is_super_admin: { Args: { _user_id: string }; Returns: boolean }
-      slugify: { Args: { _text: string }; Returns: string }
     }
     Enums: {
       app_role: "admin" | "oga" | "visitante"

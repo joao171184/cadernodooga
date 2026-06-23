@@ -13,7 +13,6 @@ import Index from "./pages/Index.tsx";
 import Login from "./pages/Login.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import Pendentes from "./pages/Pendentes.tsx";
-import PontoPage from "./pages/PontoPage.tsx";
 import ResetPassword from "./pages/ResetPassword.tsx";
 import type { ReactNode } from "react";
 import { Loader2 } from "lucide-react";
@@ -53,7 +52,6 @@ const App = () => (
                 <Routes>
                   <Route path="/login" element={<Login />} />
                   <Route path="/reset-password" element={<ResetPassword />} />
-                  <Route path="/ponto/:slug" element={<PontoPage />} />
                   <Route path="/" element={<ProtectedLayout><Index /></ProtectedLayout>} />
                   <Route path="/pendentes" element={<ProtectedLayout><Pendentes /></ProtectedLayout>} />
                   <Route path="/guia/:categoria" element={<ProtectedLayout><Index /></ProtectedLayout>} />

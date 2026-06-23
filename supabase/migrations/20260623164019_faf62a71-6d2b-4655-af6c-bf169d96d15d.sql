@@ -1,1 +1,0 @@
-ALTER TABLE public.pontos ALTER COLUMN slug SET DEFAULT '';
