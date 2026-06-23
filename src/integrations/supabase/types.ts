@@ -183,7 +183,7 @@ export type Database = {
           nome: string
           ordem?: number
           puxador?: string
-          slug: string
+          slug?: string
           status?: Database["public"]["Enums"]["ponto_status"]
           toque?: Database["public"]["Enums"]["toque_tipo"] | null
           updated_at?: string
