@@ -137,7 +137,6 @@ export function PontosProvider({ children }: { children: ReactNode }) {
 
   // Realtime: re-fetch on any change (com janela de supressão pós-reorder)
   useEffect(() => {
-    if (!user) return;
     const maybeRefresh = () => {
       if (Date.now() < suppressRefreshUntilRef.current) return;
       refresh();
