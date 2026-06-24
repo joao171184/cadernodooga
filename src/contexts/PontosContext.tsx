@@ -78,17 +78,15 @@ export function PontosProvider({ children }: { children: ReactNode }) {
   const suppressRefreshUntilRef = useRef<number>(0);
   const refresh = useCallback(async () => {
     if (authLoading) return;
-    if (!user) {
-      setPontos([]); setPendentes([]); setFavoritos(new Set()); setLoading(false);
-      return;
-    }
     if (!hasLoadedRef.current) setLoading(true);
 
     const [{ data: rawPontos }, { data: subs }, { data: classes }, { data: favs }, { data: toqueOrds }] = await Promise.all([
       supabase.from("pontos").select("*").order("ordem", { ascending: true }).order("created_at", { ascending: true }),
       supabase.from("ponto_subcategorias").select("*"),
       supabase.from("ponto_classificacoes").select("*"),
-      supabase.from("favoritos").select("ponto_id").eq("user_id", user.id),
+      user
+        ? supabase.from("favoritos").select("ponto_id").eq("user_id", user.id)
+        : Promise.resolve({ data: [] as { ponto_id: string }[] }),
       supabase.from("ponto_toque_ordem").select("*"),
     ]);
 
