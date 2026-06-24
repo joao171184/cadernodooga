@@ -31,11 +31,6 @@ export function CategoriasProvider({ children }: { children: ReactNode }) {
 
   const refresh = useCallback(async () => {
     if (authLoading) return;
-    if (!user) {
-      setCategorias([]);
-      setLoading(false);
-      return;
-    }
     setLoading(true);
     const { data, error } = await supabase
       .from("categorias")
@@ -80,13 +75,12 @@ export function CategoriasProvider({ children }: { children: ReactNode }) {
 
   // Realtime
   useEffect(() => {
-    if (!user) return;
     const ch = supabase
       .channel("cats-sync")
       .on("postgres_changes", { event: "*", schema: "public", table: "categorias" }, () => { refresh(); })
       .subscribe();
     return () => { supabase.removeChannel(ch); };
-  }, [user, refresh]);
+  }, [refresh]);
 
   const addCategoria = useCallback(async (nome: string, emoji: string) => {
     const { error } = await supabase.from("categorias").insert({ nome, emoji, ordem: categorias.length + 1 });
