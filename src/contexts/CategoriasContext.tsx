@@ -31,11 +31,6 @@ export function CategoriasProvider({ children }: { children: ReactNode }) {
 
   const refresh = useCallback(async () => {
     if (authLoading) return;
-    if (!user) {
-      setCategorias([]);
-      setLoading(false);
-      return;
-    }
     setLoading(true);
     const { data, error } = await supabase
       .from("categorias")
