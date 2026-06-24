@@ -20,6 +20,17 @@ import { Loader2 } from "lucide-react";
 
 const queryClient = new QueryClient();
 
+function AppLayout({ children }: { children: ReactNode }) {
+  return (
+    <SidebarProvider>
+      <div className="min-h-screen flex w-full">
+        <AppSidebar />
+        <div className="flex-1 flex flex-col min-w-0">{children}</div>
+      </div>
+    </SidebarProvider>
+  );
+}
+
 function ProtectedLayout({ children }: { children: ReactNode }) {
   const { isLoggedIn, loading } = useAuth();
   if (loading) {
@@ -30,14 +41,7 @@ function ProtectedLayout({ children }: { children: ReactNode }) {
     );
   }
   if (!isLoggedIn) return <Navigate to="/login" replace />;
-  return (
-    <SidebarProvider>
-      <div className="min-h-screen flex w-full">
-        <AppSidebar />
-        <div className="flex-1 flex flex-col min-w-0">{children}</div>
-      </div>
-    </SidebarProvider>
-  );
+  return <AppLayout>{children}</AppLayout>;
 }
 
 const App = () => (
@@ -54,10 +58,11 @@ const App = () => (
                   <Route path="/login" element={<Login />} />
                   <Route path="/reset-password" element={<ResetPassword />} />
                   <Route path="/ponto/:slug" element={<PontoPage />} />
-                  <Route path="/" element={<ProtectedLayout><Index /></ProtectedLayout>} />
+                  <Route path="/" element={<AppLayout><Index /></AppLayout>} />
                   <Route path="/pendentes" element={<ProtectedLayout><Pendentes /></ProtectedLayout>} />
-                  <Route path="/guia/:categoria" element={<ProtectedLayout><Index /></ProtectedLayout>} />
-                  <Route path="/guia/:categoria/:subcategoria" element={<ProtectedLayout><Index /></ProtectedLayout>} />
+                  <Route path="/guia/:categoria" element={<AppLayout><Index /></AppLayout>} />
+                  <Route path="/guia/:categoria/:subcategoria" element={<AppLayout><Index /></AppLayout>} />
+
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </PontosProvider>
