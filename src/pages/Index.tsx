@@ -27,7 +27,7 @@ type ClassifFilter = "all" | Classificacao;
 type ToqueFilter = "all" | ToqueTipo;
 
 const Index = () => {
-  const { isAdmin, logout, can } = useAuth();
+  const { isAdmin, isLoggedIn, user, logout, can } = useAuth();
   const navigate = useNavigate();
   const canAdd = can("add_pontos");
   const canManageCats = can("manage_categories");
