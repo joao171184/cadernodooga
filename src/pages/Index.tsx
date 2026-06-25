@@ -181,49 +181,79 @@ const Index = () => {
               </p>
             </div>
 
-            {isAdmin && pendentes.length > 0 && (
-              <button
-                onClick={() => navigate("/pendentes")}
-                className="relative flex items-center gap-1.5 px-2.5 py-2 rounded-xl bg-amber-500 text-white text-xs font-bold transition-all active:scale-95 shadow-sm uppercase"
-                title="Pontos pendentes de aprovação"
-              >
-                <Inbox size={14} />
-                <span className="hidden md:inline">Pendentes</span>
-                <span className="bg-white text-amber-600 rounded-full px-1.5 min-w-[20px] text-center">{pendentes.length}</span>
-              </button>
-            )}
-
-            {showSettings && (
-              <button
-                onClick={() => setAdminOpen(true)}
-                className="p-2 sm:px-3 rounded-xl bg-primary-foreground/10 hover:bg-primary-foreground/20 text-primary-foreground text-xs font-bold transition-all active:scale-95 uppercase border border-primary-foreground/10 flex items-center gap-1.5"
-                title="Configurações"
-                aria-label="Configurações"
-              >
-                <Settings size={16} />
-                <span className="hidden md:inline">Configurações</span>
-              </button>
-            )}
-            {canAdd && (
-              <button
-                onClick={() => { setEditingPonto(null); setFormOpen(true); }}
-                className="flex items-center gap-1.5 px-2.5 sm:px-3 py-2 rounded-xl bg-accent text-accent-foreground text-xs font-bold transition-all active:scale-95 shadow-sm uppercase"
-                title="Adicionar novo ponto"
-                aria-label="Adicionar novo ponto"
-              >
-                <Plus size={16} />
-                <span className="hidden md:inline">Novo Ponto</span>
-              </button>
-            )}
             <ThemeToggle />
-            <button
-              onClick={logout}
-              className="p-2 rounded-xl text-primary-foreground hover:bg-primary-foreground/10 transition-all active:scale-95"
-              aria-label="Sair"
-              title="Sair"
-            >
-              <LogOut size={18} />
-            </button>
+
+            {!isLoggedIn ? (
+              <button
+                onClick={() => navigate("/login")}
+                className="flex items-center gap-1.5 px-3 sm:px-4 py-2 rounded-xl bg-accent text-accent-foreground text-xs font-bold transition-all active:scale-95 shadow-sm uppercase"
+                title="Entrar"
+                aria-label="Entrar"
+              >
+                <LogIn size={16} />
+                <span>Entrar</span>
+              </button>
+            ) : (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button
+                    className="flex items-center gap-1.5 px-2.5 sm:px-3 py-2 rounded-xl bg-primary-foreground/10 hover:bg-primary-foreground/20 text-primary-foreground text-xs font-bold transition-all active:scale-95 uppercase border border-primary-foreground/10"
+                    title="Conta"
+                    aria-label="Conta"
+                  >
+                    <UserCircle2 size={18} />
+                    <span className="hidden md:inline max-w-[160px] truncate">
+                      {user?.email?.split("@")[0] ?? "Conta"}
+                    </span>
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  {user?.email && (
+                    <>
+                      <DropdownMenuLabel className="text-[11px] font-bold uppercase truncate">
+                        {user.email}
+                      </DropdownMenuLabel>
+                      <DropdownMenuSeparator />
+                    </>
+                  )}
+                  {isAdmin && pendentes.length > 0 && (
+                    <DropdownMenuItem
+                      onClick={() => navigate("/pendentes")}
+                      className="gap-2 text-xs font-bold uppercase"
+                    >
+                      <Inbox size={14} />
+                      Pendentes ({pendentes.length})
+                    </DropdownMenuItem>
+                  )}
+                  {canAdd && (
+                    <DropdownMenuItem
+                      onClick={() => { setEditingPonto(null); setFormOpen(true); }}
+                      className="gap-2 text-xs font-bold uppercase"
+                    >
+                      <Plus size={14} />
+                      Novo Ponto
+                    </DropdownMenuItem>
+                  )}
+                  {showSettings && (
+                    <DropdownMenuItem
+                      onClick={() => setAdminOpen(true)}
+                      className="gap-2 text-xs font-bold uppercase"
+                    >
+                      <Settings size={14} />
+                      Configurações
+                    </DropdownMenuItem>
+                  )}
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    onClick={logout}
+                    className="gap-2 text-xs font-bold uppercase text-destructive focus:text-destructive"
+                  >
+                    <LogOut size={14} />
+                    Sair
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
           </div>
           {/* Search */}
           <div className="relative">
