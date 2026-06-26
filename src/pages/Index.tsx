@@ -181,6 +181,43 @@ const Index = () => {
               </p>
             </div>
 
+            {isLoggedIn && isAdmin && pendentes.length > 0 && (
+              <button
+                onClick={() => navigate("/pendentes")}
+                className="relative flex items-center gap-1.5 px-2.5 py-2 rounded-xl bg-amber-500 text-white text-xs font-bold transition-all active:scale-95 shadow-sm uppercase"
+                title="Pontos pendentes de aprovação"
+                aria-label="Pontos pendentes"
+              >
+                <Inbox size={14} />
+                <span className="bg-white text-amber-600 rounded-full px-1.5 min-w-[20px] text-center">
+                  {pendentes.length}
+                </span>
+              </button>
+            )}
+
+            {isLoggedIn && canAdd && (
+              <button
+                onClick={() => { setEditingPonto(null); setFormOpen(true); }}
+                className="flex items-center gap-1.5 px-2.5 sm:px-3 py-2 rounded-xl bg-accent text-accent-foreground text-xs font-bold transition-all active:scale-95 shadow-sm uppercase"
+                title="Novo ponto"
+                aria-label="Novo ponto"
+              >
+                <Plus size={16} />
+                <span className="hidden sm:inline">Novo</span>
+              </button>
+            )}
+
+            {isLoggedIn && showSettings && (
+              <button
+                onClick={() => setAdminOpen(true)}
+                className="flex items-center justify-center p-2 rounded-xl bg-primary-foreground/10 hover:bg-primary-foreground/20 text-primary-foreground transition-all active:scale-95 border border-primary-foreground/10"
+                title="Configurações"
+                aria-label="Configurações"
+              >
+                <Settings size={16} />
+              </button>
+            )}
+
             <ThemeToggle />
 
             {!isLoggedIn ? (
@@ -216,34 +253,6 @@ const Index = () => {
                       <DropdownMenuSeparator />
                     </>
                   )}
-                  {isAdmin && pendentes.length > 0 && (
-                    <DropdownMenuItem
-                      onClick={() => navigate("/pendentes")}
-                      className="gap-2 text-xs font-bold uppercase"
-                    >
-                      <Inbox size={14} />
-                      Pendentes ({pendentes.length})
-                    </DropdownMenuItem>
-                  )}
-                  {canAdd && (
-                    <DropdownMenuItem
-                      onClick={() => { setEditingPonto(null); setFormOpen(true); }}
-                      className="gap-2 text-xs font-bold uppercase"
-                    >
-                      <Plus size={14} />
-                      Novo Ponto
-                    </DropdownMenuItem>
-                  )}
-                  {showSettings && (
-                    <DropdownMenuItem
-                      onClick={() => setAdminOpen(true)}
-                      className="gap-2 text-xs font-bold uppercase"
-                    >
-                      <Settings size={14} />
-                      Configurações
-                    </DropdownMenuItem>
-                  )}
-                  <DropdownMenuSeparator />
                   <DropdownMenuItem
                     onClick={logout}
                     className="gap-2 text-xs font-bold uppercase text-destructive focus:text-destructive"
