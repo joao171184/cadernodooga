@@ -66,10 +66,7 @@ const Login = () => {
       return;
     }
     if (needsConfirm) {
-      toast.success("Conta criada!", {
-        description:
-          "Se receber um e-mail de confirmação, verifique também a caixa de SPAM/Lixo eletrônico. Mas você já pode entrar normalmente.",
-      });
+      toast.success("Conta criada! Faça login para entrar.");
       setMode("signin");
       setPassword("");
       setConfirmPassword("");

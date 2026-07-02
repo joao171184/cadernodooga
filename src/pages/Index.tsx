@@ -56,6 +56,24 @@ const Index = () => {
     setToqueFilter("all");
   }, [categoria, subcategoria]);
 
+  // Notificação convidando visitantes a fazerem login (só uma vez por sessão)
+  useEffect(() => {
+    if (isLoggedIn) return;
+    if (sessionStorage.getItem("login-prompt-shown") === "1") return;
+    const t = setTimeout(() => {
+      toast("🪘 Faça login para uma imersão completa", {
+        description: "Salve favoritos, adicione pontos e aproveite tudo do caderno.",
+        duration: 8000,
+        action: {
+          label: "Entrar",
+          onClick: () => navigate("/login"),
+        },
+      });
+      sessionStorage.setItem("login-prompt-shown", "1");
+    }, 1200);
+    return () => clearTimeout(t);
+  }, [isLoggedIn, navigate]);
+
   const togglePlay = useCallback((id: string) => {
     setPlayingId((curr) => (curr === id ? null : id));
   }, []);

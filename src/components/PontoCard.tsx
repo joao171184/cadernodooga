@@ -53,7 +53,7 @@ const PontoCard = ({ ponto, isPlaying, isFavorite, onTogglePlay, onToggleFavorit
   const canEdit = !!onEdit && (isAdmin || can("edit_pontos"));
   const canDelete = !!onDelete && (isAdmin || can("delete_pontos"));
   const canFavorite = isAdmin || can("favorite");
-  const canPlay = isAdmin || can("play_audio");
+  const canPlay = true; // Player liberado para todos, inclusive visitantes
 
   return (
     <div
