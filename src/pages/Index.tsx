@@ -405,15 +405,16 @@ const Index = () => {
                 ponto={ponto}
                 isPlaying={playingId === ponto.id}
                 isFavorite={favoritos.has(ponto.id)}
+                visitorMode={visitorMode}
                 onTogglePlay={togglePlay}
                 onToggleFavorite={toggleFavorito}
                 onEdit={handleEditPonto}
                 onDelete={handleDeletePonto}
                 onMoveUp={(id) => movePontoInList(id, -1, visibleList, { toque: toqueFilter === "all" ? null : toqueFilter })}
                 onMoveDown={(id) => movePontoInList(id, 1, visibleList, { toque: toqueFilter === "all" ? null : toqueFilter })}
-                onDragStart={isAdmin ? handleDragStart : undefined}
-                onDragOver={isAdmin ? handleDragOver : undefined}
-                onDrop={isAdmin ? handleDrop : undefined}
+                onDragStart={effectiveIsAdmin ? handleDragStart : undefined}
+                onDragOver={effectiveIsAdmin ? handleDragOver : undefined}
+                onDrop={effectiveIsAdmin ? handleDrop : undefined}
                 onOpenFullscreen={(p) => setFullscreenPonto(p)}
                 canMoveUp={i > 0}
                 canMoveDown={i < visibleList.length - 1}
