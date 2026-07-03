@@ -201,7 +201,7 @@ const Index = () => {
               </p>
             </div>
 
-            {isLoggedIn && isAdmin && pendentes.length > 0 && (
+            {isLoggedIn && effectiveIsAdmin && pendentes.length > 0 && (
               <button
                 onClick={() => navigate("/pendentes")}
                 className="relative flex items-center gap-1.5 px-2.5 py-2 rounded-xl bg-amber-500 text-white text-xs font-bold transition-all active:scale-95 shadow-sm uppercase"
