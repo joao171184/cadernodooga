@@ -227,7 +227,20 @@ const Index = () => {
               </button>
             )}
 
-            {isLoggedIn && showSettings && (
+            {isLoggedIn && isAdmin && (
+              <button
+                onClick={() => setVisitorMode((v) => !v)}
+                className={`flex items-center justify-center p-2 rounded-xl transition-all active:scale-95 border ${
+                  visitorMode
+                    ? "bg-amber-500 text-white border-amber-500 shadow-sm"
+                    : "bg-primary-foreground/10 hover:bg-primary-foreground/20 text-primary-foreground border-primary-foreground/10"
+                }`}
+                title={visitorMode ? "Voltar ao modo admin" : "Ver como visitante"}
+                aria-label={visitorMode ? "Voltar ao modo admin" : "Ver como visitante"}
+              >
+                {visitorMode ? <ShieldCheck size={16} /> : <Eye size={16} />}
+              </button>
+            )}
               <button
                 onClick={() => setAdminOpen(true)}
                 className="flex items-center justify-center p-2 rounded-xl bg-primary-foreground/10 hover:bg-primary-foreground/20 text-primary-foreground transition-all active:scale-95 border border-primary-foreground/10"
