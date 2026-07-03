@@ -30,9 +30,10 @@ const Index = () => {
   const { isAdmin, isLoggedIn, user, logout, can } = useAuth();
   const [visitorMode, setVisitorMode] = useState(false);
   const effectiveIsAdmin = isAdmin && !visitorMode;
+  const effectiveCan = useCallback((key: PermissionKey) => !visitorMode && (isAdmin || can(key)), [visitorMode, isAdmin, can]);
   const navigate = useNavigate();
-  const canAdd = effectiveIsAdmin || can("add_pontos");
-  const canManageCats = effectiveIsAdmin || can("manage_categories");
+  const canAdd = effectiveCan("add_pontos");
+  const canManageCats = effectiveCan("manage_categories");
   const showSettings = canManageCats || effectiveIsAdmin;
   const { categoria, subcategoria } = useParams<{ categoria?: string; subcategoria?: string }>();
   const [search, setSearch] = useState("");
