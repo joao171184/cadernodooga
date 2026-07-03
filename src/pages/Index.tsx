@@ -17,7 +17,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth, type PermissionKey } from "@/contexts/AuthContext";
 import { usePontos, type Ponto, type Classificacao, type ToqueTipo, CLASSIFICACAO_OPTIONS, TOQUE_OPTIONS } from "@/contexts/PontosContext";
 import { useCategorias } from "@/contexts/CategoriasContext";
 import { ThemeToggle } from "@/components/ThemeToggle";
