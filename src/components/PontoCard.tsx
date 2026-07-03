@@ -1,4 +1,4 @@
-import { Heart, Pencil, Trash2, Mic2, ArrowUp, ArrowDown, Volume2, Pause, Drum, Share2, Eye, ShieldCheck } from "lucide-react";
+import { Heart, Pencil, Trash2, Mic2, ArrowUp, ArrowDown, Volume2, Pause, Drum, Share2 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { getEmbedInfo, type EmbedKind } from "@/lib/embed";
 import { type Ponto, TOQUE_OPTIONS, CLASSIFICACAO_OPTIONS } from "@/contexts/PontosContext";
