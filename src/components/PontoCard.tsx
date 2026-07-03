@@ -8,6 +8,7 @@ interface PontoCardProps {
   ponto: Ponto;
   isPlaying: boolean;
   isFavorite: boolean;
+  visitorMode?: boolean;
   onTogglePlay: (id: string) => void;
   onToggleFavorite: (id: string) => void;
   onEdit?: (ponto: Ponto) => void;
@@ -22,7 +23,7 @@ interface PontoCardProps {
   canMoveDown?: boolean;
 }
 
-const PontoCard = ({ ponto, isPlaying, isFavorite, onTogglePlay, onToggleFavorite, onEdit, onDelete, onMoveUp, onMoveDown, onDragStart, onDragOver, onDrop, onOpenFullscreen, canMoveUp, canMoveDown }: PontoCardProps) => {
+const PontoCard = ({ ponto, isPlaying, isFavorite, visitorMode = false, onTogglePlay, onToggleFavorite, onEdit, onDelete, onMoveUp, onMoveDown, onDragStart, onDragOver, onDrop, onOpenFullscreen, canMoveUp, canMoveDown }: PontoCardProps) => {
   const handleShare = async () => {
     const subs = ponto.subcategorias;
     const header = `🪘 ${ponto.nome}\n${ponto.categoria}${subs.length ? " › " + subs.join(" • ") : ""}\n\n`;
@@ -50,9 +51,9 @@ const PontoCard = ({ ponto, isPlaying, isFavorite, onTogglePlay, onToggleFavorit
     .map((c) => CLASSIFICACAO_OPTIONS.find((o) => o.value === c))
     .filter(Boolean) as { value: string; label: string }[];
 
-  const canEdit = !!onEdit && (isAdmin || can("edit_pontos"));
-  const canDelete = !!onDelete && (isAdmin || can("delete_pontos"));
-  const canFavorite = isAdmin || can("favorite");
+  const canEdit = !!onEdit && !visitorMode && (isAdmin || can("edit_pontos"));
+  const canDelete = !!onDelete && !visitorMode && (isAdmin || can("delete_pontos"));
+  const canFavorite = !visitorMode && (isAdmin || can("favorite"));
   const canPlay = true; // Player liberado para todos, inclusive visitantes
 
   return (
@@ -102,7 +103,7 @@ const PontoCard = ({ ponto, isPlaying, isFavorite, onTogglePlay, onToggleFavorit
             )}
           </div>
           <div className="flex items-center gap-1 shrink-0">
-            {isAdmin && onMoveUp && (
+            {isAdmin && !visitorMode && onMoveUp && (
               <button
                 onClick={() => onMoveUp(ponto.id)}
                 disabled={!canMoveUp}
@@ -112,7 +113,7 @@ const PontoCard = ({ ponto, isPlaying, isFavorite, onTogglePlay, onToggleFavorit
                 <ArrowUp size={16} className="text-muted-foreground" />
               </button>
             )}
-            {isAdmin && onMoveDown && (
+            {isAdmin && !visitorMode && onMoveDown && (
               <button
                 onClick={() => onMoveDown(ponto.id)}
                 disabled={!canMoveDown}

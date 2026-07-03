@@ -1,5 +1,5 @@
 import { useState, useCallback, useMemo, useRef, useEffect } from "react";
-import { Search, Star, Music, Plus, Settings, LogOut, Instagram, Heart, Inbox, Loader2, Drum, Check, LogIn, UserCircle2 } from "lucide-react";
+import { Search, Star, Music, Plus, Settings, LogOut, Instagram, Heart, Inbox, Loader2, Drum, Check, LogIn, UserCircle2, Eye, ShieldCheck } from "lucide-react";
 import logoImg from "@/assets/logo.png";
 import { useParams, useNavigate } from "react-router-dom";
 import PontoCard from "@/components/PontoCard";
@@ -17,7 +17,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth, type PermissionKey } from "@/contexts/AuthContext";
 import { usePontos, type Ponto, type Classificacao, type ToqueTipo, CLASSIFICACAO_OPTIONS, TOQUE_OPTIONS } from "@/contexts/PontosContext";
 import { useCategorias } from "@/contexts/CategoriasContext";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -28,10 +28,13 @@ type ToqueFilter = "all" | ToqueTipo;
 
 const Index = () => {
   const { isAdmin, isLoggedIn, user, logout, can } = useAuth();
+  const [visitorMode, setVisitorMode] = useState(false);
+  const effectiveIsAdmin = isAdmin && !visitorMode;
+  const effectiveCan = useCallback((key: PermissionKey) => !visitorMode && (isAdmin || can(key)), [visitorMode, isAdmin, can]);
   const navigate = useNavigate();
-  const canAdd = can("add_pontos");
-  const canManageCats = can("manage_categories");
-  const showSettings = canManageCats || isAdmin;
+  const canAdd = effectiveCan("add_pontos");
+  const canManageCats = effectiveCan("manage_categories");
+  const showSettings = canManageCats || effectiveIsAdmin;
   const { categoria, subcategoria } = useParams<{ categoria?: string; subcategoria?: string }>();
   const [search, setSearch] = useState("");
   const [showFavorites, setShowFavorites] = useState(false);
@@ -199,7 +202,7 @@ const Index = () => {
               </p>
             </div>
 
-            {isLoggedIn && isAdmin && pendentes.length > 0 && (
+            {isLoggedIn && effectiveIsAdmin && pendentes.length > 0 && (
               <button
                 onClick={() => navigate("/pendentes")}
                 className="relative flex items-center gap-1.5 px-2.5 py-2 rounded-xl bg-amber-500 text-white text-xs font-bold transition-all active:scale-95 shadow-sm uppercase"
@@ -222,6 +225,21 @@ const Index = () => {
               >
                 <Plus size={16} />
                 <span className="hidden sm:inline">Novo</span>
+              </button>
+            )}
+
+            {isLoggedIn && isAdmin && (
+              <button
+                onClick={() => setVisitorMode((v) => !v)}
+                className={`flex items-center justify-center p-2 rounded-xl transition-all active:scale-95 border ${
+                  visitorMode
+                    ? "bg-amber-500 text-white border-amber-500 shadow-sm"
+                    : "bg-primary-foreground/10 hover:bg-primary-foreground/20 text-primary-foreground border-primary-foreground/10"
+                }`}
+                title={visitorMode ? "Voltar ao modo admin" : "Ver como visitante"}
+                aria-label={visitorMode ? "Voltar ao modo admin" : "Ver como visitante"}
+              >
+              {visitorMode ? <ShieldCheck size={16} /> : <Eye size={16} />}
               </button>
             )}
 
@@ -388,15 +406,16 @@ const Index = () => {
                 ponto={ponto}
                 isPlaying={playingId === ponto.id}
                 isFavorite={favoritos.has(ponto.id)}
+                visitorMode={visitorMode}
                 onTogglePlay={togglePlay}
                 onToggleFavorite={toggleFavorito}
                 onEdit={handleEditPonto}
                 onDelete={handleDeletePonto}
                 onMoveUp={(id) => movePontoInList(id, -1, visibleList, { toque: toqueFilter === "all" ? null : toqueFilter })}
                 onMoveDown={(id) => movePontoInList(id, 1, visibleList, { toque: toqueFilter === "all" ? null : toqueFilter })}
-                onDragStart={isAdmin ? handleDragStart : undefined}
-                onDragOver={isAdmin ? handleDragOver : undefined}
-                onDrop={isAdmin ? handleDrop : undefined}
+                onDragStart={effectiveIsAdmin ? handleDragStart : undefined}
+                onDragOver={effectiveIsAdmin ? handleDragOver : undefined}
+                onDrop={effectiveIsAdmin ? handleDrop : undefined}
                 onOpenFullscreen={(p) => setFullscreenPonto(p)}
                 canMoveUp={i > 0}
                 canMoveDown={i < visibleList.length - 1}
@@ -423,7 +442,7 @@ const Index = () => {
           ponto={fullscreenPonto}
           isFavorite={favoritos.has(fullscreenPonto.id)}
           onToggleFavorite={toggleFavorito}
-          canFavorite={isAdmin || can("favorite")}
+          canFavorite={effectiveIsAdmin || can("favorite")}
           onClose={() => setFullscreenPonto(null)}
         />
       )}
