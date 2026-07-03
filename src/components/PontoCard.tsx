@@ -103,7 +103,7 @@ const PontoCard = ({ ponto, isPlaying, isFavorite, visitorMode = false, onToggle
             )}
           </div>
           <div className="flex items-center gap-1 shrink-0">
-            {isAdmin && onMoveUp && (
+            {isAdmin && !visitorMode && onMoveUp && (
               <button
                 onClick={() => onMoveUp(ponto.id)}
                 disabled={!canMoveUp}
@@ -113,7 +113,7 @@ const PontoCard = ({ ponto, isPlaying, isFavorite, visitorMode = false, onToggle
                 <ArrowUp size={16} className="text-muted-foreground" />
               </button>
             )}
-            {isAdmin && onMoveDown && (
+            {isAdmin && !visitorMode && onMoveDown && (
               <button
                 onClick={() => onMoveDown(ponto.id)}
                 disabled={!canMoveDown}
