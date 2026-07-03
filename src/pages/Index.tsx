@@ -441,7 +441,7 @@ const Index = () => {
           ponto={fullscreenPonto}
           isFavorite={favoritos.has(fullscreenPonto.id)}
           onToggleFavorite={toggleFavorito}
-          canFavorite={isAdmin || can("favorite")}
+          canFavorite={effectiveIsAdmin || can("favorite")}
           onClose={() => setFullscreenPonto(null)}
         />
       )}
