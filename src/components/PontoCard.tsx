@@ -8,6 +8,7 @@ interface PontoCardProps {
   ponto: Ponto;
   isPlaying: boolean;
   isFavorite: boolean;
+  visitorMode?: boolean;
   onTogglePlay: (id: string) => void;
   onToggleFavorite: (id: string) => void;
   onEdit?: (ponto: Ponto) => void;
@@ -22,7 +23,7 @@ interface PontoCardProps {
   canMoveDown?: boolean;
 }
 
-const PontoCard = ({ ponto, isPlaying, isFavorite, onTogglePlay, onToggleFavorite, onEdit, onDelete, onMoveUp, onMoveDown, onDragStart, onDragOver, onDrop, onOpenFullscreen, canMoveUp, canMoveDown }: PontoCardProps) => {
+const PontoCard = ({ ponto, isPlaying, isFavorite, visitorMode = false, onTogglePlay, onToggleFavorite, onEdit, onDelete, onMoveUp, onMoveDown, onDragStart, onDragOver, onDrop, onOpenFullscreen, canMoveUp, canMoveDown }: PontoCardProps) => {
   const handleShare = async () => {
     const subs = ponto.subcategorias;
     const header = `🪘 ${ponto.nome}\n${ponto.categoria}${subs.length ? " › " + subs.join(" • ") : ""}\n\n`;
