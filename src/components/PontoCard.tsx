@@ -51,9 +51,9 @@ const PontoCard = ({ ponto, isPlaying, isFavorite, visitorMode = false, onToggle
     .map((c) => CLASSIFICACAO_OPTIONS.find((o) => o.value === c))
     .filter(Boolean) as { value: string; label: string }[];
 
-  const canEdit = !!onEdit && (isAdmin || can("edit_pontos"));
-  const canDelete = !!onDelete && (isAdmin || can("delete_pontos"));
-  const canFavorite = isAdmin || can("favorite");
+  const canEdit = !!onEdit && ((isAdmin && !visitorMode) || can("edit_pontos"));
+  const canDelete = !!onDelete && ((isAdmin && !visitorMode) || can("delete_pontos"));
+  const canFavorite = (isAdmin && !visitorMode) || can("favorite");
   const canPlay = true; // Player liberado para todos, inclusive visitantes
 
   return (
