@@ -238,8 +238,10 @@ const Index = () => {
                 title={visitorMode ? "Voltar ao modo admin" : "Ver como visitante"}
                 aria-label={visitorMode ? "Voltar ao modo admin" : "Ver como visitante"}
               >
-                {visitorMode ? <ShieldCheck size={16} /> : <Eye size={16} />}
+              {visitorMode ? <ShieldCheck size={16} /> : <Eye size={16} />}
               </button>
+            )}
+
             {isLoggedIn && showSettings && (
               <button
                 onClick={() => setAdminOpen(true)}
