@@ -28,10 +28,12 @@ type ToqueFilter = "all" | ToqueTipo;
 
 const Index = () => {
   const { isAdmin, isLoggedIn, user, logout, can } = useAuth();
+  const [visitorMode, setVisitorMode] = useState(false);
+  const effectiveIsAdmin = isAdmin && !visitorMode;
   const navigate = useNavigate();
-  const canAdd = can("add_pontos");
-  const canManageCats = can("manage_categories");
-  const showSettings = canManageCats || isAdmin;
+  const canAdd = effectiveIsAdmin || can("add_pontos");
+  const canManageCats = effectiveIsAdmin || can("manage_categories");
+  const showSettings = canManageCats || effectiveIsAdmin;
   const { categoria, subcategoria } = useParams<{ categoria?: string; subcategoria?: string }>();
   const [search, setSearch] = useState("");
   const [showFavorites, setShowFavorites] = useState(false);
