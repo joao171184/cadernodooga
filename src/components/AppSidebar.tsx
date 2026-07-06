@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/sidebar";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
-import { ChevronDown, ChevronRight, Shield, Eye, BookOpen, Instagram, UserCog } from "lucide-react";
+import { ChevronDown, ChevronRight, Shield, Eye, BookOpen, Instagram, UserCog, Heart } from "lucide-react";
 import type { CategoriaNode } from "@/contexts/CategoriasContext";
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
@@ -25,7 +25,7 @@ export function AppSidebar() {
   const location = useLocation();
   const currentPath = decodeURIComponent(location.pathname);
   const [openFolders, setOpenFolders] = useState<Set<string>>(new Set(["Orixás", "Guias de Direita", "Guias de Esquerda"]));
-  const { isAdmin, role, user } = useAuth();
+  const { isAdmin, role, user, isLoggedIn } = useAuth();
   const roleLabel = role === "admin" ? "Administrador" : role === "oga" ? "Ogã" : "Visitante";
   const RoleIcon = role === "admin" ? Shield : role === "oga" ? UserCog : Eye;
   const { categorias } = useCategorias();
@@ -159,6 +159,28 @@ export function AppSidebar() {
                   </NavLink>
                 </SidebarMenuButton>
               </SidebarMenuItem>
+
+              {isLoggedIn && (
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild>
+                    <NavLink
+                      to="/favoritos"
+                      end
+                      onClick={handleNavClick}
+                      title="Meu Terreiro"
+                      className={`flex items-center gap-2.5 px-3 py-2.5 rounded-xl transition-all text-sm font-semibold ${
+                        currentPath === "/favoritos"
+                          ? "bg-accent/20 text-accent"
+                          : "text-sidebar-foreground hover:bg-sidebar-accent"
+                      }`}
+                      activeClassName=""
+                    >
+                      <Heart size={18} strokeWidth={2} className="shrink-0 fill-accent/30 text-accent" />
+                      <span className="tracking-wide text-[13px] font-display">Meu Terreiro</span>
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              )}
 
               {categorias.map((node) => renderNode(node))}
             </SidebarMenu>
