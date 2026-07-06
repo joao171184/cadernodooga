@@ -394,9 +394,28 @@ const Index = () => {
         {/* Cards */}
         <div className="space-y-3 sm:space-y-4 max-w-2xl">
           {loading ? (
-            <div className="text-center py-16 text-muted-foreground">
-              <Loader2 size={32} className="mx-auto animate-spin opacity-60" />
-              <p className="text-sm mt-3 uppercase">Carregando pontos...</p>
+            <div className="space-y-3 sm:space-y-4" aria-label="Carregando pontos">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <div key={i} className="bg-card rounded-2xl border border-border shadow-sm p-4 sm:p-5">
+                  <div className="flex items-start justify-between gap-2 mb-3">
+                    <div className="flex-1 min-w-0 space-y-2">
+                      <Skeleton className="h-5 w-2/3" />
+                      <Skeleton className="h-3 w-1/3" />
+                      <div className="flex gap-2 pt-1">
+                        <Skeleton className="h-4 w-20" />
+                        <Skeleton className="h-4 w-16" />
+                      </div>
+                    </div>
+                    <Skeleton className="h-8 w-8 rounded-lg" />
+                  </div>
+                  <div className="pl-4 space-y-2">
+                    <Skeleton className="h-3 w-full" />
+                    <Skeleton className="h-3 w-11/12" />
+                    <Skeleton className="h-3 w-4/5" />
+                    <Skeleton className="h-3 w-3/4" />
+                  </div>
+                </div>
+              ))}
             </div>
           ) : filtered.length === 0 ? (
             <div className="text-center py-16 text-muted-foreground">
@@ -418,6 +437,7 @@ const Index = () => {
               <PontoCard
                 key={ponto.id}
                 ponto={ponto}
+                highlight={search.trim()}
                 isPlaying={playingId === ponto.id}
                 isFavorite={favoritos.has(ponto.id)}
                 visitorMode={visitorMode}
