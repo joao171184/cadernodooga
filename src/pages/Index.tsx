@@ -183,8 +183,8 @@ const Index = () => {
 
   const playingPonto = playingId ? pontos.find((p) => p.id === playingId) : null;
 
-  const pageTitle = subcategoria || categoria || "Todos os Pontos";
-  const pageSubtitle = subcategoria ? categoria : "Caderno do Ogã";
+  const pageTitle = isFavoritosRoute ? "Meu Terreiro" : (subcategoria || categoria || "Todos os Pontos");
+  const pageSubtitle = isFavoritosRoute ? "Seus pontos favoritos" : (subcategoria ? categoria : "Caderno do Ogã");
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
