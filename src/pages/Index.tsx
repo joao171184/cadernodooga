@@ -1,5 +1,6 @@
 import { useState, useCallback, useMemo, useRef, useEffect } from "react";
-import { Search, Star, Music, Plus, Settings, LogOut, Instagram, Heart, Inbox, Loader2, Drum, Check, LogIn, UserCircle2, Eye, ShieldCheck } from "lucide-react";
+import { Search, Star, Music, Plus, Settings, LogOut, Instagram, Heart, Inbox, Loader2, Drum, Check, LogIn, UserCircle2, Eye, ShieldCheck, Menu } from "lucide-react";
+import { useSidebar } from "@/components/ui/sidebar";
 import logoImg from "@/assets/logo.png";
 import { useParams, useNavigate } from "react-router-dom";
 import PontoCard from "@/components/PontoCard";
@@ -8,7 +9,7 @@ import { SettingsDialog } from "@/components/SettingsDialog";
 import { MediaPlayer } from "@/components/MediaPlayer";
 import { PontoFullscreen } from "@/components/PontoFullscreen";
 import { AutoScrollControl } from "@/components/AutoScrollControl";
-import { SidebarTrigger } from "@/components/ui/sidebar";
+
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -28,6 +29,7 @@ type ToqueFilter = "all" | ToqueTipo;
 
 const Index = () => {
   const { isAdmin, isLoggedIn, user, logout, can } = useAuth();
+  const { toggleSidebar } = useSidebar();
   const [visitorMode, setVisitorMode] = useState(false);
   const effectiveIsAdmin = isAdmin && !visitorMode;
   const effectiveCan = useCallback((key: PermissionKey) => !visitorMode && (isAdmin || can(key)), [visitorMode, isAdmin, can]);
@@ -187,7 +189,15 @@ const Index = () => {
       <header className="bg-primary shadow-xl">
         <div className="px-3 sm:px-4 pt-3 pb-3 sm:pt-4 sm:pb-4">
           <div className="flex items-center gap-2 sm:gap-3 mb-3">
-            <SidebarTrigger className="text-primary-foreground hover:bg-primary-foreground/10 rounded-lg p-2 -ml-1" />
+            <button
+              onClick={toggleSidebar}
+              className="flex items-center gap-1.5 px-2.5 sm:px-2 py-2 rounded-xl bg-primary-foreground/15 hover:bg-primary-foreground/25 text-primary-foreground border border-primary-foreground/20 shadow-sm transition-all active:scale-95 -ml-0.5"
+              aria-label="Abrir menu de categorias"
+              title="Abrir menu"
+            >
+              <Menu size={18} />
+              <span className="text-[11px] font-bold uppercase tracking-wider sm:hidden">Menu</span>
+            </button>
             <img
               src={logoImg}
               alt="Caderno do Ogã"
