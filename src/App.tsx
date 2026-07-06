@@ -59,6 +59,7 @@ const App = () => (
                   <Route path="/reset-password" element={<ResetPassword />} />
                   <Route path="/ponto/:slug" element={<PontoPage />} />
                   <Route path="/" element={<AppLayout><Index /></AppLayout>} />
+                  <Route path="/favoritos" element={<AppLayout><Index /></AppLayout>} />
                   <Route path="/pendentes" element={<ProtectedLayout><Pendentes /></ProtectedLayout>} />
                   <Route path="/guia/:categoria" element={<AppLayout><Index /></AppLayout>} />
                   <Route path="/guia/:categoria/:subcategoria" element={<AppLayout><Index /></AppLayout>} />
