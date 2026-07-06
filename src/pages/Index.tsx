@@ -43,7 +43,7 @@ const Index = () => {
   const isFavoritosRoute = location.pathname === "/favoritos";
   const [search, setSearch] = useState("");
   const [showFavorites, setShowFavorites] = useState(false);
-  useEffect(() => { if (isFavoritosRoute) setShowFavorites(true); }, [isFavoritosRoute]);
+  useEffect(() => { setShowFavorites(isFavoritosRoute); }, [isFavoritosRoute]);
   const [classifFilter, setClassifFilter] = useState<ClassifFilter>("all");
   const [toqueFilter, setToqueFilter] = useState<ToqueFilter>("all");
   const [playingId, setPlayingId] = useState<string | null>(null);
