@@ -9,6 +9,7 @@ interface PontoCardProps {
   isPlaying: boolean;
   isFavorite: boolean;
   visitorMode?: boolean;
+  highlight?: string;
   onTogglePlay: (id: string) => void;
   onToggleFavorite: (id: string) => void;
   onEdit?: (ponto: Ponto) => void;
@@ -23,7 +24,33 @@ interface PontoCardProps {
   canMoveDown?: boolean;
 }
 
-const PontoCard = ({ ponto, isPlaying, isFavorite, visitorMode = false, onTogglePlay, onToggleFavorite, onEdit, onDelete, onMoveUp, onMoveDown, onDragStart, onDragOver, onDrop, onOpenFullscreen, canMoveUp, canMoveDown }: PontoCardProps) => {
+const norm = (s: string) => (s || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+
+function renderHighlighted(text: string, query?: string) {
+  const q = (query || "").trim();
+  if (!q) return text;
+  const nText = norm(text);
+  const nQuery = norm(q);
+  if (!nQuery || !nText.includes(nQuery)) return text;
+  const parts: React.ReactNode[] = [];
+  let i = 0;
+  let idx = nText.indexOf(nQuery);
+  let k = 0;
+  while (idx !== -1) {
+    if (idx > i) parts.push(text.slice(i, idx));
+    parts.push(
+      <mark key={k++} className="bg-accent/40 text-accent-foreground font-bold rounded px-0.5">
+        {text.slice(idx, idx + nQuery.length)}
+      </mark>
+    );
+    i = idx + nQuery.length;
+    idx = nText.indexOf(nQuery, i);
+  }
+  if (i < text.length) parts.push(text.slice(i));
+  return parts;
+}
+
+const PontoCard = ({ ponto, isPlaying, isFavorite, visitorMode = false, highlight, onTogglePlay, onToggleFavorite, onEdit, onDelete, onMoveUp, onMoveDown, onDragStart, onDragOver, onDrop, onOpenFullscreen, canMoveUp, canMoveDown }: PontoCardProps) => {
   const handleShare = async () => {
     const subs = ponto.subcategorias;
     const header = `🪘 ${ponto.nome}\n${ponto.categoria}${subs.length ? " › " + subs.join(" • ") : ""}\n\n`;
@@ -181,7 +208,7 @@ const PontoCard = ({ ponto, isPlaying, isFavorite, visitorMode = false, onToggle
         >
           <div className="absolute left-0 top-0 bottom-0 w-1 rounded-full bg-accent/30" />
           <pre className="text-sm sm:text-base text-card-foreground/80 whitespace-pre-wrap font-[inherit] leading-relaxed pl-4 py-1 uppercase">
-            {ponto.letra}
+            {renderHighlighted(ponto.letra, highlight)}
           </pre>
         </div>
       </div>
