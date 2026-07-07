@@ -3,7 +3,7 @@ import { writeFileSync } from "fs";
 import { resolve } from "path";
 import { createClient } from "@supabase/supabase-js";
 
-const BASE_URL = "https://cadernodooga.lovable.app";
+const BASE_URL = "https://cadernodooga.com.br";
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL || "https://mqfrmyndqcyosnipjzrg.supabase.co";
 const SUPABASE_KEY =
   process.env.VITE_SUPABASE_PUBLISHABLE_KEY ||
