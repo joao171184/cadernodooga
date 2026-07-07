@@ -441,6 +441,7 @@ const Index = () => {
                 isPlaying={playingId === ponto.id}
                 isFavorite={favoritos.has(ponto.id)}
                 visitorMode={visitorMode}
+                showFavorite={isFavoritosRoute}
                 onTogglePlay={togglePlay}
                 onToggleFavorite={toggleFavorito}
                 onEdit={handleEditPonto}
