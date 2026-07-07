@@ -1,5 +1,5 @@
 import { useState, useCallback, useMemo, useRef, useEffect } from "react";
-import { Search, Star, Music, Plus, Settings, LogOut, Instagram, Heart, Inbox, Loader2, Drum, Check, LogIn, UserCircle2, Eye, ShieldCheck, Menu } from "lucide-react";
+import { Search, Music, Plus, Settings, LogOut, Instagram, Heart, Inbox, Loader2, Drum, Check, LogIn, UserCircle2, Eye, ShieldCheck, Menu } from "lucide-react";
 import { useSidebar } from "@/components/ui/sidebar";
 import logoImg from "@/assets/logo.png";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
@@ -336,18 +336,6 @@ const Index = () => {
       <main className="flex-1 px-3 sm:px-4 py-4 sm:py-5 pb-32">
         {/* Toolbar: favoritos + classificações + count */}
         <div className="flex flex-wrap items-center gap-2 mb-4">
-          <button
-            onClick={() => setShowFavorites(!showFavorites)}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold transition-all active:scale-95 shadow-sm uppercase ${
-              showFavorites
-                ? "bg-accent text-accent-foreground shadow-md"
-                : "bg-card text-muted-foreground border border-border hover:border-accent/30"
-            }`}
-          >
-            <Star size={14} className={showFavorites ? "fill-accent-foreground" : ""} />
-            Favoritos {favoritos.size > 0 && `(${favoritos.size})`}
-          </button>
-
           {showClassifFilters && (
             <>
               <ClassifChip label="Todos" active={classifFilter === "all"} onClick={() => setClassifFilter("all")} />

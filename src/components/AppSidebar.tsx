@@ -175,7 +175,7 @@ export function AppSidebar() {
                       }`}
                       activeClassName=""
                     >
-                      <Heart size={18} strokeWidth={2} className="shrink-0 fill-accent/30 text-accent" />
+                      <Heart size={18} strokeWidth={2} className="shrink-0 fill-white/30 text-white" />
                       <span className="tracking-wide text-[13px] font-display">Meu Terreiro</span>
                     </NavLink>
                   </SidebarMenuButton>
