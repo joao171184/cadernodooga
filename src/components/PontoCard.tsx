@@ -9,6 +9,7 @@ interface PontoCardProps {
   isPlaying: boolean;
   isFavorite: boolean;
   visitorMode?: boolean;
+  showFavorite?: boolean;
   highlight?: string;
   onTogglePlay: (id: string) => void;
   onToggleFavorite: (id: string) => void;
@@ -50,7 +51,7 @@ function renderHighlighted(text: string, query?: string) {
   return parts;
 }
 
-const PontoCard = ({ ponto, isPlaying, isFavorite, visitorMode = false, highlight, onTogglePlay, onToggleFavorite, onEdit, onDelete, onMoveUp, onMoveDown, onDragStart, onDragOver, onDrop, onOpenFullscreen, canMoveUp, canMoveDown }: PontoCardProps) => {
+const PontoCard = ({ ponto, isPlaying, isFavorite, visitorMode = false, showFavorite = false, highlight, onTogglePlay, onToggleFavorite, onEdit, onDelete, onMoveUp, onMoveDown, onDragStart, onDragOver, onDrop, onOpenFullscreen, canMoveUp, canMoveDown }: PontoCardProps) => {
   const handleShare = async () => {
     const subs = ponto.subcategorias;
     const header = `🪘 ${ponto.nome}\n${ponto.categoria}${subs.length ? " › " + subs.join(" • ") : ""}\n\n`;
@@ -80,7 +81,7 @@ const PontoCard = ({ ponto, isPlaying, isFavorite, visitorMode = false, highligh
 
   const canEdit = !!onEdit && !visitorMode && (isAdmin || can("edit_pontos"));
   const canDelete = !!onDelete && !visitorMode && (isAdmin || can("delete_pontos"));
-  const canFavorite = !visitorMode && (isAdmin || can("favorite"));
+  const canFavorite = showFavorite && !visitorMode && (isAdmin || can("favorite"));
   const canPlay = true; // Player liberado para todos, inclusive visitantes
 
   return (
