@@ -84,8 +84,20 @@ const PontoCard = ({ ponto, isPlaying, isFavorite, visitorMode = false, showFavo
 
   const canEdit = !!onEdit && !visitorMode && (isAdmin || can("edit_pontos"));
   const canDelete = !!onDelete && !visitorMode && (isAdmin || can("delete_pontos"));
-  const canFavorite = showFavorite && !visitorMode && (isAdmin || can("favorite"));
+  const canFavorite = !visitorMode && (isAdmin || can("favorite"));
   const canPlay = true; // Player liberado para todos, inclusive visitantes
+
+  const color = categoryColor || null;
+  const cardStyle: React.CSSProperties = color
+    ? {
+        borderColor: `${color}55`,
+        boxShadow: isPlaying
+          ? `0 0 0 2px ${color}66, 0 10px 30px -10px ${color}80`
+          : `0 4px 20px -6px ${color}55`,
+      }
+    : {};
+  const accentBarStyle: React.CSSProperties = color ? { backgroundColor: `${color}80` } : {};
+
 
   return (
     <div
