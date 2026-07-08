@@ -105,8 +105,10 @@ const PontoCard = ({ ponto, isPlaying, isFavorite, visitorMode = false, showFavo
       onDragStart={() => onDragStart?.(ponto.id)}
       onDragOver={(e) => { e.preventDefault(); onDragOver?.(ponto.id); }}
       onDrop={onDrop}
-      className={`bg-card rounded-2xl border border-border shadow-sm overflow-hidden transition-all duration-200 ${onDragStart ? "cursor-grab active:cursor-grabbing" : ""} ${isPlaying ? "ring-2 ring-accent/40 shadow-lg" : "hover:shadow-md"}`}
+      style={{ ...cardStyle, animationDelay: `${Math.min(index, 12) * 40}ms` }}
+      className={`bg-card/60 backdrop-blur-xl supports-[backdrop-filter]:bg-card/50 rounded-2xl border border-border shadow-sm overflow-hidden transition-all duration-300 animate-fade-in opacity-0 [animation-fill-mode:forwards] ${onDragStart ? "cursor-grab active:cursor-grabbing" : ""} ${isPlaying ? "ring-2 ring-accent/40" : "hover:shadow-md"}`}
     >
+
       <div className="p-4 sm:p-5">
         <div className="flex items-start justify-between gap-2 mb-3">
           <div className="flex-1 min-w-0">
