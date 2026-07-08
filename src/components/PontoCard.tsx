@@ -224,7 +224,7 @@ const PontoCard = ({ ponto, isPlaying, isFavorite, visitorMode = false, showFavo
           role={onOpenFullscreen ? "button" : undefined}
           title={onOpenFullscreen ? "Abrir em tela cheia" : undefined}
         >
-          <div className="absolute left-0 top-0 bottom-0 w-1 rounded-full bg-accent/30" />
+          <div className="absolute left-0 top-0 bottom-0 w-1 rounded-full bg-accent/30" style={accentBarStyle} />
           <pre className="text-sm sm:text-base text-card-foreground/80 whitespace-pre-wrap font-[inherit] leading-relaxed pl-4 py-1 uppercase">
             {renderHighlighted(ponto.letra, highlight)}
           </pre>
