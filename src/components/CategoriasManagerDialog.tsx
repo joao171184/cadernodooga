@@ -64,11 +64,12 @@ export function CategoriasManagerDialog({ open, onClose }: Props) {
     setEditing({ id: node.id });
     setEditNome(node.nome);
     setEditEmoji(node.emoji);
+    setEditCor(node.cor || "#d97706");
   };
 
   const saveEdit = async () => {
     if (!editing || !editNome.trim()) return;
-    await renameCategoria(editing.id, editNome.trim(), editEmoji || "•");
+    await renameCategoria(editing.id, editNome.trim(), editEmoji || "•", editCor || null);
     setEditing(null);
     toast.success("Atualizado");
   };
@@ -80,7 +81,7 @@ export function CategoriasManagerDialog({ open, onClose }: Props) {
       toast.error("Já existe uma categoria com esse nome");
       return;
     }
-    const { error } = await addCategoria(n, newCatEmoji || "•");
+    const { error } = await addCategoria(n, newCatEmoji || "•", newCatCor || null);
     if (error) return toast.error("Erro: " + error);
     setNewCatNome("");
     setNewCatEmoji("crown");
@@ -90,13 +91,14 @@ export function CategoriasManagerDialog({ open, onClose }: Props) {
   const handleAddSub = async (parentId: string) => {
     const n = newSubNome.trim();
     if (!n) return;
-    const { error } = await addSubcategoria(parentId, n, newSubEmoji || "•");
+    const { error } = await addSubcategoria(parentId, n, newSubEmoji || "•", newSubCor || null);
     if (error) return toast.error("Erro: " + error);
     setNewSubNome("");
     setNewSubEmoji("feather");
     setAddSubFor(null);
     toast.success("Subcategoria criada");
   };
+
 
   const handleDelete = async (node: CategoriaNode, isSub: boolean) => {
     const msg = isSub
