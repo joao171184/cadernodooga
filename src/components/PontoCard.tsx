@@ -11,6 +11,8 @@ interface PontoCardProps {
   visitorMode?: boolean;
   showFavorite?: boolean;
   highlight?: string;
+  categoryColor?: string | null;
+  index?: number;
   onTogglePlay: (id: string) => void;
   onToggleFavorite: (id: string) => void;
   onEdit?: (ponto: Ponto) => void;
@@ -24,6 +26,7 @@ interface PontoCardProps {
   canMoveUp?: boolean;
   canMoveDown?: boolean;
 }
+
 
 const norm = (s: string) => (s || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 
