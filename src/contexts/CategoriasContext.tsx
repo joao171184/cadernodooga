@@ -16,13 +16,15 @@ interface Ctx {
   categorias: CategoriaNode[];
   loading: boolean;
   refresh: () => Promise<void>;
-  addCategoria: (nome: string, emoji: string) => Promise<{ error: string | null }>;
-  addSubcategoria: (parentId: string, nome: string, emoji: string) => Promise<{ error: string | null }>;
-  renameCategoria: (id: string, nome: string, emoji: string) => Promise<void>;
+  addCategoria: (nome: string, emoji: string, cor?: string | null) => Promise<{ error: string | null }>;
+  addSubcategoria: (parentId: string, nome: string, emoji: string, cor?: string | null) => Promise<{ error: string | null }>;
+  renameCategoria: (id: string, nome: string, emoji: string, cor?: string | null) => Promise<void>;
+  setCategoriaCor: (id: string, cor: string | null) => Promise<void>;
   setMostrarFiltrosClassificacao: (id: string, value: boolean) => Promise<void>;
   deleteCategoria: (id: string) => Promise<void>;
   moveCategoria: (id: string, dir: -1 | 1, parentId: string | null) => Promise<void>;
 }
+
 
 const CategoriasContext = createContext<Ctx | null>(null);
 
