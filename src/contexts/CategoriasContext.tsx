@@ -174,8 +174,9 @@ export function CategoriasProvider({ children }: { children: ReactNode }) {
   return (
     <CategoriasContext.Provider value={{
       categorias, loading, refresh,
-      addCategoria, addSubcategoria, renameCategoria, setMostrarFiltrosClassificacao, deleteCategoria, moveCategoria,
+      addCategoria, addSubcategoria, renameCategoria, setCategoriaCor, setMostrarFiltrosClassificacao, deleteCategoria, moveCategoria,
     }}>
+
       {children}
     </CategoriasContext.Provider>
   );
