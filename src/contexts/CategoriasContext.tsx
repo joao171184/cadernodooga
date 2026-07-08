@@ -6,9 +6,11 @@ export interface CategoriaNode {
   id: string;
   nome: string;
   emoji: string;
+  cor: string | null;
   mostrarFiltrosClassificacao: boolean;
   filhos: CategoriaNode[];
 }
+
 
 interface Ctx {
   categorias: CategoriaNode[];
