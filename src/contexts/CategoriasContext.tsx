@@ -52,15 +52,17 @@ export function CategoriasProvider({ children }: { children: ReactNode }) {
     const rows = data ?? [];
     const byId = new Map<string, CategoriaNode>();
     rows.forEach((r) => {
-      const row = r as typeof r & { mostrar_filtros_classificacao?: boolean };
+      const row = r as typeof r & { mostrar_filtros_classificacao?: boolean; cor?: string | null };
       byId.set(r.id, {
         id: r.id,
         nome: r.nome,
         emoji: r.emoji,
+        cor: row.cor ?? null,
         mostrarFiltrosClassificacao: row.mostrar_filtros_classificacao ?? true,
         filhos: [],
       });
     });
+
     const roots: CategoriaNode[] = [];
     rows.forEach((r) => {
       const node = byId.get(r.id)!;
