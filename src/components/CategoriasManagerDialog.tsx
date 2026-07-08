@@ -37,16 +37,20 @@ function IconPicker({ value, onChange }: { value: string; onChange: (v: string) 
 }
 
 export function CategoriasManagerDialog({ open, onClose }: Props) {
-  const { categorias, addCategoria, addSubcategoria, renameCategoria, setMostrarFiltrosClassificacao, deleteCategoria, moveCategoria } = useCategorias();
+  const { categorias, addCategoria, addSubcategoria, renameCategoria, setCategoriaCor, setMostrarFiltrosClassificacao, deleteCategoria, moveCategoria } = useCategorias();
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
   const [newCatNome, setNewCatNome] = useState("");
   const [newCatEmoji, setNewCatEmoji] = useState("crown");
+  const [newCatCor, setNewCatCor] = useState("#d97706");
   const [addSubFor, setAddSubFor] = useState<string | null>(null); // parent id
   const [newSubNome, setNewSubNome] = useState("");
   const [newSubEmoji, setNewSubEmoji] = useState("feather");
+  const [newSubCor, setNewSubCor] = useState("#d97706");
   const [editing, setEditing] = useState<{ id: string } | null>(null);
   const [editNome, setEditNome] = useState("");
   const [editEmoji, setEditEmoji] = useState("");
+  const [editCor, setEditCor] = useState<string>("#d97706");
+
 
   const toggle = (id: string) => {
     setExpanded((p) => {
