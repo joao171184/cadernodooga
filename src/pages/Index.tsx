@@ -58,6 +58,21 @@ const Index = () => {
   const { categorias } = useCategorias();
   const activeCategoria = categorias.find((c) => c.nome === categoria);
   const showClassifFilters = !categoria || (activeCategoria?.mostrarFiltrosClassificacao ?? true);
+  const hasSubcategorias = (activeCategoria?.filhos?.length ?? 0) > 0;
+
+  // Mapa nome-categoria => cor (inclui subs)
+  const categoryColorMap = useMemo(() => {
+    const m = new Map<string, string>();
+    const norm2 = (s: string) => (s || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    categorias.forEach((c) => {
+      if (c.cor) m.set(norm2(c.nome), c.cor);
+      c.filhos.forEach((f) => {
+        if (f.cor) m.set(norm2(f.nome), f.cor);
+      });
+    });
+    return m;
+  }, [categorias]);
+
 
   // Ao trocar de categoria/subcategoria, volta para "Todos" (incluindo filtro de toque)
   useEffect(() => {
