@@ -1,0 +1,1 @@
+ALTER TABLE public.categorias ADD COLUMN IF NOT EXISTS cor text;

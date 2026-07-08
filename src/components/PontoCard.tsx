@@ -11,6 +11,8 @@ interface PontoCardProps {
   visitorMode?: boolean;
   showFavorite?: boolean;
   highlight?: string;
+  categoryColor?: string | null;
+  index?: number;
   onTogglePlay: (id: string) => void;
   onToggleFavorite: (id: string) => void;
   onEdit?: (ponto: Ponto) => void;
@@ -24,6 +26,7 @@ interface PontoCardProps {
   canMoveUp?: boolean;
   canMoveDown?: boolean;
 }
+
 
 const norm = (s: string) => (s || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 
@@ -51,7 +54,7 @@ function renderHighlighted(text: string, query?: string) {
   return parts;
 }
 
-const PontoCard = ({ ponto, isPlaying, isFavorite, visitorMode = false, showFavorite = false, highlight, onTogglePlay, onToggleFavorite, onEdit, onDelete, onMoveUp, onMoveDown, onDragStart, onDragOver, onDrop, onOpenFullscreen, canMoveUp, canMoveDown }: PontoCardProps) => {
+const PontoCard = ({ ponto, isPlaying, isFavorite, visitorMode = false, showFavorite = false, highlight, categoryColor, index = 0, onTogglePlay, onToggleFavorite, onEdit, onDelete, onMoveUp, onMoveDown, onDragStart, onDragOver, onDrop, onOpenFullscreen, canMoveUp, canMoveDown }: PontoCardProps) => {
   const handleShare = async () => {
     const subs = ponto.subcategorias;
     const header = `🪘 ${ponto.nome}\n${ponto.categoria}${subs.length ? " › " + subs.join(" • ") : ""}\n\n`;
@@ -81,8 +84,20 @@ const PontoCard = ({ ponto, isPlaying, isFavorite, visitorMode = false, showFavo
 
   const canEdit = !!onEdit && !visitorMode && (isAdmin || can("edit_pontos"));
   const canDelete = !!onDelete && !visitorMode && (isAdmin || can("delete_pontos"));
-  const canFavorite = showFavorite && !visitorMode && (isAdmin || can("favorite"));
+  const canFavorite = !visitorMode && (isAdmin || can("favorite"));
   const canPlay = true; // Player liberado para todos, inclusive visitantes
+
+  const color = categoryColor || null;
+  const cardStyle: React.CSSProperties = color
+    ? {
+        borderColor: `${color}55`,
+        boxShadow: isPlaying
+          ? `0 0 0 2px ${color}66, 0 10px 30px -10px ${color}80`
+          : `0 4px 20px -6px ${color}55`,
+      }
+    : {};
+  const accentBarStyle: React.CSSProperties = color ? { backgroundColor: `${color}80` } : {};
+
 
   return (
     <div
@@ -90,8 +105,10 @@ const PontoCard = ({ ponto, isPlaying, isFavorite, visitorMode = false, showFavo
       onDragStart={() => onDragStart?.(ponto.id)}
       onDragOver={(e) => { e.preventDefault(); onDragOver?.(ponto.id); }}
       onDrop={onDrop}
-      className={`bg-card rounded-2xl border border-border shadow-sm overflow-hidden transition-all duration-200 ${onDragStart ? "cursor-grab active:cursor-grabbing" : ""} ${isPlaying ? "ring-2 ring-accent/40 shadow-lg" : "hover:shadow-md"}`}
+      style={{ ...cardStyle, animationDelay: `${Math.min(index, 12) * 40}ms` }}
+      className={`bg-card/60 backdrop-blur-xl supports-[backdrop-filter]:bg-card/50 rounded-2xl border border-border shadow-sm overflow-hidden transition-all duration-300 animate-fade-in opacity-0 [animation-fill-mode:forwards] ${onDragStart ? "cursor-grab active:cursor-grabbing" : ""} ${isPlaying ? "ring-2 ring-accent/40" : "hover:shadow-md"}`}
     >
+
       <div className="p-4 sm:p-5">
         <div className="flex items-start justify-between gap-2 mb-3">
           <div className="flex-1 min-w-0">
@@ -207,7 +224,7 @@ const PontoCard = ({ ponto, isPlaying, isFavorite, visitorMode = false, showFavo
           role={onOpenFullscreen ? "button" : undefined}
           title={onOpenFullscreen ? "Abrir em tela cheia" : undefined}
         >
-          <div className="absolute left-0 top-0 bottom-0 w-1 rounded-full bg-accent/30" />
+          <div className="absolute left-0 top-0 bottom-0 w-1 rounded-full bg-accent/30" style={accentBarStyle} />
           <pre className="text-sm sm:text-base text-card-foreground/80 whitespace-pre-wrap font-[inherit] leading-relaxed pl-4 py-1 uppercase">
             {renderHighlighted(ponto.letra, highlight)}
           </pre>

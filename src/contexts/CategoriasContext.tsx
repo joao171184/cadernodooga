@@ -6,21 +6,25 @@ export interface CategoriaNode {
   id: string;
   nome: string;
   emoji: string;
+  cor: string | null;
   mostrarFiltrosClassificacao: boolean;
   filhos: CategoriaNode[];
 }
+
 
 interface Ctx {
   categorias: CategoriaNode[];
   loading: boolean;
   refresh: () => Promise<void>;
-  addCategoria: (nome: string, emoji: string) => Promise<{ error: string | null }>;
-  addSubcategoria: (parentId: string, nome: string, emoji: string) => Promise<{ error: string | null }>;
-  renameCategoria: (id: string, nome: string, emoji: string) => Promise<void>;
+  addCategoria: (nome: string, emoji: string, cor?: string | null) => Promise<{ error: string | null }>;
+  addSubcategoria: (parentId: string, nome: string, emoji: string, cor?: string | null) => Promise<{ error: string | null }>;
+  renameCategoria: (id: string, nome: string, emoji: string, cor?: string | null) => Promise<void>;
+  setCategoriaCor: (id: string, cor: string | null) => Promise<void>;
   setMostrarFiltrosClassificacao: (id: string, value: boolean) => Promise<void>;
   deleteCategoria: (id: string) => Promise<void>;
   moveCategoria: (id: string, dir: -1 | 1, parentId: string | null) => Promise<void>;
 }
+
 
 const CategoriasContext = createContext<Ctx | null>(null);
 
@@ -48,15 +52,17 @@ export function CategoriasProvider({ children }: { children: ReactNode }) {
     const rows = data ?? [];
     const byId = new Map<string, CategoriaNode>();
     rows.forEach((r) => {
-      const row = r as typeof r & { mostrar_filtros_classificacao?: boolean };
+      const row = r as typeof r & { mostrar_filtros_classificacao?: boolean; cor?: string | null };
       byId.set(r.id, {
         id: r.id,
         nome: r.nome,
         emoji: r.emoji,
+        cor: row.cor ?? null,
         mostrarFiltrosClassificacao: row.mostrar_filtros_classificacao ?? true,
         filhos: [],
       });
     });
+
     const roots: CategoriaNode[] = [];
     rows.forEach((r) => {
       const node = byId.get(r.id)!;
@@ -82,21 +88,21 @@ export function CategoriasProvider({ children }: { children: ReactNode }) {
     return () => { supabase.removeChannel(ch); };
   }, [refresh]);
 
-  const addCategoria = useCallback(async (nome: string, emoji: string) => {
-    const { error } = await supabase.from("categorias").insert({ nome, emoji, ordem: categorias.length + 1 });
+  const addCategoria = useCallback(async (nome: string, emoji: string, cor: string | null = null) => {
+    const { error } = await (supabase.from("categorias") as any).insert({ nome, emoji, cor, ordem: categorias.length + 1 });
     if (!error) await refresh();
     return { error: error?.message ?? null };
   }, [categorias.length, refresh]);
 
-  const addSubcategoria = useCallback(async (parentId: string, nome: string, emoji: string) => {
+  const addSubcategoria = useCallback(async (parentId: string, nome: string, emoji: string, cor: string | null = null) => {
     const parent = categorias.find((c) => c.id === parentId);
     const ordem = (parent?.filhos.length ?? 0) + 1;
-    const { error } = await supabase.from("categorias").insert({ nome, emoji, parent_id: parentId, ordem });
+    const { error } = await (supabase.from("categorias") as any).insert({ nome, emoji, cor, parent_id: parentId, ordem });
     if (!error) await refresh();
     return { error: error?.message ?? null };
   }, [categorias, refresh]);
 
-  const renameCategoria = useCallback(async (id: string, nome: string, emoji: string) => {
+  const renameCategoria = useCallback(async (id: string, nome: string, emoji: string, cor?: string | null) => {
     // Encontrar nome antigo e se é raiz ou subcategoria
     let oldName: string | null = null;
     let parentName: string | null = null;
@@ -105,11 +111,12 @@ export function CategoriasProvider({ children }: { children: ReactNode }) {
       const child = root.filhos.find((f) => f.id === id);
       if (child) { oldName = child.nome; parentName = root.nome; break; }
     }
-    await supabase.from("categorias").update({ nome, emoji }).eq("id", id);
+    const payload: any = { nome, emoji };
+    if (cor !== undefined) payload.cor = cor;
+    await (supabase.from("categorias") as any).update(payload).eq("id", id);
     // Propagar rename para os pontos vinculados
     if (oldName && oldName !== nome) {
       if (parentName) {
-        // Subcategoria: atualizar ponto_subcategorias dos pontos cuja categoria = parentName
         const { data: pts } = await supabase.from("pontos").select("id").eq("categoria", parentName);
         const ids = (pts ?? []).map((p) => p.id);
         if (ids.length > 0) {
@@ -120,12 +127,16 @@ export function CategoriasProvider({ children }: { children: ReactNode }) {
             .eq("subcategoria", oldName);
         }
       } else {
-        // Categoria raiz: atualizar pontos.categoria
         await supabase.from("pontos").update({ categoria: nome }).eq("categoria", oldName);
       }
     }
     await refresh();
   }, [categorias, refresh]);
+
+  const setCategoriaCor = useCallback(async (id: string, cor: string | null) => {
+    await (supabase.from("categorias") as any).update({ cor }).eq("id", id);
+    await refresh();
+  }, [refresh]);
 
   const setMostrarFiltrosClassificacao = useCallback(async (id: string, value: boolean) => {
     const payload: { mostrar_filtros_classificacao: boolean } = { mostrar_filtros_classificacao: value };
@@ -137,6 +148,7 @@ export function CategoriasProvider({ children }: { children: ReactNode }) {
     await supabase.from("categorias").delete().eq("id", id);
     await refresh();
   }, [refresh]);
+
 
   const moveCategoria = useCallback(async (id: string, dir: -1 | 1, parentId: string | null) => {
     // Lista escopada (irmãos): roots ou filhos do parentId
@@ -162,8 +174,9 @@ export function CategoriasProvider({ children }: { children: ReactNode }) {
   return (
     <CategoriasContext.Provider value={{
       categorias, loading, refresh,
-      addCategoria, addSubcategoria, renameCategoria, setMostrarFiltrosClassificacao, deleteCategoria, moveCategoria,
+      addCategoria, addSubcategoria, renameCategoria, setCategoriaCor, setMostrarFiltrosClassificacao, deleteCategoria, moveCategoria,
     }}>
+
       {children}
     </CategoriasContext.Provider>
   );

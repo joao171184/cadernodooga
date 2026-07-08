@@ -58,6 +58,21 @@ const Index = () => {
   const { categorias } = useCategorias();
   const activeCategoria = categorias.find((c) => c.nome === categoria);
   const showClassifFilters = !categoria || (activeCategoria?.mostrarFiltrosClassificacao ?? true);
+  const hasSubcategorias = (activeCategoria?.filhos?.length ?? 0) > 0;
+
+  // Mapa nome-categoria => cor (inclui subs)
+  const categoryColorMap = useMemo(() => {
+    const m = new Map<string, string>();
+    const norm2 = (s: string) => (s || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    categorias.forEach((c) => {
+      if (c.cor) m.set(norm2(c.nome), c.cor);
+      c.filhos.forEach((f) => {
+        if (f.cor) m.set(norm2(f.nome), f.cor);
+      });
+    });
+    return m;
+  }, [categorias]);
+
 
   // Ao trocar de categoria/subcategoria, volta para "Todos" (incluindo filtro de toque)
   useEffect(() => {
@@ -352,15 +367,16 @@ const Index = () => {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button
-                  className={`p-2 rounded-full border transition-all active:scale-95 ${
+                  className={`flex items-center gap-1.5 px-3 py-2 rounded-xl border text-xs font-bold uppercase tracking-wide transition-all active:scale-95 shadow-sm ${
                     toqueFilter !== "all"
-                      ? "bg-accent text-accent-foreground border-accent shadow-sm"
-                      : "bg-card text-muted-foreground border-border hover:border-accent/40"
+                      ? "bg-accent text-accent-foreground border-accent"
+                      : "bg-primary text-primary-foreground border-primary/70 hover:bg-primary/90"
                   }`}
                   aria-label="Filtrar por toque"
                   title="Filtrar por toque"
                 >
                   <Drum size={16} />
+                  <span>{toqueFilter === "all" ? "Toque" : (TOQUE_OPTIONS.find(t => t.value === toqueFilter)?.label ?? "Toque")}</span>
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-52">
@@ -376,37 +392,36 @@ const Index = () => {
                 ))}
               </DropdownMenuContent>
             </DropdownMenu>
+
           </div>
         </div>
 
         {/* Cards */}
-        <div className="space-y-3 sm:space-y-4 max-w-2xl">
+        <div className={`${hasSubcategorias ? "space-y-3 sm:space-y-4 max-w-2xl" : "grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4 max-w-6xl"}`}>
           {loading ? (
-            <div className="space-y-3 sm:space-y-4" aria-label="Carregando pontos">
-              {Array.from({ length: 5 }).map((_, i) => (
-                <div key={i} className="bg-card rounded-2xl border border-border shadow-sm p-4 sm:p-5">
-                  <div className="flex items-start justify-between gap-2 mb-3">
-                    <div className="flex-1 min-w-0 space-y-2">
-                      <Skeleton className="h-5 w-2/3" />
-                      <Skeleton className="h-3 w-1/3" />
-                      <div className="flex gap-2 pt-1">
-                        <Skeleton className="h-4 w-20" />
-                        <Skeleton className="h-4 w-16" />
-                      </div>
+            Array.from({ length: 5 }).map((_, i) => (
+              <div key={i} className="bg-card rounded-2xl border border-border shadow-sm p-4 sm:p-5">
+                <div className="flex items-start justify-between gap-2 mb-3">
+                  <div className="flex-1 min-w-0 space-y-2">
+                    <Skeleton className="h-5 w-2/3" />
+                    <Skeleton className="h-3 w-1/3" />
+                    <div className="flex gap-2 pt-1">
+                      <Skeleton className="h-4 w-20" />
+                      <Skeleton className="h-4 w-16" />
                     </div>
-                    <Skeleton className="h-8 w-8 rounded-lg" />
                   </div>
-                  <div className="pl-4 space-y-2">
-                    <Skeleton className="h-3 w-full" />
-                    <Skeleton className="h-3 w-11/12" />
-                    <Skeleton className="h-3 w-4/5" />
-                    <Skeleton className="h-3 w-3/4" />
-                  </div>
+                  <Skeleton className="h-8 w-8 rounded-lg" />
                 </div>
-              ))}
-            </div>
+                <div className="pl-4 space-y-2">
+                  <Skeleton className="h-3 w-full" />
+                  <Skeleton className="h-3 w-11/12" />
+                  <Skeleton className="h-3 w-4/5" />
+                  <Skeleton className="h-3 w-3/4" />
+                </div>
+              </div>
+            ))
           ) : filtered.length === 0 ? (
-            <div className="text-center py-16 text-muted-foreground">
+            <div className="text-center py-16 text-muted-foreground col-span-full">
               <Music size={44} className="mx-auto mb-4 opacity-20" />
               <p className="text-base font-medium uppercase">Nenhum ponto nesta pasta</p>
               <p className="text-sm mt-1 opacity-70 uppercase">Tente outra busca ou outro filtro</p>
@@ -421,31 +436,44 @@ const Index = () => {
               )}
             </div>
           ) : (
-            visibleList.map((ponto, i) => (
-              <PontoCard
-                key={ponto.id}
-                ponto={ponto}
-                highlight={search.trim()}
-                isPlaying={playingId === ponto.id}
-                isFavorite={favoritos.has(ponto.id)}
-                visitorMode={visitorMode}
-                showFavorite={isFavoritosRoute}
-                onTogglePlay={togglePlay}
-                onToggleFavorite={toggleFavorito}
-                onEdit={handleEditPonto}
-                onDelete={handleDeletePonto}
-                onMoveUp={(id) => movePontoInList(id, -1, visibleList, { toque: toqueFilter === "all" ? null : toqueFilter })}
-                onMoveDown={(id) => movePontoInList(id, 1, visibleList, { toque: toqueFilter === "all" ? null : toqueFilter })}
-                onDragStart={effectiveIsAdmin ? handleDragStart : undefined}
-                onDragOver={effectiveIsAdmin ? handleDragOver : undefined}
-                onDrop={effectiveIsAdmin ? handleDrop : undefined}
-                onOpenFullscreen={(p) => setFullscreenPonto(p)}
-                canMoveUp={i > 0}
-                canMoveDown={i < visibleList.length - 1}
-              />
-            ))
+            visibleList.map((ponto, i) => {
+              const nkey = (ponto.categoria || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+              const subKey = ponto.subcategorias[0]
+                ? ponto.subcategorias[0].toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+                : null;
+              const color =
+                (subKey && categoryColorMap.get(subKey)) ||
+                categoryColorMap.get(nkey) ||
+                null;
+              return (
+                <PontoCard
+                  key={ponto.id}
+                  ponto={ponto}
+                  highlight={search.trim()}
+                  isPlaying={playingId === ponto.id}
+                  isFavorite={favoritos.has(ponto.id)}
+                  visitorMode={visitorMode}
+                  showFavorite={isFavoritosRoute}
+                  categoryColor={color}
+                  index={i}
+                  onTogglePlay={togglePlay}
+                  onToggleFavorite={toggleFavorito}
+                  onEdit={handleEditPonto}
+                  onDelete={handleDeletePonto}
+                  onMoveUp={(id) => movePontoInList(id, -1, visibleList, { toque: toqueFilter === "all" ? null : toqueFilter })}
+                  onMoveDown={(id) => movePontoInList(id, 1, visibleList, { toque: toqueFilter === "all" ? null : toqueFilter })}
+                  onDragStart={effectiveIsAdmin ? handleDragStart : undefined}
+                  onDragOver={effectiveIsAdmin ? handleDragOver : undefined}
+                  onDrop={effectiveIsAdmin ? handleDrop : undefined}
+                  onOpenFullscreen={(p) => setFullscreenPonto(p)}
+                  canMoveUp={i > 0}
+                  canMoveDown={i < visibleList.length - 1}
+                />
+              );
+            })
           )}
         </div>
+
       </main>
 
       {/* Auto-scroll */}

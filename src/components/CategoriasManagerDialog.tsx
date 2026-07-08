@@ -37,16 +37,20 @@ function IconPicker({ value, onChange }: { value: string; onChange: (v: string) 
 }
 
 export function CategoriasManagerDialog({ open, onClose }: Props) {
-  const { categorias, addCategoria, addSubcategoria, renameCategoria, setMostrarFiltrosClassificacao, deleteCategoria, moveCategoria } = useCategorias();
+  const { categorias, addCategoria, addSubcategoria, renameCategoria, setCategoriaCor, setMostrarFiltrosClassificacao, deleteCategoria, moveCategoria } = useCategorias();
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
   const [newCatNome, setNewCatNome] = useState("");
   const [newCatEmoji, setNewCatEmoji] = useState("crown");
+  const [newCatCor, setNewCatCor] = useState("#d97706");
   const [addSubFor, setAddSubFor] = useState<string | null>(null); // parent id
   const [newSubNome, setNewSubNome] = useState("");
   const [newSubEmoji, setNewSubEmoji] = useState("feather");
+  const [newSubCor, setNewSubCor] = useState("#d97706");
   const [editing, setEditing] = useState<{ id: string } | null>(null);
   const [editNome, setEditNome] = useState("");
   const [editEmoji, setEditEmoji] = useState("");
+  const [editCor, setEditCor] = useState<string>("#d97706");
+
 
   const toggle = (id: string) => {
     setExpanded((p) => {
@@ -60,11 +64,12 @@ export function CategoriasManagerDialog({ open, onClose }: Props) {
     setEditing({ id: node.id });
     setEditNome(node.nome);
     setEditEmoji(node.emoji);
+    setEditCor(node.cor || "#d97706");
   };
 
   const saveEdit = async () => {
     if (!editing || !editNome.trim()) return;
-    await renameCategoria(editing.id, editNome.trim(), editEmoji || "•");
+    await renameCategoria(editing.id, editNome.trim(), editEmoji || "•", editCor || null);
     setEditing(null);
     toast.success("Atualizado");
   };
@@ -76,7 +81,7 @@ export function CategoriasManagerDialog({ open, onClose }: Props) {
       toast.error("Já existe uma categoria com esse nome");
       return;
     }
-    const { error } = await addCategoria(n, newCatEmoji || "•");
+    const { error } = await addCategoria(n, newCatEmoji || "•", newCatCor || null);
     if (error) return toast.error("Erro: " + error);
     setNewCatNome("");
     setNewCatEmoji("crown");
@@ -86,13 +91,14 @@ export function CategoriasManagerDialog({ open, onClose }: Props) {
   const handleAddSub = async (parentId: string) => {
     const n = newSubNome.trim();
     if (!n) return;
-    const { error } = await addSubcategoria(parentId, n, newSubEmoji || "•");
+    const { error } = await addSubcategoria(parentId, n, newSubEmoji || "•", newSubCor || null);
     if (error) return toast.error("Erro: " + error);
     setNewSubNome("");
     setNewSubEmoji("feather");
     setAddSubFor(null);
     toast.success("Subcategoria criada");
   };
+
 
   const handleDelete = async (node: CategoriaNode, isSub: boolean) => {
     const msg = isSub
@@ -128,6 +134,11 @@ export function CategoriasManagerDialog({ open, onClose }: Props) {
                 placeholder="Nome (ex: Boiadeiros)"
                 className="w-full px-3 py-2.5 rounded-xl bg-muted text-foreground text-sm outline-none focus:ring-2 focus:ring-accent/50 border border-border"
               />
+              <label className="flex items-center gap-2 text-xs font-bold uppercase text-muted-foreground">
+                Cor:
+                <input type="color" value={newCatCor} onChange={(e) => setNewCatCor(e.target.value)} className="w-10 h-8 rounded cursor-pointer border border-border bg-transparent" />
+                <span className="font-mono normal-case">{newCatCor}</span>
+              </label>
               <button
                 onClick={handleAddCat}
                 className="w-full flex items-center justify-center gap-1.5 py-2 rounded-xl bg-primary text-primary-foreground text-xs font-bold uppercase active:scale-[0.98]"
@@ -135,6 +146,7 @@ export function CategoriasManagerDialog({ open, onClose }: Props) {
                 <Plus size={14} /> Adicionar Categoria
               </button>
             </div>
+
           </div>
         </div>
 
@@ -159,6 +171,11 @@ export function CategoriasManagerDialog({ open, onClose }: Props) {
                         className="w-full px-3 py-1.5 rounded-lg bg-muted text-sm border border-border"
                       />
                       <IconPicker value={editEmoji} onChange={setEditEmoji} />
+                      <label className="flex items-center gap-2 text-xs font-bold uppercase text-muted-foreground">
+                        Cor:
+                        <input type="color" value={editCor} onChange={(e) => setEditCor(e.target.value)} className="w-10 h-8 rounded cursor-pointer border border-border bg-transparent" />
+                        <span className="font-mono normal-case">{editCor}</span>
+                      </label>
                       <div className="flex gap-2">
                         <button onClick={saveEdit} className="flex-1 py-2 rounded-lg bg-accent text-accent-foreground text-xs font-bold uppercase flex items-center justify-center gap-1.5"><Check size={14} /> Salvar</button>
                         <button onClick={() => setEditing(null)} className="flex-1 py-2 rounded-lg bg-muted text-muted-foreground text-xs font-bold uppercase flex items-center justify-center gap-1.5"><X size={14} /> Cancelar</button>
@@ -168,6 +185,15 @@ export function CategoriasManagerDialog({ open, onClose }: Props) {
                     <>
                       {(() => { const I = resolveIcon(cat.emoji, cat.nome); return <I size={20} className="text-accent shrink-0" strokeWidth={2} />; })()}
                       <span className="flex-1 font-bold text-sm uppercase truncate">{cat.nome}</span>
+                      <input
+                        type="color"
+                        value={cat.cor || "#d97706"}
+                        onChange={(e) => setCategoriaCor(cat.id, e.target.value)}
+                        className="w-7 h-7 rounded-md cursor-pointer border border-border bg-transparent"
+                        title="Cor da categoria"
+                        aria-label="Cor da categoria"
+                      />
+
                       <button
                         onClick={() => setMostrarFiltrosClassificacao(cat.id, !cat.mostrarFiltrosClassificacao)}
                         className={`p-1.5 rounded-lg transition-all ${
@@ -235,6 +261,11 @@ export function CategoriasManagerDialog({ open, onClose }: Props) {
                                 className="w-full px-3 py-1.5 rounded-lg bg-muted text-sm border border-border"
                               />
                               <IconPicker value={editEmoji} onChange={setEditEmoji} />
+                              <label className="flex items-center gap-2 text-xs font-bold uppercase text-muted-foreground">
+                                Cor:
+                                <input type="color" value={editCor} onChange={(e) => setEditCor(e.target.value)} className="w-10 h-8 rounded cursor-pointer border border-border bg-transparent" />
+                                <span className="font-mono normal-case">{editCor}</span>
+                              </label>
                               <div className="flex gap-2">
                                 <button onClick={saveEdit} className="flex-1 py-2 rounded-lg bg-accent text-accent-foreground text-xs font-bold uppercase flex items-center justify-center gap-1.5"><Check size={14} /> Salvar</button>
                                 <button onClick={() => setEditing(null)} className="flex-1 py-2 rounded-lg bg-muted text-muted-foreground text-xs font-bold uppercase flex items-center justify-center gap-1.5"><X size={14} /> Cancelar</button>
@@ -244,6 +275,15 @@ export function CategoriasManagerDialog({ open, onClose }: Props) {
                             <>
                               {(() => { const I = resolveIcon(sub.emoji, sub.nome); return <I size={16} className="text-accent shrink-0 mt-1" strokeWidth={2} />; })()}
                               <span className="flex-1 text-sm truncate mt-0.5">{sub.nome}</span>
+                              <input
+                                type="color"
+                                value={sub.cor || "#d97706"}
+                                onChange={(e) => setCategoriaCor(sub.id, e.target.value)}
+                                className="w-6 h-6 rounded cursor-pointer border border-border bg-transparent"
+                                title="Cor"
+                                aria-label="Cor"
+                              />
+
                               <button
                                 onClick={() => moveCategoria(sub.id, -1, cat.id)}
                                 disabled={si === 0}
@@ -292,6 +332,11 @@ export function CategoriasManagerDialog({ open, onClose }: Props) {
                               placeholder="Nome da subcategoria (ex: Chamada)"
                               className="w-full px-3 py-2 rounded-lg bg-muted text-sm border border-border"
                             />
+                            <label className="flex items-center gap-2 text-xs font-bold uppercase text-muted-foreground">
+                              Cor:
+                              <input type="color" value={newSubCor} onChange={(e) => setNewSubCor(e.target.value)} className="w-10 h-8 rounded cursor-pointer border border-border bg-transparent" />
+                              <span className="font-mono normal-case">{newSubCor}</span>
+                            </label>
                             <div className="flex gap-2">
                               <button
                                 onClick={() => { setAddSubFor(null); setNewSubNome(""); }}
@@ -303,6 +348,7 @@ export function CategoriasManagerDialog({ open, onClose }: Props) {
                               >Adicionar</button>
                             </div>
                           </div>
+
                         </div>
                       </div>
                     )}
