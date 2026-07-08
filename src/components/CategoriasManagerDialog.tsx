@@ -332,6 +332,11 @@ export function CategoriasManagerDialog({ open, onClose }: Props) {
                               placeholder="Nome da subcategoria (ex: Chamada)"
                               className="w-full px-3 py-2 rounded-lg bg-muted text-sm border border-border"
                             />
+                            <label className="flex items-center gap-2 text-xs font-bold uppercase text-muted-foreground">
+                              Cor:
+                              <input type="color" value={newSubCor} onChange={(e) => setNewSubCor(e.target.value)} className="w-10 h-8 rounded cursor-pointer border border-border bg-transparent" />
+                              <span className="font-mono normal-case">{newSubCor}</span>
+                            </label>
                             <div className="flex gap-2">
                               <button
                                 onClick={() => { setAddSubFor(null); setNewSubNome(""); }}
@@ -343,6 +348,7 @@ export function CategoriasManagerDialog({ open, onClose }: Props) {
                               >Adicionar</button>
                             </div>
                           </div>
+
                         </div>
                       </div>
                     )}
