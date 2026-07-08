@@ -134,6 +134,11 @@ export function CategoriasManagerDialog({ open, onClose }: Props) {
                 placeholder="Nome (ex: Boiadeiros)"
                 className="w-full px-3 py-2.5 rounded-xl bg-muted text-foreground text-sm outline-none focus:ring-2 focus:ring-accent/50 border border-border"
               />
+              <label className="flex items-center gap-2 text-xs font-bold uppercase text-muted-foreground">
+                Cor:
+                <input type="color" value={newCatCor} onChange={(e) => setNewCatCor(e.target.value)} className="w-10 h-8 rounded cursor-pointer border border-border bg-transparent" />
+                <span className="font-mono normal-case">{newCatCor}</span>
+              </label>
               <button
                 onClick={handleAddCat}
                 className="w-full flex items-center justify-center gap-1.5 py-2 rounded-xl bg-primary text-primary-foreground text-xs font-bold uppercase active:scale-[0.98]"
@@ -141,6 +146,7 @@ export function CategoriasManagerDialog({ open, onClose }: Props) {
                 <Plus size={14} /> Adicionar Categoria
               </button>
             </div>
+
           </div>
         </div>
 
