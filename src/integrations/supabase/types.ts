@@ -16,6 +16,7 @@ export type Database = {
     Tables: {
       categorias: {
         Row: {
+          cor: string | null
           created_at: string
           emoji: string
           id: string
@@ -25,6 +26,7 @@ export type Database = {
           parent_id: string | null
         }
         Insert: {
+          cor?: string | null
           created_at?: string
           emoji?: string
           id?: string
@@ -34,6 +36,7 @@ export type Database = {
           parent_id?: string | null
         }
         Update: {
+          cor?: string | null
           created_at?: string
           emoji?: string
           id?: string
