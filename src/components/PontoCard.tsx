@@ -54,7 +54,7 @@ function renderHighlighted(text: string, query?: string) {
   return parts;
 }
 
-const PontoCard = ({ ponto, isPlaying, isFavorite, visitorMode = false, showFavorite = false, highlight, onTogglePlay, onToggleFavorite, onEdit, onDelete, onMoveUp, onMoveDown, onDragStart, onDragOver, onDrop, onOpenFullscreen, canMoveUp, canMoveDown }: PontoCardProps) => {
+const PontoCard = ({ ponto, isPlaying, isFavorite, visitorMode = false, showFavorite = false, highlight, categoryColor, index = 0, onTogglePlay, onToggleFavorite, onEdit, onDelete, onMoveUp, onMoveDown, onDragStart, onDragOver, onDrop, onOpenFullscreen, canMoveUp, canMoveDown }: PontoCardProps) => {
   const handleShare = async () => {
     const subs = ponto.subcategorias;
     const header = `🪘 ${ponto.nome}\n${ponto.categoria}${subs.length ? " › " + subs.join(" • ") : ""}\n\n`;
