@@ -261,6 +261,11 @@ export function CategoriasManagerDialog({ open, onClose }: Props) {
                                 className="w-full px-3 py-1.5 rounded-lg bg-muted text-sm border border-border"
                               />
                               <IconPicker value={editEmoji} onChange={setEditEmoji} />
+                              <label className="flex items-center gap-2 text-xs font-bold uppercase text-muted-foreground">
+                                Cor:
+                                <input type="color" value={editCor} onChange={(e) => setEditCor(e.target.value)} className="w-10 h-8 rounded cursor-pointer border border-border bg-transparent" />
+                                <span className="font-mono normal-case">{editCor}</span>
+                              </label>
                               <div className="flex gap-2">
                                 <button onClick={saveEdit} className="flex-1 py-2 rounded-lg bg-accent text-accent-foreground text-xs font-bold uppercase flex items-center justify-center gap-1.5"><Check size={14} /> Salvar</button>
                                 <button onClick={() => setEditing(null)} className="flex-1 py-2 rounded-lg bg-muted text-muted-foreground text-xs font-bold uppercase flex items-center justify-center gap-1.5"><X size={14} /> Cancelar</button>
@@ -270,6 +275,15 @@ export function CategoriasManagerDialog({ open, onClose }: Props) {
                             <>
                               {(() => { const I = resolveIcon(sub.emoji, sub.nome); return <I size={16} className="text-accent shrink-0 mt-1" strokeWidth={2} />; })()}
                               <span className="flex-1 text-sm truncate mt-0.5">{sub.nome}</span>
+                              <input
+                                type="color"
+                                value={sub.cor || "#d97706"}
+                                onChange={(e) => setCategoriaCor(sub.id, e.target.value)}
+                                className="w-6 h-6 rounded cursor-pointer border border-border bg-transparent"
+                                title="Cor"
+                                aria-label="Cor"
+                              />
+
                               <button
                                 onClick={() => moveCategoria(sub.id, -1, cat.id)}
                                 disabled={si === 0}
