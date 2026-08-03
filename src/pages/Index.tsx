@@ -204,6 +204,39 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
+      <Helmet>
+        <title>Caderno do Ogã — Pontos Cantados de Umbanda</title>
+        <meta
+          name="description"
+          content="Caderno do Ogã: acervo de pontos cantados de Umbanda com letra, áudio e classificação por orixás, guias e toques. Busque, ouça e cante."
+        />
+        <link rel="canonical" href="https://cadernodooga.com.br/" />
+        <meta property="og:url" content="https://cadernodooga.com.br/" />
+        <meta property="og:type" content="website" />
+        <meta property="og:site_name" content="Caderno do Ogã" />
+        <meta property="og:title" content="Caderno do Ogã — Pontos Cantados de Umbanda" />
+        <meta
+          property="og:description"
+          content="Acervo de pontos cantados de Umbanda com letra, áudio e classificação por orixás, guias e toques."
+        />
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "WebSite",
+            name: "Caderno do Ogã",
+            alternateName: "Caderno do Oga",
+            url: "https://cadernodooga.com.br/",
+            inLanguage: "pt-BR",
+            description:
+              "Acervo de pontos cantados de Umbanda com letra, áudio e classificação por orixás, guias e toques.",
+            potentialAction: {
+              "@type": "SearchAction",
+              target: "https://cadernodooga.com.br/?q={search_term_string}",
+              "query-input": "required name=search_term_string",
+            },
+          })}
+        </script>
+      </Helmet>
       {/* Header */}
       <header className="bg-primary shadow-xl">
         <div className="px-3 sm:px-4 pt-3 pb-3 sm:pt-4 sm:pb-4">
