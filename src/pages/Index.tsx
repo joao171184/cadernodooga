@@ -206,37 +206,74 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <Helmet>
-        <title>Caderno do Ogã — Pontos Cantados de Umbanda</title>
+        <title>Caderno do Ogã — Plataforma Digital de Pontos Cantados de Umbanda</title>
         <meta
           name="description"
-          content="Caderno do Ogã: acervo de pontos cantados de Umbanda com letra, áudio e classificação por orixás, guias e toques. Busque, ouça e cante."
+          content="Caderno do Ogã é a plataforma digital (site/app) com acervo de pontos cantados de Umbanda: Orixás, Guias de Direita (incluindo Ciganos), Guias de Esquerda e fundamentos, com letra, áudio e toques."
         />
-        <meta name="keywords" content="pontos cantados, umbanda, orixás, guias de direita, ciganos, guias de esquerda, exu, pombagira, fundamentos, curimba, atabaque" />
+        <meta name="keywords" content="pontos cantados, umbanda, orixás, guias de direita, ciganos, guias de esquerda, exu, pombagira, fundamentos, curimba, atabaque, plataforma digital" />
 
         <meta property="og:type" content="website" />
         <meta property="og:site_name" content="Caderno do Ogã" />
-        <meta property="og:title" content="Caderno do Ogã — Pontos Cantados de Umbanda" />
+        <meta property="og:title" content="Caderno do Ogã — Plataforma Digital de Pontos Cantados de Umbanda" />
         <meta
           property="og:description"
-          content="Acervo de pontos cantados de Umbanda com letra, áudio e classificação por orixás, guias e toques."
+          content="Plataforma digital de pontos cantados de Umbanda: Orixás, Guias de Direita (Ciganos), Guias de Esquerda e fundamentos, com letra, áudio e toques."
         />
         <script type="application/ld+json">
           {JSON.stringify({
             "@context": "https://schema.org",
-            "@type": "WebSite",
-            name: "Caderno do Ogã",
-            alternateName: "Caderno do Oga",
-            url: "https://cadernodooga.com.br/",
-            inLanguage: "pt-BR",
-            description:
-              "Acervo de pontos cantados de Umbanda com letra, áudio e classificação por orixás, guias e toques.",
-            potentialAction: {
-              "@type": "SearchAction",
-              target: "https://cadernodooga.com.br/?q={search_term_string}",
-              "query-input": "required name=search_term_string",
-            },
+            "@graph": [
+              {
+                "@type": ["WebSite", "WebApplication"],
+                "@id": "https://cadernodooga.com.br/#website",
+                name: "Caderno do Ogã",
+                alternateName: ["Caderno do Oga", "Caderno do Ogã Online"],
+                url: "https://cadernodooga.com.br/",
+                inLanguage: "pt-BR",
+                applicationCategory: "ReferenceApplication",
+                operatingSystem: "Web",
+                isAccessibleForFree: true,
+                description:
+                  "Caderno do Ogã é uma plataforma digital (site e aplicativo web) de pontos cantados de Umbanda, com letras, áudios e classificação por Orixás, Guias de Direita (incluindo Ciganos), Guias de Esquerda, toques e fundamentos.",
+                keywords:
+                  "pontos cantados, Umbanda, Orixás, Guias de Direita, Ciganos, Guias de Esquerda, Exu, Pombagira, fundamentos, curimba, toques de atabaque",
+                about: [
+                  { "@type": "Thing", name: "Pontos cantados de Umbanda" },
+                  { "@type": "Thing", name: "Orixás" },
+                  { "@type": "Thing", name: "Guias de Direita (Caboclos, Pretos-Velhos, Erês, Ciganos)" },
+                  { "@type": "Thing", name: "Guias de Esquerda (Exus e Pombagiras)" },
+                  { "@type": "Thing", name: "Fundamentos e toques de atabaque" },
+                ],
+                potentialAction: {
+                  "@type": "SearchAction",
+                  target: "https://cadernodooga.com.br/?q={search_term_string}",
+                  "query-input": "required name=search_term_string",
+                },
+                publisher: { "@id": "https://cadernodooga.com.br/#organization" },
+              },
+              {
+                "@type": "Organization",
+                "@id": "https://cadernodooga.com.br/#organization",
+                name: "Caderno do Ogã",
+                url: "https://cadernodooga.com.br/",
+                description:
+                  "Projeto digital dedicado à preservação e ao ensino de pontos cantados de Umbanda.",
+              },
+              {
+                "@type": "CollectionPage",
+                "@id": "https://cadernodooga.com.br/#collection",
+                url: "https://cadernodooga.com.br/",
+                name: "Acervo de pontos cantados",
+                isPartOf: { "@id": "https://cadernodooga.com.br/#website" },
+                inLanguage: "pt-BR",
+                description:
+                  "Coleção online de pontos cantados de Umbanda organizados por Orixás, Guias de Direita, Ciganos, Guias de Esquerda e fundamentos.",
+              },
+            ],
           })}
         </script>
+
       </Helmet>
       {/* Header */}
       <header className="bg-primary shadow-xl">
