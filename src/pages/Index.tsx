@@ -1,4 +1,5 @@
 import { useState, useCallback, useMemo, useRef, useEffect } from "react";
+import { Helmet } from "react-helmet-async";
 import { Search, Music, Plus, Settings, LogOut, Instagram, Heart, Inbox, Loader2, Drum, Check, LogIn, UserCircle2, Eye, ShieldCheck, Menu } from "lucide-react";
 import { useSidebar } from "@/components/ui/sidebar";
 import logoImg from "@/assets/logo.png";
