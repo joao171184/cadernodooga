@@ -401,15 +401,15 @@ const Index = () => {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button
-                  className={`flex items-center gap-1.5 px-3 py-2 rounded-xl border text-xs font-bold uppercase tracking-wide transition-all active:scale-95 shadow-sm ${
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold uppercase transition-all active:scale-95 ${
                     toqueFilter !== "all"
-                      ? "bg-accent text-accent-foreground border-accent"
-                      : "bg-primary text-primary-foreground border-primary/70 hover:bg-primary/90"
+                      ? "bg-primary text-primary-foreground shadow-sm"
+                      : "bg-card text-muted-foreground border border-border hover:border-accent/30"
                   }`}
                   aria-label="Filtrar por toque"
                   title="Filtrar por toque"
                 >
-                  <Drum size={16} />
+                  <Drum size={14} />
                   <span>{toqueFilter === "all" ? "Toque" : (TOQUE_OPTIONS.find(t => t.value === toqueFilter)?.label ?? "Toque")}</span>
                 </button>
               </DropdownMenuTrigger>
