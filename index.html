@@ -1,11 +1,21 @@
 <!doctype html>
 <html lang="pt-BR" translate="no">
   <head>
+
+    <!-- Redireciona o domínio antigo (.lovable.app) para o domínio oficial (.com.br) -->
+    <script>
+      (function () {
+        var h = location.hostname;
+        if (h === "cadernodooga.lovable.app" || h === "www.cadernodooga.lovable.app") {
+          location.replace("https://cadernodooga.com.br" + location.pathname + location.search + location.hash);
+        }
+      })();
+    </script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="google" content="notranslate" />
-    <title>Caderno do Ogã — Pontos Cantados</title>
-    <meta name="description" content="Caderno do Ogã: acervo de pontos cantados de Umbanda com letra, áudio e classificação por orixás, guias e toques. Busque, ouça e cante.">
+    <title>Caderno do Ogã — Plataforma Digital de Pontos Cantados de Umbanda</title>
+    <meta name="description" content="Caderno do Ogã é a plataforma digital de pontos cantados de Umbanda: Orixás, Guias de Direita (incluindo Ciganos), Guias de Esquerda, toques e fundamentos, com letra e áudio.">
     <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1" />
     <meta name="author" content="João Pedro Marques" />
     <meta name="theme-color" content="#3a1f15" />
@@ -33,14 +43,22 @@
         "@context": "https://schema.org",
         "@type": "Organization",
         "name": "Caderno do Ogã",
+        "alternateName": ["Caderno do Oga", "Caderno do Ogã Online"],
         "url": "https://cadernodooga.com.br/",
-        "description": "Acervo de pontos cantados de Umbanda com letra, áudio e classificação por orixás, guias e toques."
+        "description": "Caderno do Ogã é uma plataforma digital (site e aplicativo web) de pontos cantados de Umbanda, com letras, áudios e classificação por Orixás, Guias de Direita (incluindo Ciganos), Guias de Esquerda, toques e fundamentos. Não é um caderno físico.",
+        "knowsAbout": [
+          "Pontos cantados de Umbanda",
+          "Orixás",
+          "Guias de Direita (Caboclos, Pretos-Velhos, Erês, Ciganos)",
+          "Guias de Esquerda (Exus e Pombagiras)",
+          "Fundamentos e toques de atabaque"
+        ]
       }
     </script>
-    <meta property="og:title" content="Caderno do Ogã — Pontos Cantados">
-  <meta name="twitter:title" content="Caderno do Ogã — Pontos Cantados">
-  <meta property="og:description" content="Caderno do Ogã: acervo de pontos cantados de Umbanda com letra, áudio e classificação por orixás, guias e toques. Busque, ouça e cante.">
-  <meta name="twitter:description" content="Caderno do Ogã: acervo de pontos cantados de Umbanda com letra, áudio e classificação por orixás, guias e toques. Busque, ouça e cante.">
+    <meta property="og:title" content="Caderno do Ogã — Plataforma Digital de Pontos Cantados de Umbanda">
+  <meta name="twitter:title" content="Caderno do Ogã — Plataforma Digital de Pontos Cantados de Umbanda">
+  <meta property="og:description" content="Caderno do Ogã é a plataforma digital de pontos cantados de Umbanda: Orixás, Guias de Direita (incluindo Ciganos), Guias de Esquerda, toques e fundamentos, com letra e áudio.">
+  <meta name="twitter:description" content="Caderno do Ogã é a plataforma digital de pontos cantados de Umbanda: Orixás, Guias de Direita (incluindo Ciganos), Guias de Esquerda, toques e fundamentos, com letra e áudio.">
   <meta property="og:image" content="https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/86af37a6-4b7f-4925-ab1a-94f20585f188/id-preview-a0d725e0--2d38e551-afe9-492c-a05b-fe4df1cdfc96.lovable.app-1785771581008.png">
   <meta name="twitter:image" content="https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/86af37a6-4b7f-4925-ab1a-94f20585f188/id-preview-a0d725e0--2d38e551-afe9-492c-a05b-fe4df1cdfc96.lovable.app-1785771581008.png">
 </head>

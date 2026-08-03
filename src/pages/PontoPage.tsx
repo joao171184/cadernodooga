@@ -143,7 +143,7 @@ const PontoPage = () => {
       <Helmet>
         <title>{title}</title>
         <meta name="description" content={description} />
-        <link rel="canonical" href={url} />
+        {/* canonical emitido globalmente por <Canonical /> */}
         <meta property="og:type" content="article" />
         <meta property="og:site_name" content="Caderno do Ogã" />
         <meta property="og:title" content={ponto.nome} />
