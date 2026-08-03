@@ -2,4 +2,4 @@ User-agent: *
 Allow: /
 Allow: /ponto/
 
-Sitemap: https://cadernodooga.lovable.app/sitemap.xml
+Sitemap: https://cadernodooga.com.br/sitemap.xml
