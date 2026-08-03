@@ -52,6 +52,7 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
+          <Canonical />
           <AuthProvider>
             <CategoriasProvider>
               <PontosProvider>
