@@ -211,8 +211,8 @@ const Index = () => {
           name="description"
           content="Caderno do Ogã: acervo de pontos cantados de Umbanda com letra, áudio e classificação por orixás, guias e toques. Busque, ouça e cante."
         />
-        <link rel="canonical" href="https://cadernodooga.com.br/" />
-        <meta property="og:url" content="https://cadernodooga.com.br/" />
+        <meta name="keywords" content="pontos cantados, umbanda, orixás, guias de direita, ciganos, guias de esquerda, exu, pombagira, fundamentos, curimba, atabaque" />
+
         <meta property="og:type" content="website" />
         <meta property="og:site_name" content="Caderno do Ogã" />
         <meta property="og:title" content="Caderno do Ogã — Pontos Cantados de Umbanda" />
