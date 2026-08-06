@@ -613,7 +613,7 @@ function ClassifChip({ label, active, onClick }: { label: string; active: boolea
   return (
     <button
       onClick={onClick}
-      className={`shrink-0 px-3 py-1.5 rounded-full text-[11px] font-bold uppercase transition-all active:scale-95 ${
+      className={`shrink-0 px-2 sm:px-3 py-1 sm:py-1.5 rounded-full text-[10px] sm:text-[11px] font-bold uppercase transition-all active:scale-95 ${
         active
           ? "bg-primary text-primary-foreground shadow-sm"
           : "bg-card text-muted-foreground border border-border hover:border-accent/30"
