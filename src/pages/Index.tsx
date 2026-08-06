@@ -420,25 +420,22 @@ const Index = () => {
 
       {/* Content */}
       <main className="flex-1 px-3 sm:px-4 py-4 sm:py-5 pb-32">
-        {/* Toolbar: favoritos + classificações + count */}
-        <div className="flex flex-wrap items-center gap-2 mb-4">
-          {showClassifFilters && (
-            <>
-              <ClassifChip label="Todos" active={classifFilter === "all"} onClick={() => setClassifFilter("all")} />
-              {CLASSIFICACAO_OPTIONS.map((c) => (
-                <ClassifChip key={c.value} label={c.label} active={classifFilter === c.value} onClick={() => setClassifFilter(c.value)} />
-              ))}
-            </>
-          )}
+        {/* Toolbar: filtros em uma única linha no mobile */}
+        <div className="mb-4 space-y-2">
+          <div className="flex items-center gap-2 overflow-x-auto scrollbar-none sm:overflow-visible sm:flex-wrap">
+            {showClassifFilters && (
+              <>
+                <ClassifChip label="Todos" active={classifFilter === "all"} onClick={() => setClassifFilter("all")} />
+                {CLASSIFICACAO_OPTIONS.map((c) => (
+                  <ClassifChip key={c.value} label={c.label} active={classifFilter === c.value} onClick={() => setClassifFilter(c.value)} />
+                ))}
+              </>
+            )}
 
-          <div className="ml-auto flex items-center gap-2">
-            <p className="text-xs text-muted-foreground font-medium whitespace-nowrap">
-              {filtered.length} {filtered.length === 1 ? "ponto" : "pontos"}
-            </p>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold uppercase transition-all active:scale-95 ${
+                  className={`shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold uppercase transition-all active:scale-95 ${
                     toqueFilter !== "all"
                       ? "bg-primary text-primary-foreground shadow-sm"
                       : "bg-card text-muted-foreground border border-border hover:border-accent/30"
@@ -463,7 +460,12 @@ const Index = () => {
                 ))}
               </DropdownMenuContent>
             </DropdownMenu>
+          </div>
 
+          <div className="flex justify-end">
+            <p className="text-xs text-muted-foreground font-medium">
+              {filtered.length} {filtered.length === 1 ? "ponto" : "pontos"}
+            </p>
           </div>
         </div>
 
