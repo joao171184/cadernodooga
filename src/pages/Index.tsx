@@ -420,25 +420,22 @@ const Index = () => {
 
       {/* Content */}
       <main className="flex-1 px-3 sm:px-4 py-4 sm:py-5 pb-32">
-        {/* Toolbar: favoritos + classificações + count */}
-        <div className="flex flex-wrap items-center gap-2 mb-4">
-          {showClassifFilters && (
-            <>
-              <ClassifChip label="Todos" active={classifFilter === "all"} onClick={() => setClassifFilter("all")} />
-              {CLASSIFICACAO_OPTIONS.map((c) => (
-                <ClassifChip key={c.value} label={c.label} active={classifFilter === c.value} onClick={() => setClassifFilter(c.value)} />
-              ))}
-            </>
-          )}
+        {/* Toolbar: filtros em uma única linha no mobile */}
+        <div className="mb-4 space-y-2">
+          <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto scrollbar-none sm:overflow-visible sm:flex-wrap">
+            {showClassifFilters && (
+              <>
+                <ClassifChip label="Todos" active={classifFilter === "all"} onClick={() => setClassifFilter("all")} />
+                {CLASSIFICACAO_OPTIONS.map((c) => (
+                  <ClassifChip key={c.value} label={c.label} active={classifFilter === c.value} onClick={() => setClassifFilter(c.value)} />
+                ))}
+              </>
+            )}
 
-          <div className="ml-auto flex items-center gap-2">
-            <p className="text-xs text-muted-foreground font-medium whitespace-nowrap">
-              {filtered.length} {filtered.length === 1 ? "ponto" : "pontos"}
-            </p>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold uppercase transition-all active:scale-95 ${
+                  className={`shrink-0 flex items-center gap-1 px-2 sm:px-3 py-1 sm:py-1.5 rounded-full text-[10px] sm:text-[11px] font-bold uppercase transition-all active:scale-95 ${
                     toqueFilter !== "all"
                       ? "bg-primary text-primary-foreground shadow-sm"
                       : "bg-card text-muted-foreground border border-border hover:border-accent/30"
@@ -446,7 +443,7 @@ const Index = () => {
                   aria-label="Filtrar por toque"
                   title="Filtrar por toque"
                 >
-                  <Drum size={14} />
+                  <Drum className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
                   <span>{toqueFilter === "all" ? "Toque" : (TOQUE_OPTIONS.find(t => t.value === toqueFilter)?.label ?? "Toque")}</span>
                 </button>
               </DropdownMenuTrigger>
@@ -463,7 +460,12 @@ const Index = () => {
                 ))}
               </DropdownMenuContent>
             </DropdownMenu>
+          </div>
 
+          <div className="flex justify-end">
+            <p className="text-xs text-muted-foreground font-medium">
+              {filtered.length} {filtered.length === 1 ? "ponto" : "pontos"}
+            </p>
           </div>
         </div>
 
@@ -611,7 +613,7 @@ function ClassifChip({ label, active, onClick }: { label: string; active: boolea
   return (
     <button
       onClick={onClick}
-      className={`px-3 py-1.5 rounded-full text-[11px] font-bold uppercase transition-all active:scale-95 ${
+      className={`shrink-0 px-2 sm:px-3 py-1 sm:py-1.5 rounded-full text-[10px] sm:text-[11px] font-bold uppercase transition-all active:scale-95 ${
         active
           ? "bg-primary text-primary-foreground shadow-sm"
           : "bg-card text-muted-foreground border border-border hover:border-accent/30"
