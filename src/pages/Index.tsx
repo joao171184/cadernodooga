@@ -422,7 +422,7 @@ const Index = () => {
       <main className="flex-1 px-3 sm:px-4 py-4 sm:py-5 pb-32">
         {/* Toolbar: filtros em uma única linha no mobile */}
         <div className="mb-4 space-y-2">
-          <div className="flex items-center gap-2 overflow-x-auto scrollbar-none sm:overflow-visible sm:flex-wrap">
+          <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto scrollbar-none sm:overflow-visible sm:flex-wrap">
             {showClassifFilters && (
               <>
                 <ClassifChip label="Todos" active={classifFilter === "all"} onClick={() => setClassifFilter("all")} />
