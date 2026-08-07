@@ -422,20 +422,20 @@ const Index = () => {
       <main className="flex-1 px-3 sm:px-4 py-4 sm:py-5 pb-32">
         {/* Toolbar: filtros em uma única linha no mobile */}
         <div className="mb-4 space-y-2">
-          <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto scrollbar-none sm:overflow-visible sm:flex-wrap">
+          <div className="flex items-center gap-2">
             {showClassifFilters && (
-              <>
+              <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto scrollbar-none sm:overflow-visible sm:flex-wrap">
                 <ClassifChip label="Todos" active={classifFilter === "all"} onClick={() => setClassifFilter("all")} />
                 {CLASSIFICACAO_OPTIONS.map((c) => (
                   <ClassifChip key={c.value} label={c.label} active={classifFilter === c.value} onClick={() => setClassifFilter(c.value)} />
                 ))}
-              </>
+              </div>
             )}
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button
-                  className={`shrink-0 flex items-center gap-1 px-2 sm:px-3 py-1 sm:py-1.5 rounded-full text-[10px] sm:text-[11px] font-bold uppercase transition-all active:scale-95 ${
+                  className={`shrink-0 ml-auto flex items-center justify-center w-9 h-9 rounded-full transition-all active:scale-95 ${
                     toqueFilter !== "all"
                       ? "bg-primary text-primary-foreground shadow-sm"
                       : "bg-card text-muted-foreground border border-border hover:border-accent/30"
@@ -443,8 +443,7 @@ const Index = () => {
                   aria-label="Filtrar por toque"
                   title="Filtrar por toque"
                 >
-                  <Drum className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
-                  <span>{toqueFilter === "all" ? "Toque" : (TOQUE_OPTIONS.find(t => t.value === toqueFilter)?.label ?? "Toque")}</span>
+                  <Drum className="w-4 h-4" />
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-52">
