@@ -24,6 +24,7 @@ export const CLASSIFICACAO_OPTIONS: { value: Classificacao; label: string }[] = 
 export interface Ponto {
   id: string;
   nome: string;
+  slug: string;
   categoria: string;
   subcategorias: string[];
   classificacoes: Classificacao[];
