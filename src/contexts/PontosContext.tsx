@@ -24,6 +24,7 @@ export const CLASSIFICACAO_OPTIONS: { value: Classificacao; label: string }[] = 
 export interface Ponto {
   id: string;
   nome: string;
+  slug: string;
   categoria: string;
   subcategorias: string[];
   classificacoes: Classificacao[];
@@ -107,6 +108,7 @@ export function PontosProvider({ children }: { children: ReactNode }) {
     const all: Ponto[] = (rawPontos ?? []).map((p) => ({
       id: p.id,
       nome: p.nome,
+      slug: p.slug,
       categoria: p.categoria,
       subcategorias: subMap.get(p.id) ?? [],
       classificacoes: classMap.get(p.id) ?? [],

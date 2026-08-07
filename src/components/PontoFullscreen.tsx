@@ -31,11 +31,10 @@ export function PontoFullscreen({ ponto, isFavorite, onClose, onToggleFavorite, 
   const embed = getEmbedInfo(ponto.audio);
 
   const handleShare = async () => {
-    const header = `🪘 ${ponto.nome}\n${ponto.categoria}${subs.length ? " › " + subs.join(" • ") : ""}\n\n`;
-    const text = header + ponto.letra + (ponto.audio ? `\n\n🎧 ${ponto.audio}` : "");
+    const url = `${window.location.origin}/ponto/${ponto.slug}`;
     try {
-      if (navigator.share) await navigator.share({ title: ponto.nome, text });
-      else window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank", "noopener,noreferrer");
+      if (navigator.share) await navigator.share({ title: ponto.nome, url, text: url });
+      else window.open(`https://wa.me/?text=${encodeURIComponent(url)}`, "_blank", "noopener,noreferrer");
     } catch { /* cancelado */ }
   };
 
