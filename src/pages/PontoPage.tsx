@@ -130,11 +130,9 @@ const PontoPage = () => {
   };
 
   const handleShare = async () => {
-    const header = `🪘 ${ponto.nome}\n${ponto.categoria}${ponto.subcategorias.length ? " › " + ponto.subcategorias.join(" • ") : ""}\n\n`;
-    const text = header + ponto.letra + `\n\n${url}`;
     try {
-      if (navigator.share) await navigator.share({ title: ponto.nome, text, url });
-      else window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank", "noopener,noreferrer");
+      if (navigator.share) await navigator.share({ title: ponto.nome, url, text: url });
+      else window.open(`https://wa.me/?text=${encodeURIComponent(url)}`, "_blank", "noopener,noreferrer");
     } catch { /* cancelado */ }
   };
 
