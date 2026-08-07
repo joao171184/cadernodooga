@@ -420,11 +420,11 @@ const Index = () => {
 
       {/* Content */}
       <main className="flex-1 px-3 sm:px-4 py-4 sm:py-5 pb-32">
-        {/* Toolbar: filtros em uma única linha no mobile */}
+        {/* Toolbar: filtros sempre inteiros em uma única linha */}
         <div className="mb-4 space-y-2">
-          <div className="flex items-center gap-2">
+          <div className="flex w-full min-w-0 items-center gap-1.5 sm:gap-2">
             {showClassifFilters && (
-              <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto scrollbar-none sm:overflow-visible sm:flex-wrap">
+              <div className="flex min-w-0 flex-1 items-center gap-1 sm:flex-none sm:gap-2">
                 <ClassifChip label="Todos" active={classifFilter === "all"} onClick={() => setClassifFilter("all")} />
                 {CLASSIFICACAO_OPTIONS.map((c) => (
                   <ClassifChip key={c.value} label={c.label} active={classifFilter === c.value} onClick={() => setClassifFilter(c.value)} />
@@ -435,7 +435,7 @@ const Index = () => {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button
-                  className={`shrink-0 ml-auto flex items-center justify-center w-9 h-9 rounded-full transition-all active:scale-95 ${
+                  className={`ml-auto flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition-all active:scale-95 ${
                     toqueFilter !== "all"
                       ? "bg-primary text-primary-foreground shadow-sm"
                       : "bg-card text-muted-foreground border border-border hover:border-accent/30"
@@ -612,7 +612,7 @@ function ClassifChip({ label, active, onClick }: { label: string; active: boolea
   return (
     <button
       onClick={onClick}
-      className={`shrink-0 px-3 py-1.5 rounded-full text-[11px] font-bold uppercase transition-all active:scale-95 ${
+      className={`min-w-0 flex-1 px-1 py-1.5 text-[8px] min-[360px]:text-[9px] min-[400px]:px-2 min-[400px]:text-[10px] sm:flex-none sm:px-3 sm:text-[11px] rounded-full font-bold uppercase tracking-normal whitespace-nowrap transition-all active:scale-95 ${
         active
           ? "bg-primary text-primary-foreground shadow-sm"
           : "bg-card text-muted-foreground border border-border hover:border-accent/30"
