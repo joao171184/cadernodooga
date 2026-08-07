@@ -56,17 +56,12 @@ function renderHighlighted(text: string, query?: string) {
 
 const PontoCard = ({ ponto, isPlaying, isFavorite, visitorMode = false, showFavorite = false, highlight, categoryColor, index = 0, onTogglePlay, onToggleFavorite, onEdit, onDelete, onMoveUp, onMoveDown, onDragStart, onDragOver, onDrop, onOpenFullscreen, canMoveUp, canMoveDown }: PontoCardProps) => {
   const handleShare = async () => {
-    const subs = ponto.subcategorias;
-    const header = `🪘 ${ponto.nome}\n${ponto.categoria}${subs.length ? " › " + subs.join(" • ") : ""}\n\n`;
-    const body = ponto.letra;
-    const link = ponto.audio ? `\n\n🎧 ${ponto.audio}` : "";
-    const text = header + body + link;
+    const url = `${window.location.origin}/ponto/${ponto.slug}`;
     try {
       if (navigator.share) {
-        await navigator.share({ title: ponto.nome, text });
+        await navigator.share({ title: ponto.nome, url, text: url });
       } else {
-        const wa = `https://wa.me/?text=${encodeURIComponent(text)}`;
-        window.open(wa, "_blank", "noopener,noreferrer");
+        window.open(`https://wa.me/?text=${encodeURIComponent(url)}`, "_blank", "noopener,noreferrer");
       }
     } catch {
       // usuário cancelou
