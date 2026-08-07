@@ -108,6 +108,7 @@ export function PontosProvider({ children }: { children: ReactNode }) {
     const all: Ponto[] = (rawPontos ?? []).map((p) => ({
       id: p.id,
       nome: p.nome,
+      slug: p.slug,
       categoria: p.categoria,
       subcategorias: subMap.get(p.id) ?? [],
       classificacoes: classMap.get(p.id) ?? [],
