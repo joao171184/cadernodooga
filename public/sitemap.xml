@@ -354,6 +354,12 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://cadernodooga.com.br/ponto/calunga-eh-calunga-a</loc>
+    <lastmod>2026-08-06</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://cadernodooga.com.br/ponto/descarrega-descarrega-meu-santo-antonio</loc>
     <lastmod>2026-07-06</lastmod>
     <changefreq>monthly</changefreq>
@@ -415,12 +421,6 @@
   </url>
   <url>
     <loc>https://cadernodooga.com.br/ponto/tata-caveira</loc>
-    <lastmod>2026-08-05</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://cadernodooga.com.br/ponto/calunga-eh-calunga-a</loc>
     <lastmod>2026-08-05</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
@@ -1020,6 +1020,12 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://cadernodooga.com.br/ponto/se-o-cabare-fechar-eu-vou-mandar-abrir</loc>
+    <lastmod>2026-08-06</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://cadernodooga.com.br/ponto/exu-caveira-3</loc>
     <lastmod>2026-08-05</lastmod>
     <changefreq>monthly</changefreq>
@@ -1069,12 +1075,6 @@
   </url>
   <url>
     <loc>https://cadernodooga.com.br/ponto/maria-mulambo-5</loc>
-    <lastmod>2026-08-05</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://cadernodooga.com.br/ponto/se-o-cabare-fechar-eu-vou-mandar-abrir</loc>
     <lastmod>2026-08-05</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
@@ -1740,8 +1740,8 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://cadernodooga.com.br/ponto/exu-gato-preto</loc>
-    <lastmod>2026-08-05</lastmod>
+    <loc>https://cadernodooga.com.br/ponto/eu-vejo-fogo-chegando-na-calunga</loc>
+    <lastmod>2026-08-06</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
