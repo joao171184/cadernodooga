@@ -7,7 +7,7 @@ import { TOQUE_OPTIONS, CLASSIFICACAO_OPTIONS, type ToqueTipo, type Classificaca
 import { getEmbedInfo } from "@/lib/embed";
 import { PublicHeader } from "@/components/PublicHeader";
 
-const SITE_URL = "https://cadernodooga.lovable.app";
+const SITE_URL = "https://cadernodooga.com.br";
 
 interface PontoView {
   id: string;
