@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { TOQUE_OPTIONS, CLASSIFICACAO_OPTIONS, type ToqueTipo, type Classificacao } from "@/contexts/PontosContext";
 import { getEmbedInfo } from "@/lib/embed";
 import { PublicHeader } from "@/components/PublicHeader";
+import { TikTokPlayer } from "@/components/TikTokPlayer";
 
 const SITE_URL = "https://cadernodooga.com.br";
 
@@ -220,19 +221,7 @@ const PontoPage = () => {
             )}
             {embed.kind === "tiktok" && (
               embed.src ? (
-                <div
-                  className="relative w-full mx-auto rounded-2xl overflow-hidden bg-black"
-                  style={{ maxWidth: 325, height: "min(75vh, 740px)" }}
-                >
-                  <iframe
-                    src={embed.src}
-                    title={ponto.nome}
-                    className="w-full h-full border-0"
-                    allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
-                    allowFullScreen
-                    scrolling="no"
-                  />
-                </div>
+                <TikTokPlayer src={embed.src} title={ponto.nome} />
               ) : (
                 <a
                   href={embed.externalUrl}

@@ -1,6 +1,7 @@
 import { X, Heart, Share2, Drum, Mic2 } from "lucide-react";
 import { type Ponto, TOQUE_OPTIONS, CLASSIFICACAO_OPTIONS } from "@/contexts/PontosContext";
 import { getEmbedInfo } from "@/lib/embed";
+import { TikTokPlayer } from "@/components/TikTokPlayer";
 import { useEffect } from "react";
 
 interface Props {
@@ -123,19 +124,7 @@ export function PontoFullscreen({ ponto, isFavorite, onClose, onToggleFavorite, 
             )}
             {embed.kind === "tiktok" && (
               embed.src ? (
-                <div
-                  className="relative w-full mx-auto rounded-2xl overflow-hidden bg-black"
-                  style={{ maxWidth: 325, height: "min(75vh, 740px)" }}
-                >
-                  <iframe
-                    src={embed.src}
-                    title={ponto.nome}
-                    className="w-full h-full border-0"
-                    allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
-                    allowFullScreen
-                    scrolling="no"
-                  />
-                </div>
+                <TikTokPlayer src={embed.src} title={ponto.nome} />
               ) : (
                 <a
                   href={embed.externalUrl}
