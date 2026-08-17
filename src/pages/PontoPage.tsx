@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { TOQUE_OPTIONS, CLASSIFICACAO_OPTIONS, type ToqueTipo, type Classificacao } from "@/contexts/PontosContext";
 import { getEmbedInfo } from "@/lib/embed";
 import { PublicHeader } from "@/components/PublicHeader";
+import { TikTokPlayer } from "@/components/TikTokPlayer";
 
 const SITE_URL = "https://cadernodooga.com.br";
 

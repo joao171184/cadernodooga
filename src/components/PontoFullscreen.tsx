@@ -1,6 +1,7 @@
 import { X, Heart, Share2, Drum, Mic2 } from "lucide-react";
 import { type Ponto, TOQUE_OPTIONS, CLASSIFICACAO_OPTIONS } from "@/contexts/PontosContext";
 import { getEmbedInfo } from "@/lib/embed";
+import { TikTokPlayer } from "@/components/TikTokPlayer";
 import { useEffect } from "react";
 
 interface Props {
