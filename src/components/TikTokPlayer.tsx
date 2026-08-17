@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from "react";
-import { Volume2 } from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { Volume2, VolumeX } from "lucide-react";
 
 interface Props {
   src: string;
@@ -9,26 +9,48 @@ interface Props {
 export function TikTokPlayer({ src, title }: Props) {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [needsUnmute, setNeedsUnmute] = useState(false);
+  const [muted, setMuted] = useState(false);
+  const [volume, setVolume] = useState(1);
+
+  const post = useCallback((messages: unknown[]) => {
+    const win = iframeRef.current?.contentWindow;
+    if (!win) return;
+    try {
+      messages.forEach((m) => win.postMessage(m, "*"));
+    } catch { /* cross-origin fallback */ }
+  }, []);
+
+  const applyAudio = useCallback(
+    (nextMuted: boolean, nextVolume: number) => {
+      post([
+        { type: "player:mute", value: nextMuted ? 1 : 0 },
+        { type: "player:volume", value: nextMuted ? 0 : nextVolume },
+        { method: "setVolume", value: nextMuted ? 0 : nextVolume },
+        { method: nextMuted ? "mute" : "unmute" },
+      ]);
+    },
+    [post],
+  );
 
   useEffect(() => {
     const iframe = iframeRef.current;
     if (!iframe) return;
 
-    const tryUnmute = () => {
-      try {
-        iframe.contentWindow?.postMessage({ type: "player:mute", value: 0 }, "*");
-        iframe.contentWindow?.postMessage({ type: "player:volume", value: 1 }, "*");
-        iframe.contentWindow?.postMessage({ method: "setVolume", value: 1 }, "*");
-        iframe.contentWindow?.postMessage({ method: "unmute" }, "*");
-      } catch { /* cross-origin fallback */ }
-    };
+    const tryUnmute = () => applyAudio(false, 1);
 
     const timer = setTimeout(tryUnmute, 1200);
     const interval = setInterval(tryUnmute, 2500);
 
     const onMessage = (e: MessageEvent) => {
       if (e.source !== iframe.contentWindow) return;
-      const data = typeof e.data === "string" ? JSON.parse(e.data) : e.data;
+      let data: any = e.data;
+      if (typeof data === "string") {
+        try {
+          data = JSON.parse(data);
+        } catch {
+          return;
+        }
+      }
       if (data?.muted || data?.volume === 0) setNeedsUnmute(true);
     };
 
@@ -38,19 +60,26 @@ export function TikTokPlayer({ src, title }: Props) {
       clearInterval(interval);
       window.removeEventListener("message", onMessage);
     };
-  }, [src]);
+  }, [src, applyAudio]);
 
   const handleUnmute = () => {
-    const iframe = iframeRef.current;
-    if (!iframe) return;
-    try {
-      iframe.contentWindow?.postMessage({ type: "player:mute", value: 0 }, "*");
-      iframe.contentWindow?.postMessage({ type: "player:volume", value: 1 }, "*");
-      iframe.contentWindow?.postMessage({ method: "setVolume", value: 1 }, "*");
-      iframe.contentWindow?.postMessage({ method: "unmute" }, "*");
-      iframe.contentWindow?.postMessage({ type: "player:play" }, "*");
-    } catch { /* noop */ }
+    setMuted(false);
+    applyAudio(false, volume || 1);
+    post([{ type: "player:play" }]);
     setNeedsUnmute(false);
+  };
+
+  const toggleMute = () => {
+    const next = !muted;
+    setMuted(next);
+    applyAudio(next, volume);
+  };
+
+  const handleVolume = (value: number) => {
+    setVolume(value);
+    const nextMuted = value === 0;
+    setMuted(nextMuted);
+    applyAudio(nextMuted, value);
   };
 
   return (
@@ -67,6 +96,27 @@ export function TikTokPlayer({ src, title }: Props) {
         allowFullScreen
         scrolling="no"
       />
+
+      <div className="absolute bottom-3 left-3 right-3 z-20 flex items-center gap-3 rounded-full bg-background/70 backdrop-blur-md px-3 py-2 border border-border">
+        <button
+          onClick={toggleMute}
+          className="text-foreground shrink-0"
+          aria-label={muted ? "Ativar som" : "Silenciar"}
+        >
+          {muted || volume === 0 ? <VolumeX size={20} /> : <Volume2 size={20} />}
+        </button>
+        <input
+          type="range"
+          min={0}
+          max={1}
+          step={0.05}
+          value={muted ? 0 : volume}
+          onChange={(e) => handleVolume(Number(e.target.value))}
+          aria-label="Volume"
+          className="w-full accent-primary cursor-pointer"
+        />
+      </div>
+
       {needsUnmute && (
         <button
           onClick={handleUnmute}
