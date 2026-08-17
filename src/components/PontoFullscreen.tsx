@@ -124,19 +124,7 @@ export function PontoFullscreen({ ponto, isFavorite, onClose, onToggleFavorite, 
             )}
             {embed.kind === "tiktok" && (
               embed.src ? (
-                <div
-                  className="relative w-full mx-auto rounded-2xl overflow-hidden bg-black"
-                  style={{ maxWidth: 325, height: "min(75vh, 740px)" }}
-                >
-                  <iframe
-                    src={embed.src}
-                    title={ponto.nome}
-                    className="w-full h-full border-0"
-                    allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
-                    allowFullScreen
-                    scrolling="no"
-                  />
-                </div>
+                <TikTokPlayer src={embed.src} title={ponto.nome} />
               ) : (
                 <a
                   href={embed.externalUrl}
