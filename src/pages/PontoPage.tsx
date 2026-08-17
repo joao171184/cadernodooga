@@ -218,6 +218,32 @@ const PontoPage = () => {
             {embed.kind === "spotify" && (
               <iframe src={embed.src} title={ponto.nome} className="w-full rounded-2xl" height={232} allow="autoplay; clipboard-write; encrypted-media; picture-in-picture" />
             )}
+            {embed.kind === "tiktok" && (
+              embed.src ? (
+                <div
+                  className="relative w-full mx-auto rounded-2xl overflow-hidden bg-black"
+                  style={{ maxWidth: 325, height: "min(75vh, 740px)" }}
+                >
+                  <iframe
+                    src={embed.src}
+                    title={ponto.nome}
+                    className="w-full h-full border-0"
+                    allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
+                    allowFullScreen
+                    scrolling="no"
+                  />
+                </div>
+              ) : (
+                <a
+                  href={embed.externalUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center gap-2 w-full py-4 rounded-2xl bg-foreground text-background text-sm font-bold uppercase"
+                >
+                  Abrir no TikTok
+                </a>
+              )
+            )}
             {embed.kind === "audio" && (
               <audio src={embed.src} controls className="w-full" />
             )}
