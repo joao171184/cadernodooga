@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Volume2, VolumeX } from "lucide-react";
+import { Volume2 } from "lucide-react";
 
 interface Props {
   src: string;
@@ -9,8 +9,6 @@ interface Props {
 export function TikTokPlayer({ src, title }: Props) {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [needsUnmute, setNeedsUnmute] = useState(false);
-  const [muted, setMuted] = useState(false);
-  const [volume, setVolume] = useState(1);
 
   const post = useCallback((messages: unknown[]) => {
     const win = iframeRef.current?.contentWindow;
@@ -20,26 +18,22 @@ export function TikTokPlayer({ src, title }: Props) {
     } catch { /* cross-origin fallback */ }
   }, []);
 
-  const applyAudio = useCallback(
-    (nextMuted: boolean, nextVolume: number) => {
-      post([
-        { type: "player:mute", value: nextMuted ? 1 : 0 },
-        { type: "player:volume", value: nextMuted ? 0 : nextVolume },
-        { method: "setVolume", value: nextMuted ? 0 : nextVolume },
-        { method: nextMuted ? "mute" : "unmute" },
-      ]);
-    },
-    [post],
-  );
+  const unmute = useCallback(() => {
+    post([
+      { type: "player:mute", value: 0 },
+      { type: "player:volume", value: 1 },
+      { method: "setVolume", value: 1 },
+      { method: "unmute" },
+      { type: "player:play" },
+    ]);
+  }, [post]);
 
   useEffect(() => {
     const iframe = iframeRef.current;
     if (!iframe) return;
 
-    const tryUnmute = () => applyAudio(false, 1);
-
-    const timer = setTimeout(tryUnmute, 1200);
-    const interval = setInterval(tryUnmute, 2500);
+    const timer = setTimeout(unmute, 1200);
+    const interval = setInterval(unmute, 2500);
 
     const onMessage = (e: MessageEvent) => {
       if (e.source !== iframe.contentWindow) return;
@@ -60,26 +54,11 @@ export function TikTokPlayer({ src, title }: Props) {
       clearInterval(interval);
       window.removeEventListener("message", onMessage);
     };
-  }, [src, applyAudio]);
+  }, [src, unmute]);
 
   const handleUnmute = () => {
-    setMuted(false);
-    applyAudio(false, volume || 1);
-    post([{ type: "player:play" }]);
+    unmute();
     setNeedsUnmute(false);
-  };
-
-  const toggleMute = () => {
-    const next = !muted;
-    setMuted(next);
-    applyAudio(next, volume);
-  };
-
-  const handleVolume = (value: number) => {
-    setVolume(value);
-    const nextMuted = value === 0;
-    setMuted(nextMuted);
-    applyAudio(nextMuted, value);
   };
 
   return (
@@ -96,26 +75,6 @@ export function TikTokPlayer({ src, title }: Props) {
         allowFullScreen
         scrolling="no"
       />
-
-      <div className="absolute bottom-3 left-3 right-3 z-20 flex items-center gap-3 rounded-full bg-background/70 backdrop-blur-md px-3 py-2 border border-border">
-        <button
-          onClick={toggleMute}
-          className="text-foreground shrink-0"
-          aria-label={muted ? "Ativar som" : "Silenciar"}
-        >
-          {muted || volume === 0 ? <VolumeX size={20} /> : <Volume2 size={20} />}
-        </button>
-        <input
-          type="range"
-          min={0}
-          max={1}
-          step={0.05}
-          value={muted ? 0 : volume}
-          onChange={(e) => handleVolume(Number(e.target.value))}
-          aria-label="Volume"
-          className="w-full accent-primary cursor-pointer"
-        />
-      </div>
 
       {needsUnmute && (
         <button
