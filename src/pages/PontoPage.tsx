@@ -158,6 +158,13 @@ const PontoPage = () => {
 
       <div className="sticky top-[57px] z-10 bg-background/95 backdrop-blur-md border-b border-border">
         <div className="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between gap-2">
+          <Link
+            to="/"
+            aria-label="Voltar"
+            className="p-2 rounded-lg hover:bg-muted transition-all active:scale-90 shrink-0"
+          >
+            <ArrowLeft size={20} className="text-muted-foreground" />
+          </Link>
           <div className="flex-1 min-w-0">
             <p className="text-[10px] text-muted-foreground font-bold uppercase truncate">
               {ponto.categoria}{ponto.subcategorias.length ? ` › ${ponto.subcategorias.join(" • ")}` : ""}
@@ -175,6 +182,7 @@ const PontoPage = () => {
           </button>
         </div>
       </div>
+
 
       <main className="max-w-3xl mx-auto px-4 sm:px-6 py-6 sm:py-10 pb-32">
         <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mb-6">
