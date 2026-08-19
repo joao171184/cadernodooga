@@ -7,6 +7,7 @@ import { TOQUE_OPTIONS, CLASSIFICACAO_OPTIONS, type ToqueTipo, type Classificaca
 import { getEmbedInfo } from "@/lib/embed";
 import { PublicHeader } from "@/components/PublicHeader";
 import { TikTokPlayer } from "@/components/TikTokPlayer";
+import { AutoScrollControl } from "@/components/AutoScrollControl";
 
 const SITE_URL = "https://cadernodooga.com.br";
 
@@ -247,6 +248,8 @@ const PontoPage = () => {
           </div>
         )}
       </main>
+
+      <AutoScrollControl />
     </div>
   );
 };
