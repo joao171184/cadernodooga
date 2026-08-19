@@ -31,24 +31,33 @@ const CategoriasContext = createContext<Ctx | null>(null);
 
 export function CategoriasProvider({ children }: { children: ReactNode }) {
   const { user, loading: authLoading } = useAuth();
-  const [categorias, setCategorias] = useState<CategoriaNode[]>([]);
-  const [loading, setLoading] = useState(true);
+  const cachedCats = readCache<CategoriaNode[]>("categorias");
+  const [categorias, setCategorias] = useState<CategoriaNode[]>(cachedCats ?? []);
+  const [loading, setLoading] = useState(!(cachedCats?.length));
 
   const refresh = useCallback(async () => {
     if (authLoading) return;
     setLoading(true);
-    const { data, error } = await supabase
-      .from("categorias")
-      .select("*")
-      .order("ordem", { ascending: true })
-      .order("nome", { ascending: true });
+    let data: Awaited<ReturnType<typeof supabase.from>> extends never ? never : any = null;
+    let error: unknown = null;
+    try {
+      const res = await supabase
+        .from("categorias")
+        .select("*")
+        .order("ordem", { ascending: true })
+        .order("nome", { ascending: true });
+      data = res.data;
+      error = res.error;
+    } catch (e) {
+      error = e;
+    }
 
-    if (error) {
-      console.error("Erro ao carregar categorias", error);
-      setCategorias([]);
+    if (error || !data) {
+      // Offline / falha: mantém o que já está em cache
       setLoading(false);
       return;
     }
+
 
     const rows = data ?? [];
     const byId = new Map<string, CategoriaNode>();
