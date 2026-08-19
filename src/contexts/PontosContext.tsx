@@ -70,17 +70,21 @@ const PontosContext = createContext<Ctx | null>(null);
 
 export function PontosProvider({ children }: { children: ReactNode }) {
   const { user, isAdmin, loading: authLoading } = useAuth();
-  const [pontos, setPontos] = useState<Ponto[]>([]);
+  const cached = readCache<{ pontos: Ponto[]; toqueOrdens: [string, Partial<Record<ToqueTipo, number>>][] }>("pontos");
+  const [pontos, setPontos] = useState<Ponto[]>(cached?.pontos ?? []);
   const [pendentes, setPendentes] = useState<Ponto[]>([]);
   const [favoritos, setFavoritos] = useState<Set<string>>(new Set());
-  const [toqueOrdens, setToqueOrdens] = useState<Map<string, Partial<Record<ToqueTipo, number>>>>(new Map());
-  const [loading, setLoading] = useState(true);
+  const [toqueOrdens, setToqueOrdens] = useState<Map<string, Partial<Record<ToqueTipo, number>>>>(
+    new Map(cached?.toqueOrdens ?? []),
+  );
+  const [loading, setLoading] = useState(!(cached?.pontos?.length));
 
-  const hasLoadedRef = useRef(false);
+  const hasLoadedRef = useRef(Boolean(cached?.pontos?.length));
   const suppressRefreshUntilRef = useRef<number>(0);
   const refresh = useCallback(async () => {
     if (authLoading) return;
     if (!hasLoadedRef.current) setLoading(true);
+
 
     const [{ data: rawPontos }, { data: subs }, { data: classes }, { data: favs }, { data: toqueOrds }] = await Promise.all([
       supabase.from("pontos").select("*").order("ordem", { ascending: true }).order("created_at", { ascending: true }),
