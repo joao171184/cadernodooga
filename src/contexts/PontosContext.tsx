@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useRef, useState, useCallback, type ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { readCache, writeCache } from "@/lib/offlineCache";
 import type { Database } from "@/integrations/supabase/types";
 
 export type ToqueTipo = Database["public"]["Enums"]["toque_tipo"];
