@@ -86,15 +86,28 @@ export function PontosProvider({ children }: { children: ReactNode }) {
     if (!hasLoadedRef.current) setLoading(true);
 
 
-    const [{ data: rawPontos }, { data: subs }, { data: classes }, { data: favs }, { data: toqueOrds }] = await Promise.all([
-      supabase.from("pontos").select("*").order("ordem", { ascending: true }).order("created_at", { ascending: true }),
-      supabase.from("ponto_subcategorias").select("*"),
-      supabase.from("ponto_classificacoes").select("*"),
-      user
-        ? supabase.from("favoritos").select("ponto_id").eq("user_id", user.id)
-        : Promise.resolve({ data: [] as { ponto_id: string }[] }),
-      supabase.from("ponto_toque_ordem").select("*"),
-    ]);
+    let result;
+    try {
+      result = await Promise.all([
+        supabase.from("pontos").select("*").order("ordem", { ascending: true }).order("created_at", { ascending: true }),
+        supabase.from("ponto_subcategorias").select("*"),
+        supabase.from("ponto_classificacoes").select("*"),
+        user
+          ? supabase.from("favoritos").select("ponto_id").eq("user_id", user.id)
+          : Promise.resolve({ data: [] as { ponto_id: string }[] }),
+        supabase.from("ponto_toque_ordem").select("*"),
+      ]);
+    } catch {
+      // Offline: mantém os dados em cache já carregados
+      setLoading(false);
+      return;
+    }
+    const [{ data: rawPontos }, { data: subs }, { data: classes }, { data: favs }, { data: toqueOrds }] = result;
+
+    if (!rawPontos && hasLoadedRef.current) {
+      setLoading(false);
+      return;
+    }
 
     const subMap = new Map<string, string[]>();
     (subs ?? []).forEach((s) => {
@@ -126,7 +139,8 @@ export function PontosProvider({ children }: { children: ReactNode }) {
       created_by: p.created_by,
     }));
 
-    setPontos(all.filter((p) => p.status === "approved"));
+    const aprovados = all.filter((p) => p.status === "approved");
+    setPontos(aprovados);
     setPendentes(all.filter((p) => p.status === "pending"));
     setFavoritos(new Set((favs ?? []).map((f) => f.ponto_id)));
     const tMap = new Map<string, Partial<Record<ToqueTipo, number>>>();
@@ -136,9 +150,11 @@ export function PontosProvider({ children }: { children: ReactNode }) {
       tMap.set(r.ponto_id, entry);
     });
     setToqueOrdens(tMap);
+    writeCache("pontos", { pontos: aprovados, toqueOrdens: Array.from(tMap.entries()) });
     hasLoadedRef.current = true;
     setLoading(false);
   }, [user, authLoading]);
+
 
   useEffect(() => { refresh(); }, [refresh]);
 
