@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { readCache, writeCache } from "@/lib/offlineCache";
 
 export interface CategoriaNode {
   id: string;
