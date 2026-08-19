@@ -537,7 +537,7 @@ const Index = () => {
                   onDragStart={effectiveIsAdmin ? handleDragStart : undefined}
                   onDragOver={effectiveIsAdmin ? handleDragOver : undefined}
                   onDrop={effectiveIsAdmin ? handleDrop : undefined}
-                  onOpenFullscreen={(p) => setFullscreenPonto(p)}
+                  onOpenFullscreen={(p) => (p.slug ? navigate(`/ponto/${p.slug}`) : setFullscreenPonto(p))}
                   canMoveUp={i > 0}
                   canMoveDown={i < visibleList.length - 1}
                 />
