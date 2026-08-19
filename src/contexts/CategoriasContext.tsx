@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { readCache, writeCache } from "@/lib/offlineCache";
 
 export interface CategoriaNode {
   id: string;
@@ -30,35 +31,51 @@ const CategoriasContext = createContext<Ctx | null>(null);
 
 export function CategoriasProvider({ children }: { children: ReactNode }) {
   const { user, loading: authLoading } = useAuth();
-  const [categorias, setCategorias] = useState<CategoriaNode[]>([]);
-  const [loading, setLoading] = useState(true);
+  const cachedCats = readCache<CategoriaNode[]>("categorias");
+  const [categorias, setCategorias] = useState<CategoriaNode[]>(cachedCats ?? []);
+  const [loading, setLoading] = useState(!(cachedCats?.length));
 
   const refresh = useCallback(async () => {
     if (authLoading) return;
     setLoading(true);
-    const { data, error } = await supabase
-      .from("categorias")
-      .select("*")
-      .order("ordem", { ascending: true })
-      .order("nome", { ascending: true });
+    let data: Record<string, unknown>[] | null = null;
+    let error: unknown = null;
+    try {
+      const res = await supabase
+        .from("categorias")
+        .select("*")
+        .order("ordem", { ascending: true })
+        .order("nome", { ascending: true });
+      data = res.data;
+      error = res.error;
+    } catch (e) {
+      error = e;
+    }
 
-    if (error) {
-      console.error("Erro ao carregar categorias", error);
-      setCategorias([]);
+    if (error || !data) {
+      // Offline / falha: mantém o que já está em cache
       setLoading(false);
       return;
     }
 
-    const rows = data ?? [];
+
+    type Row = {
+      id: string;
+      nome: string;
+      emoji: string;
+      parent_id: string | null;
+      cor?: string | null;
+      mostrar_filtros_classificacao?: boolean;
+    };
+    const rows = (data ?? []) as unknown as Row[];
     const byId = new Map<string, CategoriaNode>();
     rows.forEach((r) => {
-      const row = r as typeof r & { mostrar_filtros_classificacao?: boolean; cor?: string | null };
       byId.set(r.id, {
         id: r.id,
         nome: r.nome,
         emoji: r.emoji,
-        cor: row.cor ?? null,
-        mostrarFiltrosClassificacao: row.mostrar_filtros_classificacao ?? true,
+        cor: r.cor ?? null,
+        mostrarFiltrosClassificacao: r.mostrar_filtros_classificacao ?? true,
         filhos: [],
       });
     });
@@ -74,7 +91,9 @@ export function CategoriasProvider({ children }: { children: ReactNode }) {
       }
     });
     setCategorias(roots);
+    writeCache("categorias", roots);
     setLoading(false);
+
   }, [authLoading, user]);
 
   useEffect(() => { refresh(); }, [refresh, user]);

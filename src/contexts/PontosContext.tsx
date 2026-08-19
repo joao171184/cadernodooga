@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useRef, useState, useCallback, type ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { readCache, writeCache } from "@/lib/offlineCache";
 import type { Database } from "@/integrations/supabase/types";
 
 export type ToqueTipo = Database["public"]["Enums"]["toque_tipo"];
@@ -69,27 +70,44 @@ const PontosContext = createContext<Ctx | null>(null);
 
 export function PontosProvider({ children }: { children: ReactNode }) {
   const { user, isAdmin, loading: authLoading } = useAuth();
-  const [pontos, setPontos] = useState<Ponto[]>([]);
+  const cached = readCache<{ pontos: Ponto[]; toqueOrdens: [string, Partial<Record<ToqueTipo, number>>][] }>("pontos");
+  const [pontos, setPontos] = useState<Ponto[]>(cached?.pontos ?? []);
   const [pendentes, setPendentes] = useState<Ponto[]>([]);
   const [favoritos, setFavoritos] = useState<Set<string>>(new Set());
-  const [toqueOrdens, setToqueOrdens] = useState<Map<string, Partial<Record<ToqueTipo, number>>>>(new Map());
-  const [loading, setLoading] = useState(true);
+  const [toqueOrdens, setToqueOrdens] = useState<Map<string, Partial<Record<ToqueTipo, number>>>>(
+    new Map(cached?.toqueOrdens ?? []),
+  );
+  const [loading, setLoading] = useState(!(cached?.pontos?.length));
 
-  const hasLoadedRef = useRef(false);
+  const hasLoadedRef = useRef(Boolean(cached?.pontos?.length));
   const suppressRefreshUntilRef = useRef<number>(0);
   const refresh = useCallback(async () => {
     if (authLoading) return;
     if (!hasLoadedRef.current) setLoading(true);
 
-    const [{ data: rawPontos }, { data: subs }, { data: classes }, { data: favs }, { data: toqueOrds }] = await Promise.all([
-      supabase.from("pontos").select("*").order("ordem", { ascending: true }).order("created_at", { ascending: true }),
-      supabase.from("ponto_subcategorias").select("*"),
-      supabase.from("ponto_classificacoes").select("*"),
-      user
-        ? supabase.from("favoritos").select("ponto_id").eq("user_id", user.id)
-        : Promise.resolve({ data: [] as { ponto_id: string }[] }),
-      supabase.from("ponto_toque_ordem").select("*"),
-    ]);
+
+    let result;
+    try {
+      result = await Promise.all([
+        supabase.from("pontos").select("*").order("ordem", { ascending: true }).order("created_at", { ascending: true }),
+        supabase.from("ponto_subcategorias").select("*"),
+        supabase.from("ponto_classificacoes").select("*"),
+        user
+          ? supabase.from("favoritos").select("ponto_id").eq("user_id", user.id)
+          : Promise.resolve({ data: [] as { ponto_id: string }[] }),
+        supabase.from("ponto_toque_ordem").select("*"),
+      ]);
+    } catch {
+      // Offline: mantém os dados em cache já carregados
+      setLoading(false);
+      return;
+    }
+    const [{ data: rawPontos }, { data: subs }, { data: classes }, { data: favs }, { data: toqueOrds }] = result;
+
+    if (!rawPontos && hasLoadedRef.current) {
+      setLoading(false);
+      return;
+    }
 
     const subMap = new Map<string, string[]>();
     (subs ?? []).forEach((s) => {
@@ -121,7 +139,8 @@ export function PontosProvider({ children }: { children: ReactNode }) {
       created_by: p.created_by,
     }));
 
-    setPontos(all.filter((p) => p.status === "approved"));
+    const aprovados = all.filter((p) => p.status === "approved");
+    setPontos(aprovados);
     setPendentes(all.filter((p) => p.status === "pending"));
     setFavoritos(new Set((favs ?? []).map((f) => f.ponto_id)));
     const tMap = new Map<string, Partial<Record<ToqueTipo, number>>>();
@@ -131,9 +150,11 @@ export function PontosProvider({ children }: { children: ReactNode }) {
       tMap.set(r.ponto_id, entry);
     });
     setToqueOrdens(tMap);
+    writeCache("pontos", { pontos: aprovados, toqueOrdens: Array.from(tMap.entries()) });
     hasLoadedRef.current = true;
     setLoading(false);
   }, [user, authLoading]);
+
 
   useEffect(() => { refresh(); }, [refresh]);
 
