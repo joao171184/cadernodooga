@@ -38,7 +38,7 @@ export function CategoriasProvider({ children }: { children: ReactNode }) {
   const refresh = useCallback(async () => {
     if (authLoading) return;
     setLoading(true);
-    let data: Awaited<ReturnType<typeof supabase.from>> extends never ? never : any = null;
+    let data: Record<string, unknown>[] | null = null;
     let error: unknown = null;
     try {
       const res = await supabase
