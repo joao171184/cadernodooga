@@ -72,7 +72,7 @@ export default defineConfig(({ mode }) => ({
           {
             // Letras e dados dos pontos (Lovable Cloud / REST)
             urlPattern: ({ url }) => url.pathname.startsWith("/rest/v1/"),
-            handler: "NetworkFirst",
+            handler: "StaleWhileRevalidate",
             options: {
               cacheName: "api-dados",
               networkTimeoutSeconds: 6,

@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { Canonical } from "@/components/Canonical";
+import { OfflineIndicator } from "@/components/OfflineIndicator";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { CategoriasProvider } from "@/contexts/CategoriasContext";
 import { PontosProvider } from "@/contexts/PontosContext";
