@@ -1,4 +1,4 @@
-import { Heart, Pencil, Trash2, Mic2, ArrowUp, ArrowDown, Volume2, Pause, Drum, Share2, Clipboard } from "lucide-react";
+import { Heart, Pencil, Trash2, Mic2, ArrowUp, ArrowDown, Volume2, Pause, Drum, Share2, Copy } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import { getEmbedInfo, type EmbedKind } from "@/lib/embed";
@@ -127,7 +127,7 @@ const PontoCard = ({ ponto, isPlaying, isFavorite, visitorMode = false, showFavo
                 aria-label="Copiar letra"
                 title="Copiar letra"
               >
-                <Clipboard size={14} />
+                <Copy size={14} />
               </button>
             </div>
             <p className="text-xs text-muted-foreground mt-1">
