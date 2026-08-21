@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
-import { Drum, Mic2, Share2, Loader2, ArrowLeft } from "lucide-react";
+import { Drum, Mic2, Share2, Loader2, ArrowLeft, Clipboard } from "lucide-react";
+import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { TOQUE_OPTIONS, CLASSIFICACAO_OPTIONS, type ToqueTipo, type Classificacao } from "@/contexts/PontosContext";
 import { getEmbedInfo } from "@/lib/embed";
