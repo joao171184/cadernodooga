@@ -132,6 +132,15 @@ const PontoPage = () => {
     ...(ponto.puxador ? { composer: { "@type": "Person", name: ponto.puxador } } : {}),
   };
 
+  const handleCopyLetra = async () => {
+    try {
+      await navigator.clipboard.writeText(ponto.letra);
+      toast.success("Letra copiada!");
+    } catch {
+      toast.error("Não foi possível copiar a letra.");
+    }
+  };
+
   const handleShare = async () => {
     try {
       if (navigator.share) await navigator.share({ title: ponto.nome, url, text: url });
