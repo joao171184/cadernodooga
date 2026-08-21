@@ -127,7 +127,7 @@ const PontoCard = ({ ponto, isPlaying, isFavorite, visitorMode = false, showFavo
                 aria-label="Copiar letra"
                 title="Copiar letra"
               >
-                <Clipboard size={14} />
+                <Copy size={14} />
               </button>
             </div>
             <p className="text-xs text-muted-foreground mt-1">

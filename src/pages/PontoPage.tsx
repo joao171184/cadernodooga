@@ -190,7 +190,7 @@ const PontoPage = () => {
                 aria-label="Copiar letra"
                 title="Copiar letra"
               >
-                <Clipboard size={16} />
+                <Copy size={16} />
               </button>
             </div>
           </div>
