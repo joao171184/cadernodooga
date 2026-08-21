@@ -410,8 +410,19 @@ const Index = () => {
               autoCorrect="off"
               autoCapitalize="off"
               spellCheck={false}
-              className="w-full pl-10 pr-4 py-3 rounded-xl bg-primary-foreground/10 text-primary-foreground placeholder:text-primary-foreground/35 text-sm outline-none focus:ring-2 focus:ring-accent/50 backdrop-blur-sm transition-all border border-primary-foreground/10 uppercase"
+              className="w-full pl-10 pr-11 py-3 rounded-xl bg-primary-foreground/10 text-primary-foreground placeholder:text-primary-foreground/35 text-sm outline-none focus:ring-2 focus:ring-accent/50 backdrop-blur-sm transition-all border border-primary-foreground/10 uppercase"
             />
+            {search.length > 0 && (
+              <button
+                type="button"
+                onClick={() => setSearch("")}
+                aria-label="Limpar busca"
+                title="LIMPAR BUSCA"
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1.5 rounded-lg text-primary-foreground/60 hover:text-primary-foreground hover:bg-primary-foreground/15 transition-all active:scale-90"
+              >
+                <X size={16} />
+              </button>
+            )}
           </div>
         </div>
       </header>
