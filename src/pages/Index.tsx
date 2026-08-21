@@ -133,8 +133,10 @@ const Index = () => {
 
   const sameText = (a?: string | null, b?: string | null) => norm(a || "") === norm(b || "");
 
+  const fuse = useMemo(() => buildSearchIndex(pontos), [pontos]);
+
   const filtered = useMemo(() => {
-    const q = norm(search.trim());
+    const q = search.trim();
     let list = pontos;
 
     if (categoria && subcategoria) {
@@ -160,14 +162,9 @@ const Index = () => {
       });
     }
     if (!q) return list;
-    return list.filter(
-      (p) =>
-        norm(p.nome).includes(q) ||
-        norm(p.categoria).includes(q) ||
-        norm(p.letra).includes(q) ||
-        (p.subcategorias || []).some((s) => norm(s).includes(q))
-    );
-  }, [search, showFavorites, showClassifFilters, classifFilter, toqueFilter, favoritos, categoria, subcategoria, pontos, toqueOrdens]);
+    return fuzzySearch(list, q, fuse);
+  }, [search, showFavorites, showClassifFilters, classifFilter, toqueFilter, favoritos, categoria, subcategoria, pontos, toqueOrdens, fuse]);
+
 
   const visibleList = dragList ?? filtered;
 
