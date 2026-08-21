@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
-import { Drum, Mic2, Share2, Loader2, ArrowLeft } from "lucide-react";
+import { Drum, Mic2, Share2, Loader2, ArrowLeft, Clipboard } from "lucide-react";
+import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { TOQUE_OPTIONS, CLASSIFICACAO_OPTIONS, type ToqueTipo, type Classificacao } from "@/contexts/PontosContext";
 import { getEmbedInfo } from "@/lib/embed";
@@ -131,6 +132,15 @@ const PontoPage = () => {
     ...(ponto.puxador ? { composer: { "@type": "Person", name: ponto.puxador } } : {}),
   };
 
+  const handleCopyLetra = async () => {
+    try {
+      await navigator.clipboard.writeText(ponto.letra);
+      toast.success("Letra copiada!");
+    } catch {
+      toast.error("Não foi possível copiar a letra.");
+    }
+  };
+
   const handleShare = async () => {
     try {
       if (navigator.share) await navigator.share({ title: ponto.nome, url, text: url });
@@ -170,9 +180,19 @@ const PontoPage = () => {
             <p className="text-[10px] text-muted-foreground font-bold uppercase truncate">
               {ponto.categoria}{ponto.subcategorias.length ? ` › ${ponto.subcategorias.join(" • ")}` : ""}
             </p>
-            <h1 className="font-display text-base sm:text-lg font-bold text-foreground uppercase truncate">
-              {ponto.nome}
-            </h1>
+            <div className="flex items-center gap-2">
+              <h1 className="font-display text-base sm:text-lg font-bold text-foreground uppercase truncate">
+                {ponto.nome}
+              </h1>
+              <button
+                onClick={handleCopyLetra}
+                className="p-1.5 rounded-lg hover:bg-muted transition-all active:scale-90 text-muted-foreground shrink-0"
+                aria-label="Copiar letra"
+                title="Copiar letra"
+              >
+                <Clipboard size={16} />
+              </button>
+            </div>
           </div>
           <button
             onClick={handleShare}

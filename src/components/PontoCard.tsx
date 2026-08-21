@@ -1,4 +1,5 @@
-import { Heart, Pencil, Trash2, Mic2, ArrowUp, ArrowDown, Volume2, Pause, Drum, Share2 } from "lucide-react";
+import { Heart, Pencil, Trash2, Mic2, ArrowUp, ArrowDown, Volume2, Pause, Drum, Share2, Clipboard } from "lucide-react";
+import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import { getEmbedInfo, type EmbedKind } from "@/lib/embed";
 import { type Ponto, TOQUE_OPTIONS, CLASSIFICACAO_OPTIONS } from "@/contexts/PontosContext";
@@ -68,6 +69,15 @@ const PontoCard = ({ ponto, isPlaying, isFavorite, visitorMode = false, showFavo
     }
   };
 
+  const handleCopyLetra = async () => {
+    try {
+      await navigator.clipboard.writeText(ponto.letra);
+      toast.success("Letra copiada!");
+    } catch {
+      toast.error("Não foi possível copiar a letra.");
+    }
+  };
+
   const { isAdmin, can } = useAuth();
   const embed = getEmbedInfo(ponto.audio);
   const hasMedia = embed.kind !== "none";
@@ -107,9 +117,19 @@ const PontoCard = ({ ponto, isPlaying, isFavorite, visitorMode = false, showFavo
       <div className="p-4 sm:p-5">
         <div className="flex items-start justify-between gap-2 mb-3">
           <div className="flex-1 min-w-0">
-            <h3 className="font-display text-base sm:text-lg font-bold text-card-foreground leading-tight uppercase">
-              {ponto.nome}
-            </h3>
+            <div className="flex items-start gap-2">
+              <h3 className="font-display text-base sm:text-lg font-bold text-card-foreground leading-tight uppercase">
+                {ponto.nome}
+              </h3>
+              <button
+                onClick={handleCopyLetra}
+                className="p-1.5 rounded-lg hover:bg-muted transition-all active:scale-90 text-muted-foreground shrink-0 mt-0.5"
+                aria-label="Copiar letra"
+                title="Copiar letra"
+              >
+                <Clipboard size={14} />
+              </button>
+            </div>
             <p className="text-xs text-muted-foreground mt-1">
               {ponto.categoria}{subs.length > 0 ? ` › ${subs.join(" • ")}` : ""}
             </p>
