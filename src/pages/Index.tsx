@@ -1,6 +1,7 @@
 import { useState, useCallback, useMemo, useRef, useEffect } from "react";
 import { Helmet } from "react-helmet-async";
-import { Search, Music, Plus, Settings, LogOut, Instagram, Heart, Inbox, Loader2, Drum, Check, LogIn, UserCircle2, Eye, ShieldCheck, Menu } from "lucide-react";
+import { Search, Music, Plus, Settings, LogOut, Instagram, Heart, Inbox, Loader2, Drum, Check, LogIn, UserCircle2, Eye, ShieldCheck, Menu, X } from "lucide-react";
+import { buildSearchIndex, fuzzySearch } from "@/lib/fuzzySearch";
 import { useSidebar } from "@/components/ui/sidebar";
 import logoImg from "@/assets/logo.png";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
@@ -133,8 +134,10 @@ const Index = () => {
 
   const sameText = (a?: string | null, b?: string | null) => norm(a || "") === norm(b || "");
 
+  const fuse = useMemo(() => buildSearchIndex(pontos), [pontos]);
+
   const filtered = useMemo(() => {
-    const q = norm(search.trim());
+    const q = search.trim();
     let list = pontos;
 
     if (categoria && subcategoria) {
@@ -160,14 +163,9 @@ const Index = () => {
       });
     }
     if (!q) return list;
-    return list.filter(
-      (p) =>
-        norm(p.nome).includes(q) ||
-        norm(p.categoria).includes(q) ||
-        norm(p.letra).includes(q) ||
-        (p.subcategorias || []).some((s) => norm(s).includes(q))
-    );
-  }, [search, showFavorites, showClassifFilters, classifFilter, toqueFilter, favoritos, categoria, subcategoria, pontos, toqueOrdens]);
+    return fuzzySearch(list, q, fuse);
+  }, [search, showFavorites, showClassifFilters, classifFilter, toqueFilter, favoritos, categoria, subcategoria, pontos, toqueOrdens, fuse]);
+
 
   const visibleList = dragList ?? filtered;
 
@@ -412,8 +410,19 @@ const Index = () => {
               autoCorrect="off"
               autoCapitalize="off"
               spellCheck={false}
-              className="w-full pl-10 pr-4 py-3 rounded-xl bg-primary-foreground/10 text-primary-foreground placeholder:text-primary-foreground/35 text-sm outline-none focus:ring-2 focus:ring-accent/50 backdrop-blur-sm transition-all border border-primary-foreground/10 uppercase"
+              className="w-full pl-10 pr-11 py-3 rounded-xl bg-primary-foreground/10 text-primary-foreground placeholder:text-primary-foreground/35 text-sm outline-none focus:ring-2 focus:ring-accent/50 backdrop-blur-sm transition-all border border-primary-foreground/10 uppercase"
             />
+            {search.length > 0 && (
+              <button
+                type="button"
+                onClick={() => setSearch("")}
+                aria-label="Limpar busca"
+                title="LIMPAR BUSCA"
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1.5 rounded-lg text-primary-foreground/60 hover:text-primary-foreground hover:bg-primary-foreground/15 transition-all active:scale-90"
+              >
+                <X size={16} />
+              </button>
+            )}
           </div>
         </div>
       </header>
