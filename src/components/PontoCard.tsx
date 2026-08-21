@@ -69,6 +69,15 @@ const PontoCard = ({ ponto, isPlaying, isFavorite, visitorMode = false, showFavo
     }
   };
 
+  const handleCopyLetra = async () => {
+    try {
+      await navigator.clipboard.writeText(ponto.letra);
+      toast.success("Letra copiada!");
+    } catch {
+      toast.error("Não foi possível copiar a letra.");
+    }
+  };
+
   const { isAdmin, can } = useAuth();
   const embed = getEmbedInfo(ponto.audio);
   const hasMedia = embed.kind !== "none";
