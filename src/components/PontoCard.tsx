@@ -230,7 +230,15 @@ const PontoCard = ({ ponto, isPlaying, isFavorite, visitorMode = false, showFavo
           title={onOpenFullscreen ? "Abrir em tela cheia" : undefined}
         >
           <div className="absolute left-0 top-0 bottom-0 w-1 rounded-full bg-accent/30" style={accentBarStyle} />
-          <pre className="text-sm sm:text-base text-card-foreground/80 whitespace-pre-wrap font-[inherit] leading-relaxed pl-4 py-1 uppercase">
+          <button
+            onClick={(e) => { e.stopPropagation(); handleCopyLetra(); }}
+            className="absolute right-1 top-1 p-1.5 rounded-lg hover:bg-muted transition-all active:scale-90 text-muted-foreground z-10"
+            aria-label="Copiar letra"
+            title="Copiar letra"
+          >
+            <Copy size={14} />
+          </button>
+          <pre className="text-sm sm:text-base text-card-foreground/80 whitespace-pre-wrap font-[inherit] leading-relaxed pl-4 pr-10 py-1 uppercase">
             {renderHighlighted(ponto.letra, highlight)}
           </pre>
         </div>
