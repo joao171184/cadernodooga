@@ -180,19 +180,9 @@ const PontoPage = () => {
             <p className="text-[10px] text-muted-foreground font-bold uppercase truncate">
               {ponto.categoria}{ponto.subcategorias.length ? ` › ${ponto.subcategorias.join(" • ")}` : ""}
             </p>
-            <div className="flex items-center gap-2">
-              <h1 className="font-display text-base sm:text-lg font-bold text-foreground uppercase truncate">
-                {ponto.nome}
-              </h1>
-              <button
-                onClick={handleCopyLetra}
-                className="p-1.5 rounded-lg hover:bg-muted transition-all active:scale-90 text-muted-foreground shrink-0"
-                aria-label="Copiar letra"
-                title="Copiar letra"
-              >
-                <Copy size={16} />
-              </button>
-            </div>
+            <h1 className="font-display text-base sm:text-lg font-bold text-foreground uppercase truncate">
+              {ponto.nome}
+            </h1>
           </div>
           <button
             onClick={handleShare}
