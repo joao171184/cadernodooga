@@ -117,19 +117,9 @@ const PontoCard = ({ ponto, isPlaying, isFavorite, visitorMode = false, showFavo
       <div className="p-4 sm:p-5">
         <div className="flex items-start justify-between gap-2 mb-3">
           <div className="flex-1 min-w-0">
-            <div className="flex items-start gap-2">
-              <h3 className="font-display text-base sm:text-lg font-bold text-card-foreground leading-tight uppercase">
-                {ponto.nome}
-              </h3>
-              <button
-                onClick={handleCopyLetra}
-                className="p-1.5 rounded-lg hover:bg-muted transition-all active:scale-90 text-muted-foreground shrink-0 mt-0.5"
-                aria-label="Copiar letra"
-                title="Copiar letra"
-              >
-                <Copy size={14} />
-              </button>
-            </div>
+            <h3 className="font-display text-base sm:text-lg font-bold text-card-foreground leading-tight uppercase">
+              {ponto.nome}
+            </h3>
             <p className="text-xs text-muted-foreground mt-1">
               {ponto.categoria}{subs.length > 0 ? ` › ${subs.join(" • ")}` : ""}
             </p>
@@ -240,7 +230,15 @@ const PontoCard = ({ ponto, isPlaying, isFavorite, visitorMode = false, showFavo
           title={onOpenFullscreen ? "Abrir em tela cheia" : undefined}
         >
           <div className="absolute left-0 top-0 bottom-0 w-1 rounded-full bg-accent/30" style={accentBarStyle} />
-          <pre className="text-sm sm:text-base text-card-foreground/80 whitespace-pre-wrap font-[inherit] leading-relaxed pl-4 py-1 uppercase">
+          <button
+            onClick={(e) => { e.stopPropagation(); handleCopyLetra(); }}
+            className="absolute right-1 top-1 p-1.5 rounded-lg hover:bg-muted transition-all active:scale-90 text-muted-foreground z-10"
+            aria-label="Copiar letra"
+            title="Copiar letra"
+          >
+            <Copy size={14} />
+          </button>
+          <pre className="text-sm sm:text-base text-card-foreground/80 whitespace-pre-wrap font-[inherit] leading-relaxed pl-4 pr-10 py-1 uppercase">
             {renderHighlighted(ponto.letra, highlight)}
           </pre>
         </div>
