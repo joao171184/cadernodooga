@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { ChevronsDown, Pause, Play, ArrowUp } from "lucide-react";
+import { NotasWidget } from "@/components/NotasWidget";
 
 const STORAGE_KEY = "auto-scroll-prefs";
 
@@ -86,6 +87,7 @@ export function AutoScrollControl() {
           <ArrowUp size={20} />
         </button>
       )}
+      <NotasWidget />
       {open && (
         <div className="bg-card border border-border rounded-2xl shadow-2xl p-4 w-[min(16rem,calc(100vw-1.5rem))] space-y-3">
           <div className="flex items-center justify-between">
