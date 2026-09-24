@@ -541,7 +541,7 @@
   </url>
   <url>
     <loc>https://cadernodooga.com.br/ponto/eu-vi-mamae-oxum-cantando-na-cachoeira</loc>
-    <lastmod>2026-07-20</lastmod>
+    <lastmod>2026-09-19</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -560,12 +560,6 @@
   <url>
     <loc>https://cadernodooga.com.br/ponto/samba-quem-ta-de-tamanco</loc>
     <lastmod>2026-08-17</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://cadernodooga.com.br/ponto/o-ogum-o-ogunhe-o-ogum-ogum-xoroque</loc>
-    <lastmod>2026-08-03</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -624,6 +618,12 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://cadernodooga.com.br/ponto/o-ogum-o-ogunhe-o-ogum-ogum-xoroque</loc>
+    <lastmod>2026-09-05</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://cadernodooga.com.br/ponto/na-porta-da-delegacia-seu-delegado-eu-nao-matei-minha-pretinha</loc>
     <lastmod>2026-08-17</lastmod>
     <changefreq>monthly</changefreq>
@@ -656,12 +656,6 @@
   <url>
     <loc>https://cadernodooga.com.br/ponto/quanto-que-eu-nao-bambeio-hoje-eu-vim-pra-trabalhar-caboclo-samambaia</loc>
     <lastmod>2026-07-06</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://cadernodooga.com.br/ponto/meu-pai-que-barulho-e-esse-que-vem-la-do-bambuzal</loc>
-    <lastmod>2026-08-03</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -1314,6 +1308,12 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://cadernodooga.com.br/ponto/o-ceu-flamejou-e-o-sinal-que-ela-chegou</loc>
+    <lastmod>2026-09-05</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://cadernodooga.com.br/ponto/oh-mata-oh-mata-mata-medonha-on-de-eu-me-criei</loc>
     <lastmod>2026-07-06</lastmod>
     <changefreq>monthly</changefreq>
@@ -1334,6 +1334,12 @@
   <url>
     <loc>https://cadernodooga.com.br/ponto/guardioes</loc>
     <lastmod>2026-07-07</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://cadernodooga.com.br/ponto/a-bencao-minha-mae-pai-se-precisar-eu-chamo</loc>
+    <lastmod>2026-09-17</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -1602,12 +1608,6 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://cadernodooga.com.br/ponto/trovejou-la-no-ceu-e-o-mundo-balanceou</loc>
-    <lastmod>2026-08-03</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
     <loc>https://cadernodooga.com.br/ponto/quando-ogum-partiu-pra-guerra</loc>
     <lastmod>2026-08-03</lastmod>
     <changefreq>monthly</changefreq>
@@ -1620,13 +1620,13 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://cadernodooga.com.br/ponto/selei-selei-seu-cavalo-eu-selei</loc>
-    <lastmod>2026-08-03</lastmod>
+    <loc>https://cadernodooga.com.br/ponto/trovejou-la-no-ceu-e-o-mundo-balanceou</loc>
+    <lastmod>2026-09-05</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://cadernodooga.com.br/ponto/senhor-oxossi-la-na-mata-ele-e-o-rei</loc>
+    <loc>https://cadernodooga.com.br/ponto/selei-selei-seu-cavalo-eu-selei</loc>
     <lastmod>2026-08-03</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
@@ -1638,8 +1638,14 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://cadernodooga.com.br/ponto/senhor-oxossi-la-na-mata-ele-e-o-rei</loc>
+    <lastmod>2026-09-05</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://cadernodooga.com.br/ponto/olha-como-o-ceu-esta-bonito-azul-marinho-e-para-ogum-xoroque</loc>
-    <lastmod>2026-08-30</lastmod>
+    <lastmod>2026-09-05</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -1862,12 +1868,6 @@
   <url>
     <loc>https://cadernodooga.com.br/ponto/ele-veste-branco-e-vem-la-do-mar</loc>
     <lastmod>2026-08-30</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://cadernodooga.com.br/ponto/quando-a-mare-abaixar-va-lhe-visitar-va-fazer-devocao-va-lhe-presentear</loc>
-    <lastmod>2026-08-03</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -2436,12 +2436,6 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://cadernodooga.com.br/ponto/o-ceu-flamejou-e-o-sinal-que-ela-chegou</loc>
-    <lastmod>2026-08-03</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
     <loc>https://cadernodooga.com.br/ponto/exus-e-pomba-giras</loc>
     <lastmod>2026-08-05</lastmod>
     <changefreq>monthly</changefreq>
@@ -2634,25 +2628,19 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://cadernodooga.com.br/ponto/tantas-batalhas</loc>
-    <lastmod>2026-08-22</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
     <loc>https://cadernodooga.com.br/ponto/eu-nao-sou-daqui-marinheiro-so</loc>
     <lastmod>2026-08-30</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://cadernodooga.com.br/ponto/dono-do-dia-e-tambem-da-noite</loc>
-    <lastmod>2026-08-30</lastmod>
+    <loc>https://cadernodooga.com.br/ponto/oh-remador-remador</loc>
+    <lastmod>2026-09-03</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://cadernodooga.com.br/ponto/oh-remador-remador</loc>
+    <loc>https://cadernodooga.com.br/ponto/dono-do-dia-e-tambem-da-noite</loc>
     <lastmod>2026-08-30</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
@@ -2672,6 +2660,36 @@
   <url>
     <loc>https://cadernodooga.com.br/ponto/mare-ta-cheia-o-barco-em-agua</loc>
     <lastmod>2026-08-30</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://cadernodooga.com.br/ponto/tantas-batalhas</loc>
+    <lastmod>2026-09-05</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://cadernodooga.com.br/ponto/eu-fui-na-beira-da-praia-pra-ver-o-balanco-do-mar</loc>
+    <lastmod>2026-09-05</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://cadernodooga.com.br/ponto/quando-a-mare-abaixar-va-lhe-visitar-va-fazer-devocao-va-lhe-presentear</loc>
+    <lastmod>2026-09-05</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://cadernodooga.com.br/ponto/meu-pai-que-barulho-e-esse-que-vem-la-do-bambuzal</loc>
+    <lastmod>2026-09-19</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://cadernodooga.com.br/ponto/e-obaluae</loc>
+    <lastmod>2026-09-19</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -2706,12 +2724,12 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://cadernodooga.com.br/?categoria=Defuma%C3%A7%C3%A3o</loc>
+    <loc>https://cadernodooga.com.br/?categoria=Esquenta</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://cadernodooga.com.br/?categoria=Esquenta</loc>
+    <loc>https://cadernodooga.com.br/?categoria=Defuma%C3%A7%C3%A3o</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
