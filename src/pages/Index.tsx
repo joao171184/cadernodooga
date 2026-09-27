@@ -53,6 +53,27 @@ const Index = () => {
   const [editingPonto, setEditingPonto] = useState<Ponto | null>(null);
   const [adminOpen, setAdminOpen] = useState(false);
   const [fullscreenPonto, setFullscreenPonto] = useState<Ponto | null>(null);
+  const readerScrollY = useRef(0);
+  const restoreScroll = () => {
+    const y = readerScrollY.current;
+    requestAnimationFrame(() => requestAnimationFrame(() => window.scrollTo(0, y)));
+  };
+  const openReader = (p: Ponto) => {
+    readerScrollY.current = window.scrollY;
+    window.history.pushState({ ...(window.history.state || {}), reader: p.id }, "");
+    setFullscreenPonto(p);
+  };
+  const closeReader = () => {
+    if (window.history.state?.reader) window.history.back();
+    else { setFullscreenPonto(null); restoreScroll(); }
+  };
+  useEffect(() => {
+    const onPop = () => {
+      setFullscreenPonto((cur) => { if (cur) restoreScroll(); return null; });
+    };
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
+  }, []);
   const dragId = useRef<string | null>(null);
   const [dragList, setDragList] = useState<Ponto[] | null>(null);
 
@@ -433,7 +454,12 @@ const Index = () => {
         <div className="mb-4 space-y-2">
           <div className="flex w-full min-w-0 items-center gap-1.5 sm:gap-2">
             {showClassifFilters && (
-              <div className="flex min-w-0 flex-1 items-center gap-1 sm:flex-none sm:gap-2">
+              <div
+                role="toolbar"
+                aria-label="Filtrar por classificação"
+                className="flex min-w-0 flex-1 flex-nowrap items-center gap-2 overflow-x-auto whitespace-nowrap scrollbar-none -my-1 py-1 pr-1"
+                style={{ touchAction: "pan-x pan-y", WebkitOverflowScrolling: "touch" }}
+              >
                 <ClassifChip label="Todos" active={classifFilter === "all"} onClick={() => setClassifFilter("all")} />
                 {CLASSIFICACAO_OPTIONS.map((c) => (
                   <ClassifChip key={c.value} label={c.label} active={classifFilter === c.value} onClick={() => setClassifFilter(c.value)} />
@@ -546,7 +572,7 @@ const Index = () => {
                   onDragStart={effectiveIsAdmin ? handleDragStart : undefined}
                   onDragOver={effectiveIsAdmin ? handleDragOver : undefined}
                   onDrop={effectiveIsAdmin ? handleDrop : undefined}
-                  onOpenFullscreen={(p) => (p.slug ? navigate(`/ponto/${p.slug}`) : setFullscreenPonto(p))}
+                  onOpenFullscreen={openReader}
                   canMoveUp={i > 0}
                   canMoveDown={i < visibleList.length - 1}
                 />
@@ -575,7 +601,7 @@ const Index = () => {
           isFavorite={favoritos.has(fullscreenPonto.id)}
           onToggleFavorite={toggleFavorito}
           canFavorite={effectiveIsAdmin || can("favorite")}
-          onClose={() => setFullscreenPonto(null)}
+          onClose={closeReader}
         />
       )}
 
@@ -621,7 +647,8 @@ function ClassifChip({ label, active, onClick }: { label: string; active: boolea
   return (
     <button
       onClick={onClick}
-      className={`min-w-0 flex-1 px-1 py-1.5 text-[8px] min-[360px]:text-[9px] min-[400px]:px-2 min-[400px]:text-[10px] sm:flex-none sm:px-3 sm:text-[11px] rounded-full font-bold uppercase tracking-normal whitespace-nowrap transition-all active:scale-95 ${
+      aria-pressed={active}
+      className={`shrink-0 px-3.5 py-2 text-[11px] rounded-full font-bold uppercase tracking-normal whitespace-nowrap transition-all active:scale-95 ${
         active
           ? "bg-primary text-primary-foreground shadow-sm"
           : "bg-card text-muted-foreground border border-border hover:border-accent/30"
