@@ -212,7 +212,7 @@ export function NotasWidget() {
       )}
 
       <AlertDialog open={confirm} onOpenChange={setConfirm}>
-        <AlertDialogContent>
+        <AlertDialogContent className="z-[200]">
           <AlertDialogHeader>
             <AlertDialogTitle>Apagar notas</AlertDialogTitle>
             <AlertDialogDescription>
