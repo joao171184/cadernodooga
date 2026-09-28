@@ -629,13 +629,13 @@ const Index = () => {
             <span>por <span className="font-bold text-foreground">João Pedro de Andrade Marques</span></span>
           </div>
           <a
-            href="https://www.instagram.com/46marques__/"
+            href="https://www.instagram.com/j_marques.a/"
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-accent/15 hover:bg-accent/25 text-accent text-xs font-bold transition-all active:scale-95"
           >
             <Instagram size={14} />
-            <span>@46marques__</span>
+            <span>@j_marques.a</span>
           </a>
         </div>
       </footer>

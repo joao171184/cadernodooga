@@ -199,7 +199,7 @@ export function AppSidebar() {
           </div>
         </div>
         <a
-          href="https://www.instagram.com/46marques__/"
+          href="https://www.instagram.com/j_marques.a/"
           target="_blank"
           rel="noopener noreferrer"
           className="flex items-center gap-2 px-3 py-2 rounded-xl text-[11px] text-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent transition-all"
