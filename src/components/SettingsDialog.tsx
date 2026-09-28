@@ -321,6 +321,10 @@ function AcessosPanel() {
     await refreshPermissions();
   };
 
+  const filteredUsers = users.filter((u) =>
+    u.email.toLowerCase().includes(search.trim().toLowerCase())
+  );
+
   if (loading) {
     return (
       <div className="py-12 flex items-center justify-center text-muted-foreground">
