@@ -153,7 +153,7 @@ const Login = () => {
             🙏 Que a gira seja firme
           </p>
           <a
-            href="https://www.instagram.com/46marques__/"
+            href="https://www.instagram.com/j_marques.a/"
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-1.5 text-[11px] text-primary-foreground/70 hover:text-primary-foreground transition-colors"
