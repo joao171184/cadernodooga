@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { FolderTree, Eye, ShieldCheck, Loader2, Save, Users, Trash2 } from "lucide-react";
+import { FolderTree, Eye, ShieldCheck, Loader2, Save, Users, Trash2, Search, X } from "lucide-react";
 import { useAuth, ALL_PERMISSIONS, type AppRole, type PermissionKey } from "@/contexts/AuthContext";
 import { useCategorias } from "@/contexts/CategoriasContext";
 import { CategoriasManagerDialog } from "@/components/CategoriasManagerDialog";
