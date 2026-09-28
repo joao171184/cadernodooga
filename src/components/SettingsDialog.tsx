@@ -42,7 +42,7 @@ export function loadVisibility(): Visibility {
 }
 
 export function SettingsDialog({ open, onClose }: Props) {
-  const { isSuperAdmin } = useAuth();
+  const { isAdmin: isSuperAdmin } = useAuth();
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
       <DialogContent className="max-w-3xl mx-4 max-h-[90vh] overflow-y-auto">
