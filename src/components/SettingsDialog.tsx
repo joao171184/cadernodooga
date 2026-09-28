@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { FolderTree, Eye, ShieldCheck, Loader2, Save, Users, Trash2 } from "lucide-react";
+import { FolderTree, Eye, ShieldCheck, Loader2, Save, Users, Trash2, Search, X } from "lucide-react";
 import { useAuth, ALL_PERMISSIONS, type AppRole, type PermissionKey } from "@/contexts/AuthContext";
 import { useCategorias } from "@/contexts/CategoriasContext";
 import { CategoriasManagerDialog } from "@/components/CategoriasManagerDialog";
@@ -225,6 +225,7 @@ function AcessosPanel() {
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [search, setSearch] = useState("");
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -320,6 +321,10 @@ function AcessosPanel() {
     await refreshPermissions();
   };
 
+  const filteredUsers = users.filter((u) =>
+    u.email.toLowerCase().includes(search.trim().toLowerCase())
+  );
+
   if (loading) {
     return (
       <div className="py-12 flex items-center justify-center text-muted-foreground">
@@ -341,11 +346,32 @@ function AcessosPanel() {
   return (
     <div className="space-y-5">
       {/* Usuários */}
-      <Section title="Usuários cadastrados">
+      <Section title={`Usuários cadastrados (${users.length})`}>
+        <div className="relative">
+          <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Pesquisar e-mail..."
+            className="w-full pl-9 pr-8 py-2.5 rounded-xl bg-muted border border-border text-sm outline-none focus:ring-2 focus:ring-accent/50"
+          />
+          {search && (
+            <button
+              onClick={() => setSearch("")}
+              aria-label="Limpar busca"
+              className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded-md text-muted-foreground hover:text-foreground"
+            >
+              <X size={14} />
+            </button>
+          )}
+        </div>
         {users.length === 0 ? (
           <p className="text-sm text-muted-foreground py-2">Nenhum usuário cadastrado ainda.</p>
+        ) : filteredUsers.length === 0 ? (
+          <p className="text-sm text-muted-foreground py-2">Nenhum e-mail encontrado para "{search}".</p>
         ) : (
-          users.map((u) => (
+          filteredUsers.map((u) => (
             <div key={u.id} className="flex items-center gap-2 py-2 border-b border-border last:border-0">
               <Users size={14} className="text-muted-foreground shrink-0" />
               <span className="flex-1 text-sm truncate">
