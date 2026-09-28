@@ -24,7 +24,7 @@ export const ALL_PERMISSIONS: { key: PermissionKey; label: string }[] = [
   { key: "manage_users", label: "Gerenciar usuários" },
 ];
 
-const SUPER_ADMIN_EMAIL = "joao.pedro.am@icloud.com";
+const SUPER_ADMIN_EMAIL = "joao.pedro.am.171@gmail.com";
 
 interface AuthContextType {
   user: User | null;
