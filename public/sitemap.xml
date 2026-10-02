@@ -246,6 +246,12 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://cadernodooga.com.br/ponto/exu-tiriri</loc>
+    <lastmod>2026-09-29</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://cadernodooga.com.br/ponto/meu-lirio-branco-que-eu-plantei-aqui-2</loc>
     <lastmod>2026-07-11</lastmod>
     <changefreq>monthly</changefreq>
@@ -714,12 +720,6 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://cadernodooga.com.br/ponto/exu-tiriri</loc>
-    <lastmod>2026-08-05</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
     <loc>https://cadernodooga.com.br/ponto/olha-que-o-ceu-clareou-quando-o-dia-raiou</loc>
     <lastmod>2026-08-03</lastmod>
     <changefreq>monthly</changefreq>
@@ -834,6 +834,12 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://cadernodooga.com.br/ponto/exu-do-lodo</loc>
+    <lastmod>2026-10-02</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://cadernodooga.com.br/ponto/maria-padilha</loc>
     <lastmod>2026-08-05</lastmod>
     <changefreq>monthly</changefreq>
@@ -841,12 +847,6 @@
   </url>
   <url>
     <loc>https://cadernodooga.com.br/ponto/rosa-caveira</loc>
-    <lastmod>2026-08-05</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://cadernodooga.com.br/ponto/exu-do-lodo</loc>
     <lastmod>2026-08-05</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
@@ -1332,14 +1332,14 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://cadernodooga.com.br/ponto/o-mar-roncou-a-terra-estremeceu</loc>
-    <lastmod>2026-08-08</lastmod>
+    <loc>https://cadernodooga.com.br/ponto/oh-mare-oh-mare</loc>
+    <lastmod>2026-08-30</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://cadernodooga.com.br/ponto/oh-mare-oh-mare</loc>
-    <lastmod>2026-08-30</lastmod>
+    <loc>https://cadernodooga.com.br/ponto/o-mar-roncou-a-terra-estremeceu</loc>
+    <lastmod>2026-10-01</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -2790,12 +2790,6 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://cadernodooga.com.br/ponto/olha-o-doce-que-eu-quero-comer</loc>
-    <lastmod>2026-09-27</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
     <loc>https://cadernodooga.com.br/ponto/ibejada-esta-de-ronda-sao-jorge-de-prontidao</loc>
     <lastmod>2026-09-27</lastmod>
     <changefreq>monthly</changefreq>
@@ -2922,12 +2916,6 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://cadernodooga.com.br/ponto/mariazinha-mora-na-beira-do-rio-na-beira-do-rio-la-no-jurema</loc>
-    <lastmod>2026-09-27</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
     <loc>https://cadernodooga.com.br/ponto/tava-passeando-na-mata-quando-ouvi-alguem-me-chamar</loc>
     <lastmod>2026-09-27</lastmod>
     <changefreq>monthly</changefreq>
@@ -2958,8 +2946,20 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://cadernodooga.com.br/ponto/mariazinha-mora-na-beira-do-rio-na-beira-do-rio-la-no-jurema</loc>
+    <lastmod>2026-10-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://cadernodooga.com.br/ponto/choveu-choveu-7-dias-sem-parar</loc>
     <lastmod>2026-09-27</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://cadernodooga.com.br/ponto/olha-o-doce-que-eu-quero-comer</loc>
+    <lastmod>2026-10-01</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
