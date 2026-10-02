@@ -500,6 +500,38 @@ const Index = () => {
                 ))}
               </DropdownMenuContent>
             </DropdownMenu>
+
+            {effectiveIsAdmin && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button
+                    className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition-all active:scale-95 ${
+                      mediaFilter !== "all"
+                        ? "bg-primary text-primary-foreground shadow-sm"
+                        : "bg-card text-muted-foreground border border-border hover:border-accent/30"
+                    }`}
+                    aria-label="Filtrar por mídia"
+                    title="Filtrar por mídia (YouTube/Spotify/TikTok/áudio)"
+                  >
+                    {mediaFilter === "without" ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-52">
+                  <DropdownMenuItem onClick={() => setMediaFilter("all")} className="gap-2 text-xs font-bold uppercase">
+                    <Check size={14} className={mediaFilter === "all" ? "opacity-100" : "opacity-0"} />
+                    TODOS OS PONTOS
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setMediaFilter("with")} className="gap-2 text-xs font-bold uppercase">
+                    <Check size={14} className={mediaFilter === "with" ? "opacity-100" : "opacity-0"} />
+                    <Volume2 size={14} /> COM MÍDIA
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setMediaFilter("without")} className="gap-2 text-xs font-bold uppercase">
+                    <Check size={14} className={mediaFilter === "without" ? "opacity-100" : "opacity-0"} />
+                    <VolumeX size={14} /> SEM MÍDIA
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
           </div>
 
           <div className="flex justify-end">
