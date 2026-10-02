@@ -1,6 +1,7 @@
 import { useState, useCallback, useMemo, useRef, useEffect } from "react";
 import { Helmet } from "react-helmet-async";
-import { Search, Music, Plus, Settings, LogOut, Instagram, Heart, Inbox, Loader2, Drum, Check, LogIn, UserCircle2, Eye, ShieldCheck, Menu, X } from "lucide-react";
+import { Search, Music, Plus, Settings, LogOut, Instagram, Heart, Inbox, Loader2, Drum, Check, LogIn, UserCircle2, Eye, ShieldCheck, Menu, X, Volume2, VolumeX } from "lucide-react";
+import { getEmbedInfo } from "@/lib/embed";
 import { buildSearchIndex, fuzzySearch } from "@/lib/fuzzySearch";
 import { useSidebar } from "@/components/ui/sidebar";
 import logoImg from "@/assets/logo.png";
@@ -29,6 +30,7 @@ import { toast } from "sonner";
 
 type ClassifFilter = "all" | Classificacao;
 type ToqueFilter = "all" | ToqueTipo;
+type MediaFilter = "all" | "with" | "without";
 
 const Index = () => {
   const { isAdmin, isLoggedIn, user, logout, can } = useAuth();
@@ -48,6 +50,7 @@ const Index = () => {
   useEffect(() => { setShowFavorites(isFavoritosRoute); }, [isFavoritosRoute]);
   const [classifFilter, setClassifFilter] = useState<ClassifFilter>("all");
   const [toqueFilter, setToqueFilter] = useState<ToqueFilter>("all");
+  const [mediaFilter, setMediaFilter] = useState<MediaFilter>("all");
   const [playingId, setPlayingId] = useState<string | null>(null);
   const [formOpen, setFormOpen] = useState(false);
   const [editingPonto, setEditingPonto] = useState<Ponto | null>(null);
@@ -183,9 +186,12 @@ const Index = () => {
         return a.ordem - b.ordem;
       });
     }
+    if (mediaFilter !== "all") {
+      list = list.filter((p) => (getEmbedInfo(p.audio).kind !== "none") === (mediaFilter === "with"));
+    }
     if (!q) return list;
     return fuzzySearch(list, q, fuse);
-  }, [search, showFavorites, showClassifFilters, classifFilter, toqueFilter, favoritos, categoria, subcategoria, pontos, toqueOrdens, fuse]);
+  }, [search, showFavorites, showClassifFilters, classifFilter, toqueFilter, mediaFilter, favoritos, categoria, subcategoria, pontos, toqueOrdens, fuse]);
 
 
   const visibleList = dragList ?? filtered;
@@ -494,6 +500,38 @@ const Index = () => {
                 ))}
               </DropdownMenuContent>
             </DropdownMenu>
+
+            {effectiveIsAdmin && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button
+                    className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition-all active:scale-95 ${
+                      mediaFilter !== "all"
+                        ? "bg-primary text-primary-foreground shadow-sm"
+                        : "bg-card text-muted-foreground border border-border hover:border-accent/30"
+                    }`}
+                    aria-label="Filtrar por mídia"
+                    title="Filtrar por mídia (YouTube/Spotify/TikTok/áudio)"
+                  >
+                    {mediaFilter === "without" ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-52">
+                  <DropdownMenuItem onClick={() => setMediaFilter("all")} className="gap-2 text-xs font-bold uppercase">
+                    <Check size={14} className={mediaFilter === "all" ? "opacity-100" : "opacity-0"} />
+                    TODOS OS PONTOS
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setMediaFilter("with")} className="gap-2 text-xs font-bold uppercase">
+                    <Check size={14} className={mediaFilter === "with" ? "opacity-100" : "opacity-0"} />
+                    <Volume2 size={14} /> COM MÍDIA
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setMediaFilter("without")} className="gap-2 text-xs font-bold uppercase">
+                    <Check size={14} className={mediaFilter === "without" ? "opacity-100" : "opacity-0"} />
+                    <VolumeX size={14} /> SEM MÍDIA
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
           </div>
 
           <div className="flex justify-end">
