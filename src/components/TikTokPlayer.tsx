@@ -32,8 +32,8 @@ export function TikTokPlayer({ src, title }: Props) {
     const iframe = iframeRef.current;
     if (!iframe) return;
 
-    const timer = setTimeout(unmute, 1200);
-    const interval = setInterval(unmute, 2500);
+    const timer = setTimeout(unmute, 1500);
+    const interval = 0 as unknown as ReturnType<typeof setInterval>;
 
     const onMessage = (e: MessageEvent) => {
       if (e.source !== iframe.contentWindow) return;
