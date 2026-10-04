@@ -84,7 +84,7 @@ const Pendentes = () => {
                   </div>
                 </div>
                 <div className="relative mb-4">
-                  <div className="absolute left-0 top-0 bottom-0 w-1 rounded-full bg-amber-500/40" />
+                  <div className="absolute left-0 top-0 bottom-0 w-1 rounded-full bg-accent/40" />
                   <pre className="text-sm whitespace-pre-wrap font-[inherit] leading-relaxed pl-4 uppercase text-card-foreground/80">
                     {p.letra}
                   </pre>

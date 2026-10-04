@@ -175,7 +175,7 @@ export function AppSidebar() {
                       }`}
                       activeClassName=""
                     >
-                      <Heart size={18} strokeWidth={2} className="shrink-0 fill-white/30 text-white" />
+                      <Heart size={18} strokeWidth={2} className="shrink-0 fill-accent/40 text-accent-strong" />
                       <span className="tracking-wide text-[13px] font-display">Favoritos</span>
                     </NavLink>
                   </SidebarMenuButton>
