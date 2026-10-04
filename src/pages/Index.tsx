@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo, useRef, useEffect } from "react";
+import { useState, useCallback, useMemo, useRef, useEffect, lazy, Suspense } from "react";
 import { Helmet } from "react-helmet-async";
 import { Search, Music, Plus, Settings, LogOut, Instagram, Heart, Inbox, Loader2, Drum, Check, LogIn, UserCircle2, Eye, ShieldCheck, Menu, X, Volume2, VolumeX } from "lucide-react";
 import { getEmbedInfo } from "@/lib/embed";
@@ -8,7 +8,6 @@ import logoImg from "@/assets/logo.png";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import PontoCard from "@/components/PontoCard";
 import { PontoFormDialog } from "@/components/PontoFormDialog";
-import { SettingsDialog } from "@/components/SettingsDialog";
 import { MediaPlayer } from "@/components/MediaPlayer";
 import { PontoFullscreen } from "@/components/PontoFullscreen";
 import { AutoScrollControl } from "@/components/AutoScrollControl";
@@ -31,6 +30,10 @@ import { toast } from "sonner";
 type ClassifFilter = "all" | Classificacao;
 type ToqueFilter = "all" | ToqueTipo;
 type MediaFilter = "all" | "with" | "without";
+
+const RENDER_STEP = 60;
+
+const SettingsDialog = lazy(() => import("@/components/SettingsDialog").then((m) => ({ default: m.SettingsDialog })));
 
 const Index = () => {
   const { isAdmin, isLoggedIn, user, logout, can } = useAuth();
@@ -55,6 +58,8 @@ const Index = () => {
   const [formOpen, setFormOpen] = useState(false);
   const [editingPonto, setEditingPonto] = useState<Ponto | null>(null);
   const [adminOpen, setAdminOpen] = useState(false);
+  const [settingsRequested, setSettingsRequested] = useState(false);
+  useEffect(() => { if (adminOpen) setSettingsRequested(true); }, [adminOpen]);
   const [fullscreenPonto, setFullscreenPonto] = useState<Ponto | null>(null);
   const readerScrollY = useRef(0);
   const restoreScroll = () => {
@@ -198,6 +203,23 @@ const Index = () => {
 
 
   const visibleList = dragList ?? filtered;
+
+  const [renderLimit, setRenderLimit] = useState(RENDER_STEP);
+  const sentinelRef = useRef<HTMLDivElement>(null);
+  const hasMoreToRender = visibleList.length > renderLimit;
+  useEffect(() => {
+    setRenderLimit(RENDER_STEP);
+  }, [search, categoria, subcategoria, showFavorites, classifFilter, toqueFilter, mediaFilter]);
+  useEffect(() => {
+    const el = sentinelRef.current;
+    if (!el || !hasMoreToRender) return;
+    const io = new IntersectionObserver(
+      (entries) => { if (entries[0]?.isIntersecting) setRenderLimit((n) => n + RENDER_STEP); },
+      { rootMargin: "1500px 0px" },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, [renderLimit, hasMoreToRender, loading]);
 
   const handleDragStart = useCallback((id: string) => {
     dragId.current = id;
@@ -615,7 +637,7 @@ const Index = () => {
               </div>
             )
           ) : (
-            visibleList.map((ponto, i) => {
+            visibleList.slice(0, renderLimit).map((ponto, i) => {
               const nkey = (ponto.categoria || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
               const subKey = ponto.subcategorias[0]
                 ? ponto.subcategorias[0].toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")
@@ -652,6 +674,7 @@ const Index = () => {
             })
           )}
         </div>
+        {!loading && hasMoreToRender && <div ref={sentinelRef} className="h-px" aria-hidden="true" />}
 
       </main>
 
@@ -688,8 +711,10 @@ const Index = () => {
       />
 
       {/* Configurações */}
-      {showSettings && (
-        <SettingsDialog open={adminOpen} onClose={() => setAdminOpen(false)} />
+      {showSettings && settingsRequested && (
+        <Suspense fallback={null}>
+          <SettingsDialog open={adminOpen} onClose={() => setAdminOpen(false)} />
+        </Suspense>
       )}
 
       {/* Footer com créditos */}

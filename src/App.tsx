@@ -12,14 +12,21 @@ import { CategoriasProvider } from "@/contexts/CategoriasContext";
 import { PontosProvider } from "@/contexts/PontosContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import Index from "./pages/Index.tsx";
-import Login from "./pages/Login.tsx";
-import NotFound from "./pages/NotFound.tsx";
-import Pendentes from "./pages/Pendentes.tsx";
 import PontoPage from "./pages/PontoPage.tsx";
-import ResetPassword from "./pages/ResetPassword.tsx";
-import AuthConfirm from "./pages/AuthConfirm.tsx";
-import type { ReactNode } from "react";
+import { lazy, Suspense, type ReactNode } from "react";
 import { Loader2 } from "lucide-react";
+
+const Login = lazy(() => import("./pages/Login.tsx"));
+const NotFound = lazy(() => import("./pages/NotFound.tsx"));
+const Pendentes = lazy(() => import("./pages/Pendentes.tsx"));
+const ResetPassword = lazy(() => import("./pages/ResetPassword.tsx"));
+const AuthConfirm = lazy(() => import("./pages/AuthConfirm.tsx"));
+
+const PageSpinner = () => (
+  <div className="min-h-screen flex items-center justify-center bg-background">
+    <Loader2 className="animate-spin text-primary" size={32} />
+  </div>
+);
 
 const queryClient = new QueryClient();
 
@@ -36,13 +43,7 @@ function AppLayout({ children }: { children: ReactNode }) {
 
 function ProtectedLayout({ children }: { children: ReactNode }) {
   const { isLoggedIn, loading } = useAuth();
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <Loader2 className="animate-spin text-primary" size={32} />
-      </div>
-    );
-  }
+  if (loading) return <PageSpinner />;
   if (!isLoggedIn) return <Navigate to="/login" replace />;
   return <AppLayout>{children}</AppLayout>;
 }
@@ -60,6 +61,7 @@ const App = () => (
           <AuthProvider>
             <CategoriasProvider>
               <PontosProvider>
+                <Suspense fallback={<PageSpinner />}>
                 <Routes>
                   <Route path="/login" element={<Login />} />
                   <Route path="/reset-password" element={<ResetPassword />} />
@@ -73,6 +75,7 @@ const App = () => (
 
                   <Route path="*" element={<NotFound />} />
                 </Routes>
+                </Suspense>
               </PontosProvider>
             </CategoriasProvider>
           </AuthProvider>

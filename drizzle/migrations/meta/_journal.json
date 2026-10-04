@@ -29,6 +29,13 @@
       "when": 1791126000000,
       "tag": "0003_admin_delete_user",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1791133200000,
+      "tag": "0004_admins_manage_roles",
+      "breakpoints": true
     }
   ]
 }

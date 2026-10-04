@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { ArrowLeft, Check, X, Loader2, Inbox, Mic2 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { usePontos } from "@/contexts/PontosContext";
 import { toast } from "sonner";
@@ -12,10 +12,7 @@ const Pendentes = () => {
   const [busy, setBusy] = useState<string | null>(null);
 
   if (authLoading) return null;
-  if (!isAdmin) {
-    navigate("/", { replace: true });
-    return null;
-  }
+  if (!isAdmin) return <Navigate to="/" replace />;
 
   const handleApprove = async (id: string) => {
     setBusy(id);

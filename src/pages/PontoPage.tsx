@@ -162,7 +162,7 @@ const PontoPage = () => {
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content={ponto.nome} />
         <meta name="twitter:description" content={description} />
-        <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
+        <script type="application/ld+json">{JSON.stringify(jsonLd).replace(/</g, "\\u003c")}</script>
       </Helmet>
 
       <PublicHeader />

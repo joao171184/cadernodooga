@@ -1,4 +1,4 @@
-﻿import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from "react";
+﻿import { createContext, useContext, useState, useEffect, useCallback, useRef, type ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { Session, User } from "@supabase/supabase-js";
 import { authRedirectOrigin } from "@/lib/siteUrl";
@@ -99,18 +99,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  // getSession e o evento inicial do onAuthStateChange chegam juntos: um único carregamento por usuário.
+  const roleLoad = useRef<{ uid: string; promise: Promise<void> } | null>(null);
+  const ensureRoleAndPerms = useCallback((uid: string) => {
+    if (roleLoad.current?.uid === uid) return roleLoad.current.promise;
+    const promise = loadRoleAndPerms(uid).catch(() => { console.error("Falha ao carregar permissões"); });
+    roleLoad.current = { uid, promise };
+    return promise;
+  }, [loadRoleAndPerms]);
+
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, sess) => {
       setSession(sess);
       setUser(sess?.user ?? null);
       if (sess?.user && isConfirmed(sess.user)) {
-        setTimeout(() => { loadRoleAndPerms(sess.user.id); }, 0);
+        const uid = sess.user.id;
+        setTimeout(() => { ensureRoleAndPerms(uid).finally(() => setLoading(false)); }, 0);
       } else {
+        roleLoad.current = null;
         setRole(null);
         setIsSuperAdmin(false);
         setPermissions(new Set());
+        setLoading(false);
       }
-      setLoading(false);
     });
 
     supabase.auth.getSession()
@@ -122,9 +133,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
         setSession(sess ?? null);
         setUser(sess?.user ?? null);
-        if (sess?.user && isConfirmed(sess.user)) {
-          try { await loadRoleAndPerms(sess.user.id); } catch { console.error("Falha ao carregar permissões"); }
-        }
+        if (sess?.user && isConfirmed(sess.user)) await ensureRoleAndPerms(sess.user.id);
       })
       .catch(async () => {
         console.warn("Falha em getSession, limpando storage");
@@ -135,7 +144,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
 
     return () => subscription.unsubscribe();
-  }, [loadRoleAndPerms]);
+  }, [ensureRoleAndPerms]);
 
   // Realtime: quando admin muda a matriz, recarrega permissões na hora.
   useEffect(() => {

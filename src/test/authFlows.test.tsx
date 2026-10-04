@@ -6,7 +6,7 @@ import type { ReactNode } from "react";
 // ---------- mocks (dados artificiais, sem rede) ----------
 const { auth, supabaseMock, toastMock } = vi.hoisted(() => {
   const auth = {
-    onAuthStateChange: vi.fn(() => ({ data: { subscription: { unsubscribe: vi.fn() } } })),
+    onAuthStateChange: vi.fn((_cb?: (e: string, s: unknown) => void) => ({ data: { subscription: { unsubscribe: vi.fn() } } })),
     getSession: vi.fn(async () => ({ data: { session: null }, error: null })),
     signInWithPassword: vi.fn(),
     signUp: vi.fn(),
@@ -25,8 +25,8 @@ const { auth, supabaseMock, toastMock } = vi.hoisted(() => {
   const channel = { on: () => channel, subscribe: () => channel };
   const supabaseMock = {
     auth,
-    from: vi.fn(() => chain),
-    rpc: vi.fn(async () => ({ data: false, error: null })),
+    from: vi.fn((_table?: string) => chain),
+    rpc: vi.fn(async (_fn?: string, _args?: unknown) => ({ data: false as boolean, error: null })),
     channel: vi.fn(() => channel),
     removeChannel: vi.fn(),
   };
@@ -81,6 +81,33 @@ beforeEach(() => {
   vi.clearAllMocks();
   sessionStorage.clear();
   auth.getSession.mockResolvedValue({ data: { session: null }, error: null });
+});
+
+describe("carregamento do papel", () => {
+  function Probe() {
+    const { loading, role, isAdmin } = useAuth();
+    return <div>{loading ? "carregando" : `papel:${role} admin:${isAdmin}`}</div>;
+  }
+
+  it("busca o papel uma vez só e mantém loading até ele chegar (admin não é expulso de /pendentes)", async () => {
+    const session = { user: CONFIRMED };
+    auth.getSession.mockResolvedValue({ data: { session }, error: null });
+    auth.onAuthStateChange.mockImplementation((cb) => {
+      cb?.("INITIAL_SESSION", session);
+      return { data: { subscription: { unsubscribe: vi.fn() } } };
+    });
+    supabaseMock.rpc.mockResolvedValue({ data: true, error: null });
+    render(<AuthProvider><Probe /></AuthProvider>);
+    expect(screen.getByText("carregando")).toBeTruthy();
+    await screen.findByText("papel:admin admin:true");
+    expect(supabaseMock.rpc.mock.calls.filter((c) => c[0] === "is_super_admin")).toHaveLength(1);
+    expect(supabaseMock.from.mock.calls.filter((c) => c[0] === "user_roles")).toHaveLength(1);
+  });
+
+  afterEach(() => {
+    auth.onAuthStateChange.mockImplementation(() => ({ data: { subscription: { unsubscribe: vi.fn() } } }));
+    supabaseMock.rpc.mockResolvedValue({ data: false, error: null });
+  });
 });
 
 describe("cadastro", () => {

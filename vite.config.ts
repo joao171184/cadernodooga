@@ -95,6 +95,17 @@ export default defineConfig(({ mode }) => ({
       },
     }),
   ].filter(Boolean),
+  build: {
+    rollupOptions: {
+      output: {
+        // Bibliotecas mudam menos que o app: ficam em cache entre deploys.
+        manualChunks: {
+          react: ["react", "react-dom", "react-router-dom"],
+          supabase: ["@supabase/supabase-js"],
+        },
+      },
+    },
+  },
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
