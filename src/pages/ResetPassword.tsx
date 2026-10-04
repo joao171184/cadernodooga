@@ -37,13 +37,17 @@ export default function ResetPassword() {
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (pwd.length < MIN_PASSWORD_LENGTH) return toast.error(`Mínimo ${MIN_PASSWORD_LENGTH} caracteres`);
+    if (pwd.length < MIN_PASSWORD_LENGTH) {
+      return toast.error(
+        `A nova senha precisa ter no mínimo ${MIN_PASSWORD_LENGTH} caracteres (senhas antigas mais curtas não são mais aceitas)`,
+      );
+    }
     if (pwd !== pwd2) return toast.error("As senhas não coincidem");
     setBusy(true);
     const { error } = await supabase.auth.updateUser({ password: pwd });
     if (error) {
       setBusy(false);
-      return toast.error(translateAuthError(error.message));
+      return toast.error(translateAuthError(error.message, (error as { code?: string }).code));
     }
     sessionStorage.removeItem(RECOVERY_FLAG_KEY);
     // Encerra as demais sessões abertas com a senha antiga.

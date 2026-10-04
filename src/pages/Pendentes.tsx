@@ -19,17 +19,27 @@ const Pendentes = () => {
 
   const handleApprove = async (id: string) => {
     setBusy(id);
-    await approvePonto(id);
-    setBusy(null);
-    toast.success("Ponto aprovado");
+    try {
+      await approvePonto(id);
+      toast.success("Ponto aprovado");
+    } catch {
+      toast.error("Não foi possível aprovar o ponto. Tente novamente.");
+    } finally {
+      setBusy(null);
+    }
   };
 
   const handleReject = async (id: string) => {
     if (!window.confirm("Rejeitar este ponto? Ele será apagado.")) return;
     setBusy(id);
-    await rejectPonto(id);
-    setBusy(null);
-    toast.success("Ponto rejeitado");
+    try {
+      await rejectPonto(id);
+      toast.success("Ponto rejeitado");
+    } catch {
+      toast.error("Não foi possível rejeitar o ponto. Tente novamente.");
+    } finally {
+      setBusy(null);
+    }
   };
 
   return (

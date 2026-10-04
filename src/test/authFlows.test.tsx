@@ -321,6 +321,20 @@ describe("/reset-password", () => {
     expect(toastMock.error.mock.calls[0][0]).not.toMatch(/auth\.users|pq:/);
   });
 
+  it("avisa quando a nova senha é igual à atual", async () => {
+    sessionStorage.setItem(RECOVERY_FLAG_KEY, "1");
+    auth.getSession.mockResolvedValue({ data: { session: { user: CONFIRMED } }, error: null });
+    auth.updateUser.mockResolvedValue({
+      data: {},
+      error: { message: "New password should be different from the old password.", code: "same_password" },
+    });
+    renderReset();
+    fireEvent.change(await screen.findByLabelText("Nova senha"), { target: { value: "SenhaAntiga1" } });
+    fireEvent.change(screen.getByLabelText("Confirme a nova senha"), { target: { value: "SenhaAntiga1" } });
+    fireEvent.click(screen.getByRole("button", { name: /redefinir/i }));
+    await waitFor(() => expect(toastMock.error).toHaveBeenCalledWith(expect.stringMatching(/senha atual/i)));
+  });
+
   it("botão de olho mostra e oculta a nova senha", async () => {
     sessionStorage.setItem(RECOVERY_FLAG_KEY, "1");
     auth.getSession.mockResolvedValue({ data: { session: { user: CONFIRMED } }, error: null });

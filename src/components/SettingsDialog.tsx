@@ -289,10 +289,25 @@ function AcessosPanel() {
   }, [load]);
 
   const changeUserRole = async (userId: string, newRole: AppRole) => {
-    const { error: delErr } = await supabase.from("user_roles").delete().eq("user_id", userId);
-    if (delErr) return toast.error("Erro: " + delErr.message);
-    const { error: insErr } = await supabase.from("user_roles").insert({ user_id: userId, role: newRole });
-    if (insErr) return toast.error("Erro: " + insErr.message);
+    if (userId === user?.id && newRole !== "admin") {
+      return toast.error("Você não pode remover seu próprio acesso de administrador");
+    }
+    const current = users.find((x) => x.id === userId)?.role;
+    if (current === newRole) return;
+    // Insere o novo papel antes de remover os antigos: se algo falhar, o usuário nunca fica sem papel.
+    const { error: insErr } = await supabase
+      .from("user_roles")
+      .upsert({ user_id: userId, role: newRole }, { onConflict: "user_id,role", ignoreDuplicates: true });
+    if (insErr) return toast.error("Não foi possível alterar o papel. Tente novamente.");
+    const { error: delErr } = await supabase
+      .from("user_roles")
+      .delete()
+      .eq("user_id", userId)
+      .neq("role", newRole);
+    if (delErr) {
+      toast.error("Papel novo aplicado, mas não foi possível remover o anterior. Recarregue a lista.");
+      return load();
+    }
     setUsers((u) => u.map((x) => (x.id === userId ? { ...x, role: newRole } : x)));
     toast.success("Papel atualizado");
   };
@@ -330,7 +345,7 @@ function AcessosPanel() {
     });
     const { error } = await supabase.from("role_permissions").upsert(rows, { onConflict: "role,permission" });
     setSaving(false);
-    if (error) return toast.error("Erro ao salvar: " + error.message);
+    if (error) return toast.error("Não foi possível salvar as permissões. Tente novamente.");
     toast.success("Permissões salvas");
     await refreshPermissions();
   };

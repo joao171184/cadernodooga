@@ -226,26 +226,30 @@ export function PontosProvider({ children }: { children: ReactNode }) {
 
   const approvePonto = useCallback(async (id: string) => {
     if (!user) return;
-    await supabase.from("pontos").update({
+    const { data, error } = await supabase.from("pontos").update({
       status: "approved" as PontoStatus,
       approved_by: user.id,
       approved_at: new Date().toISOString(),
-    }).eq("id", id);
+    }).eq("id", id).select("id");
+    if (error || !data?.length) throw new Error("approve_failed");
     await refresh();
   }, [user, refresh]);
 
   const rejectPonto = useCallback(async (id: string) => {
-    await supabase.from("pontos").delete().eq("id", id);
+    const { data, error } = await supabase.from("pontos").delete().eq("id", id).select("id");
+    if (error || !data?.length) throw new Error("reject_failed");
     await refresh();
   }, [refresh]);
 
   const toggleFavorito = useCallback(async (id: string) => {
     if (!user) return;
     if (favoritos.has(id)) {
-      await supabase.from("favoritos").delete().eq("user_id", user.id).eq("ponto_id", id);
+      const { error } = await supabase.from("favoritos").delete().eq("user_id", user.id).eq("ponto_id", id);
+      if (error) throw new Error("favorite_failed");
       setFavoritos((s) => { const n = new Set(s); n.delete(id); return n; });
     } else {
-      await supabase.from("favoritos").insert({ user_id: user.id, ponto_id: id });
+      const { error } = await supabase.from("favoritos").insert({ user_id: user.id, ponto_id: id });
+      if (error) throw new Error("favorite_failed");
       setFavoritos((s) => new Set(s).add(id));
     }
   }, [user, favoritos]);

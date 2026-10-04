@@ -170,7 +170,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
     if (error) {
       if (isAccountExistsError(error.message)) return { error: null, needsConfirm: true };
-      return { error: translateAuthError(error.message), needsConfirm: false };
+      return { error: translateAuthError(error.message, error.code), needsConfirm: false };
     }
     if (data.session && !isConfirmed(data.user)) {
       await supabase.auth.signOut().catch(() => {});

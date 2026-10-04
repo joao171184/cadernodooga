@@ -81,6 +81,9 @@ const Index = () => {
   const [dragList, setDragList] = useState<Ponto[] | null>(null);
 
   const { pontos, pendentes, favoritos, toqueOrdens, loading, savePonto, deletePonto, toggleFavorito, movePontoInList, reorderPontosInList } = usePontos();
+  const handleToggleFavorito = (id: string) => {
+    toggleFavorito(id).catch(() => toast.error("Não foi possível atualizar seus favoritos. Tente novamente."));
+  };
   const { categorias } = useCategorias();
   const activeCategoria = categorias.find((c) => c.nome === categoria);
   const showClassifFilters = !categoria || (activeCategoria?.mostrarFiltrosClassificacao ?? true);
@@ -633,7 +636,7 @@ const Index = () => {
                   categoryColor={color}
                   index={i}
                   onTogglePlay={togglePlay}
-                  onToggleFavorite={toggleFavorito}
+                  onToggleFavorite={handleToggleFavorito}
                   onEdit={handleEditPonto}
                   onDelete={handleDeletePonto}
                   onMoveUp={(id) => movePontoInList(id, -1, visibleList, { toque: toqueFilter === "all" ? null : toqueFilter })}
@@ -668,7 +671,7 @@ const Index = () => {
         <PontoFullscreen
           ponto={fullscreenPonto}
           isFavorite={favoritos.has(fullscreenPonto.id)}
-          onToggleFavorite={toggleFavorito}
+          onToggleFavorite={handleToggleFavorito}
           canFavorite={effectiveIsAdmin || can("favorite")}
           onClose={closeReader}
         />
