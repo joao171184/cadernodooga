@@ -48,19 +48,17 @@ describe("handleAdminDelete", () => {
     expect(d.deleteUser).not.toHaveBeenCalled();
   });
 
-  it("admin exclui usuário comum, mas não outro admin nem o super-admin", async () => {
+  it("admin exclui usuário comum e outro admin", async () => {
     const d = deps();
     expect(await handleAdminDelete("Bearer jwt-admin", { userId: VICTIM }, d)).toEqual({ status: 200, body: { ok: true } });
-    expect((await handleAdminDelete("Bearer jwt-admin", { userId: OTHER_ADMIN }, d)).status).toBe(403);
-    expect((await handleAdminDelete("Bearer jwt-admin", { userId: SUPER }, d)).status).toBe(403);
-    expect(d.deleteUser).toHaveBeenCalledTimes(1);
+    expect((await handleAdminDelete("Bearer jwt-admin", { userId: OTHER_ADMIN }, d)).status).toBe(200);
+    expect(d.deleteUser).toHaveBeenCalledTimes(2);
   });
 
-  it("super-admin exclui outro admin, nunca a conta de super-admin", async () => {
+  it("conta listada como super-admin só pode ser excluída por outro super-admin", async () => {
     const d = deps();
+    expect((await handleAdminDelete("Bearer jwt-admin", { userId: SUPER }, d)).status).toBe(403);
     expect((await handleAdminDelete("Bearer jwt-super", { userId: OTHER_ADMIN }, d)).status).toBe(200);
-    const twoSupers = deps({ getTargetAccess: vi.fn(async () => ({ admin: true, superAdmin: true })) });
-    expect((await handleAdminDelete("Bearer jwt-super", { userId: OTHER_ADMIN }, twoSupers)).status).toBe(403);
   });
 
   it("erros internos não vazam", async () => {

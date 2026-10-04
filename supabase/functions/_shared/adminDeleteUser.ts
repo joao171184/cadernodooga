@@ -51,11 +51,8 @@ export async function handleAdminDelete(
   }
 
   const target = await deps.getTargetAccess(userId);
-  if (target.superAdmin) {
+  if (target.superAdmin && !caller.superAdmin) {
     return { status: 403, body: { error: "Esta conta não pode ser excluída" } };
-  }
-  if (target.admin && !caller.superAdmin) {
-    return { status: 403, body: { error: "Apenas o super-admin pode excluir outro administrador" } };
   }
 
   const { ok } = await deps.deleteUser(userId);
