@@ -6,6 +6,12 @@
     <priority>1.0</priority>
   </url>
   <url>
+    <loc>https://cadernodooga.com.br/ponto/o-tempo-abriu-o-tempo-fechou</loc>
+    <lastmod>2026-10-04</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://cadernodooga.com.br/ponto/so-de-falar-meu-peito-aperta</loc>
     <lastmod>2026-08-17</lastmod>
     <changefreq>monthly</changefreq>
@@ -3066,6 +3072,11 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://cadernodooga.com.br/?categoria=Orix%C3%A1s</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://cadernodooga.com.br/?categoria=Guias%20de%20Direita</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
@@ -3077,11 +3088,6 @@
   </url>
   <url>
     <loc>https://cadernodooga.com.br/?categoria=Guias%20de%20Esquerda</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://cadernodooga.com.br/?categoria=Orix%C3%A1s</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
