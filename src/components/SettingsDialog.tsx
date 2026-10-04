@@ -217,6 +217,21 @@ function ToggleButton({ checked, onChange, labelHint }: { checked: boolean; onCh
 /* ---------- ACESSOS ---------- */
 type ProfileRow = { id: string; email: string; role: AppRole };
 
+/** Mensagens levantadas por public.admin_delete_user (drizzle/migrations/0003). */
+const ADMIN_DELETE_MESSAGES = [
+  "Apenas administradores podem excluir contas",
+  "Você não pode excluir sua própria conta",
+  "Esta conta não pode ser excluída",
+  "Conta não encontrada",
+];
+
+// admin_delete_user ainda não está nos tipos gerados pelo Lovable.
+const adminDeleteUserRpc = (userId: string) =>
+  (supabase.rpc.bind(supabase) as unknown as (
+    fn: string,
+    args: Record<string, unknown>,
+  ) => Promise<{ error: { message?: string } | null }>)("admin_delete_user", { _user_id: userId });
+
 function AcessosPanel() {
   const { refreshPermissions, user } = useAuth();
   const [users, setUsers] = useState<ProfileRow[]>([]);
@@ -287,16 +302,10 @@ function AcessosPanel() {
       return toast.error("Você não pode excluir sua própria conta");
     }
     if (!window.confirm(`Excluir definitivamente a conta de ${u.email}? Esta ação não pode ser desfeita.`)) return;
-    const { data, error } = await supabase.functions.invoke("admin-delete-user", {
-      body: { userId: u.id },
-    });
-    if (error || (data && (data as { error?: string }).error)) {
-      let msg = (data as { error?: string } | null)?.error;
-      const ctx = (error as { context?: unknown } | null)?.context;
-      if (!msg && ctx instanceof Response) {
-        msg = await ctx.json().then((b: { error?: string }) => b?.error).catch(() => undefined);
-      }
-      return toast.error("Erro ao excluir: " + (msg || "não foi possível concluir"));
+    const { error } = await adminDeleteUserRpc(u.id);
+    if (error) {
+      const msg = ADMIN_DELETE_MESSAGES.find((m) => error.message?.includes(m));
+      return toast.error("Erro ao excluir: " + (msg ?? "não foi possível concluir"));
     }
     setUsers((arr) => arr.filter((x) => x.id !== u.id));
     toast.success("Conta excluída");
