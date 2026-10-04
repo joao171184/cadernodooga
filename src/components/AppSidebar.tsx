@@ -11,8 +11,8 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { NavLink } from "@/components/NavLink";
-import { useLocation } from "react-router-dom";
-import { ChevronDown, ChevronRight, Shield, Eye, BookOpen, Instagram, UserCog, Heart } from "lucide-react";
+import { Link, useLocation } from "react-router-dom";
+import { ChevronDown, ChevronRight, Shield, Eye, BookOpen, Instagram, UserCog, Heart, Megaphone } from "lucide-react";
 import type { CategoriaNode } from "@/contexts/CategoriasContext";
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
@@ -198,6 +198,24 @@ export function AppSidebar() {
             )}
           </div>
         </div>
+        {isAdmin && (
+          <Link
+            to="/admin/publicidade"
+            onClick={handleNavClick}
+            className="flex items-center gap-2 px-3 py-2 rounded-xl text-[11px] font-bold uppercase text-sidebar-foreground hover:bg-sidebar-accent transition-all"
+          >
+            <Megaphone size={12} className="text-sidebar-primary" />
+            <span className="truncate">Publicidade</span>
+          </Link>
+        )}
+        <Link
+          to="/anuncie"
+          onClick={handleNavClick}
+          className="flex items-center gap-2 px-3 py-2 rounded-xl text-[11px] font-bold uppercase text-sidebar-primary hover:bg-sidebar-accent transition-all"
+        >
+          <Megaphone size={12} />
+          <span className="truncate">Anuncie conosco</span>
+        </Link>
         <a
           href="https://www.instagram.com/j_marques.a/"
           target="_blank"

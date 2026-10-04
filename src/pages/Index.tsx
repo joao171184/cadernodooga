@@ -1,11 +1,14 @@
-import { useState, useCallback, useMemo, useRef, useEffect, lazy, Suspense } from "react";
+import { useState, useCallback, useMemo, useRef, useEffect, lazy, Suspense, Fragment } from "react";
 import { Helmet } from "react-helmet-async";
 import { Search, Music, Plus, Settings, LogOut, Instagram, Heart, Inbox, Loader2, Drum, Check, LogIn, UserCircle2, Eye, ShieldCheck, Menu, X, Volume2, VolumeX } from "lucide-react";
 import { getEmbedInfo } from "@/lib/embed";
 import { buildSearchIndex, fuzzySearch } from "@/lib/fuzzySearch";
 import { useSidebar } from "@/components/ui/sidebar";
 import logoImg from "@/assets/logo.png";
-import { useParams, useNavigate, useLocation } from "react-router-dom";
+import { useParams, useNavigate, useLocation, Link } from "react-router-dom";
+import { AdSlot } from "@/components/ads/AdSlot";
+import { AdConsentReset } from "@/components/ads/AdConsentBanner";
+import { useAdConfig, usePlacementAds } from "@/components/ads/useAds";
 import PontoCard from "@/components/PontoCard";
 import { PontoFormDialog } from "@/components/PontoFormDialog";
 import { MediaPlayer } from "@/components/MediaPlayer";
@@ -32,6 +35,7 @@ type ToqueFilter = "all" | ToqueTipo;
 type MediaFilter = "all" | "with" | "without";
 
 const RENDER_STEP = 60;
+const MAX_FEED_ADS = 6;
 
 const SettingsDialog = lazy(() => import("@/components/SettingsDialog").then((m) => ({ default: m.SettingsDialog })));
 
@@ -89,6 +93,10 @@ const Index = () => {
   const handleToggleFavorito = (id: string) => {
     toggleFavorito(id).catch(() => toast.error("Não foi possível atualizar seus favoritos. Tente novamente."));
   };
+  const adConfig = useAdConfig();
+  const feedEnabled = !!adConfig?.placements.get("lista-entre-cards")?.enabled;
+  const feedAds = usePlacementAds("lista-entre-cards", MAX_FEED_ADS, feedEnabled);
+  const feedInterval = adConfig?.settings.in_feed_interval ?? 12;
   const { categorias } = useCategorias();
   const activeCategoria = categorias.find((c) => c.nome === categoria);
   const showClassifFilters = !categoria || (activeCategoria?.mostrarFiltrosClassificacao ?? true);
@@ -566,6 +574,8 @@ const Index = () => {
           </div>
         </div>
 
+        {!loading && filtered.length > 0 && <AdSlot placement="topo-lista" className="mb-4 max-w-6xl" />}
+
         {/* Cards */}
         <div className={`${hasSubcategorias ? "space-y-3 sm:space-y-4 max-w-2xl" : "grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4 max-w-6xl"}`}>
           {loading ? (
@@ -646,9 +656,13 @@ const Index = () => {
                 (subKey && categoryColorMap.get(subKey)) ||
                 categoryColorMap.get(nkey) ||
                 null;
+              const feedSlot = (i + 1) / feedInterval - 1;
+              const showFeedAd =
+                feedEnabled && feedAds !== undefined && Number.isInteger(feedSlot) &&
+                feedSlot < MAX_FEED_ADS && i < visibleList.length - 1;
               return (
+                <Fragment key={ponto.id}>
                 <PontoCard
-                  key={ponto.id}
                   ponto={ponto}
                   highlight={search.trim()}
                   isPlaying={playingId === ponto.id}
@@ -670,6 +684,14 @@ const Index = () => {
                   canMoveUp={i > 0}
                   canMoveDown={i < visibleList.length - 1}
                 />
+                {showFeedAd && (
+                  <AdSlot
+                    placement="lista-entre-cards"
+                    ad={feedAds.length ? feedAds[feedSlot % feedAds.length] : null}
+                    variant="card"
+                  />
+                )}
+                </Fragment>
               );
             })
           )}
@@ -724,6 +746,12 @@ const Index = () => {
             <span>Feito com</span>
             <Heart size={12} className="fill-accent text-accent-strong" />
             <span>por <span className="font-bold text-foreground">João Pedro de Andrade Marques</span></span>
+          </div>
+          <div className="flex items-center gap-3 text-xs">
+            <Link to="/anuncie" className="font-bold uppercase text-accent-strong hover:underline">
+              Anuncie conosco
+            </Link>
+            <AdConsentReset className="text-muted-foreground hover:text-foreground hover:underline" />
           </div>
           <a
             href="https://www.instagram.com/j_marques.a/"

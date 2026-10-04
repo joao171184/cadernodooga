@@ -36,6 +36,13 @@
       "when": 1791133200000,
       "tag": "0004_admins_manage_roles",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1791140400000,
+      "tag": "0005_advertising",
+      "breakpoints": true
     }
   ]
 }

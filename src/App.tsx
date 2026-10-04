@@ -7,6 +7,7 @@ import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { Canonical } from "@/components/Canonical";
 import { OfflineIndicator } from "@/components/OfflineIndicator";
+import { AdConsentBanner } from "@/components/ads/AdConsentBanner";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { CategoriasProvider } from "@/contexts/CategoriasContext";
 import { PontosProvider } from "@/contexts/PontosContext";
@@ -21,6 +22,8 @@ const NotFound = lazy(() => import("./pages/NotFound.tsx"));
 const Pendentes = lazy(() => import("./pages/Pendentes.tsx"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword.tsx"));
 const AuthConfirm = lazy(() => import("./pages/AuthConfirm.tsx"));
+const Anuncie = lazy(() => import("./pages/Anuncie.tsx"));
+const AdminPublicidade = lazy(() => import("./pages/AdminPublicidade.tsx"));
 
 const PageSpinner = () => (
   <div className="min-h-screen flex items-center justify-center bg-background">
@@ -48,6 +51,15 @@ function ProtectedLayout({ children }: { children: ReactNode }) {
   return <AppLayout>{children}</AppLayout>;
 }
 
+// A interface só esconde a página; quem barra de fato é o RLS (is_ads_admin) no banco.
+function AdminLayout({ children }: { children: ReactNode }) {
+  const { isLoggedIn, isAdmin, loading } = useAuth();
+  if (loading) return <PageSpinner />;
+  if (!isLoggedIn) return <Navigate to="/login" replace />;
+  if (!isAdmin) return <Navigate to="/" replace />;
+  return <AppLayout>{children}</AppLayout>;
+}
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <ThemeProvider>
@@ -72,10 +84,13 @@ const App = () => (
                   <Route path="/pendentes" element={<ProtectedLayout><Pendentes /></ProtectedLayout>} />
                   <Route path="/guia/:categoria" element={<AppLayout><Index /></AppLayout>} />
                   <Route path="/guia/:categoria/:subcategoria" element={<AppLayout><Index /></AppLayout>} />
+                  <Route path="/anuncie" element={<Anuncie />} />
+                  <Route path="/admin/publicidade" element={<AdminLayout><AdminPublicidade /></AdminLayout>} />
 
                   <Route path="*" element={<NotFound />} />
                 </Routes>
                 </Suspense>
+                <AdConsentBanner />
               </PontosProvider>
             </CategoriasProvider>
           </AuthProvider>

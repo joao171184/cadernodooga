@@ -69,7 +69,11 @@ describe("cache do PWA", () => {
   it("guarda só tabelas públicas", () => {
     expect(isPublicApiRequest(req("/rest/v1/pontos"))).toBe(true);
     expect(isPublicApiRequest(req("/rest/v1/categorias"))).toBe(true);
-    for (const t of ["user_notas", "profiles", "user_roles", "role_permissions", "favoritos", "super_admins"]) {
+    for (const t of [
+      "user_notas", "profiles", "user_roles", "role_permissions", "favoritos", "super_admins",
+      "ad_campaigns", "ad_advertisers", "ad_leads", "ad_stats_daily", "ad_settings", "ad_placements",
+      "rpc/get_ads_for_placement",
+    ]) {
       expect(isPublicApiRequest(req(`/rest/v1/${t}`))).toBe(false);
     }
     expect(isPublicApiRequest(req("/rest/v1/rpc/is_super_admin"))).toBe(false);

@@ -9,6 +9,7 @@ import { getEmbedInfo } from "@/lib/embed";
 import { PublicHeader } from "@/components/PublicHeader";
 import { TikTokPlayer } from "@/components/TikTokPlayer";
 import { AutoScrollControl } from "@/components/AutoScrollControl";
+import { AdSlot } from "@/components/ads/AdSlot";
 
 const SITE_URL = "https://cadernodooga.com.br";
 
@@ -236,6 +237,8 @@ const PontoPage = () => {
           </pre>
         </div>
 
+        <AdSlot placement="ponto-apos-letra" className="mt-10" />
+
         {embed.kind !== "none" && (
           <div className="mt-10">
             {embed.kind === "youtube" && (
@@ -265,6 +268,11 @@ const PontoPage = () => {
             )}
           </div>
         )}
+
+        <p className="mt-12 text-center text-xs text-muted-foreground">
+          Quer divulgar seu terreiro, loja ou evento?{" "}
+          <Link to="/anuncie" className="font-bold uppercase text-accent hover:underline">Anuncie conosco</Link>
+        </p>
       </main>
 
       <AutoScrollControl />
