@@ -437,7 +437,7 @@ const Index = () => {
               autoCorrect="off"
               autoCapitalize="off"
               spellCheck={false}
-              className="w-full pl-10 pr-11 py-3 rounded-xl bg-primary-foreground/10 text-primary-foreground placeholder:text-primary-foreground/35 text-sm outline-none focus:ring-2 focus:ring-accent/50 backdrop-blur-sm transition-all border border-primary-foreground/10 uppercase"
+              className="w-full pl-10 pr-11 py-3 rounded-xl bg-primary-foreground/10 text-primary-foreground placeholder:text-primary-foreground/60 text-sm outline-none focus:ring-2 focus:ring-accent/50 backdrop-blur-sm transition-all border border-primary-foreground/10 uppercase"
             />
             {search.length > 0 && (
               <button
