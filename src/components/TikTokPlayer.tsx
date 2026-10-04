@@ -167,6 +167,11 @@ export function TikTokPlayer({ src, title, externalUrl, className = "rounded-2xl
               : "O TikTok não respondeu agora."}
           </p>
           {status === "error" && (
+            <p className="max-w-[16rem] text-xs text-white/70">
+              Se você usa bloqueador de anúncios ou proteção de rastreamento, libere este site e tente de novo.
+            </p>
+          )}
+          {status === "error" && (
             <button
               onClick={() => setReloadKey((k) => k + 1)}
               className="flex items-center gap-2 rounded-lg bg-white px-4 py-2 text-xs font-bold uppercase text-black"
