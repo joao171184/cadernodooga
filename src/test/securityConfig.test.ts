@@ -81,6 +81,13 @@ describe("cache do PWA", () => {
     expect(isPublicApiRequest(req("/auth/v1/user"))).toBe(false);
   });
 
+  it.each(["sitemap.xml", "robots.txt", "ads.txt"])("%s é servido como arquivo, sem cair no app", (file) => {
+    const escaped = file.replace(".", "\\.");
+    const rewrites = (JSON.parse(read("vercel.json")) as { rewrites: { source: string }[] }).rewrites;
+    expect(rewrites.some((r) => r.source.includes(`(?!`) && r.source.includes(escaped))).toBe(true);
+    expect(read("vite.config.ts")).toContain(`/^\\/${escaped}$/`);
+  });
+
   it("predicado é autocontido (o Workbox serializa a função)", () => {
     const fn = new Function(`return (${isPublicApiRequest.toString()})`)() as typeof isPublicApiRequest;
     expect(fn(req("/rest/v1/pontos"))).toBe(true);
