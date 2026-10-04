@@ -28,6 +28,8 @@
 
     --accent: 46 68% 47%;
     --accent-foreground: 36 55% 12%;
+    /* dourado escuro: para texto/ícone de destaque sobre fundo claro */
+    --accent-strong: 38 72% 32%;
 
     --destructive: 0 72% 45%;
     --destructive-foreground: 0 0% 98%;
@@ -79,6 +81,7 @@
 
     --accent: 36 90% 55%;
     --accent-foreground: 24 40% 10%;
+    --accent-strong: 36 90% 55%;
 
     --destructive: 0 70% 50%;
     --destructive-foreground: 210 40% 98%;
