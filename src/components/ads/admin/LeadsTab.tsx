@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { adsDb, type AdLeadRow, type LeadStatus } from "@/integrations/supabase/adsTypes";
 import { formatLocalDateTime } from "@/lib/ads/time";
 import { dbErrorMessage } from "./useAdsAdmin";
+import { LeadNotifications } from "./LeadNotifications";
 import { LeadRecipients } from "./LeadRecipients";
 import { btnGhost, inputClass } from "./ui";
 
@@ -18,6 +19,7 @@ export function LeadsTab() {
   const [leads, setLeads] = useState<AdLeadRow[]>([]);
   const [filter, setFilter] = useState<"" | LeadStatus>("");
   const [loading, setLoading] = useState(true);
+  const [recipientsVersion, setRecipientsVersion] = useState(0);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -47,7 +49,8 @@ export function LeadsTab() {
 
   return (
     <div className="space-y-4">
-      <LeadRecipients />
+      <LeadNotifications refreshKey={recipientsVersion} />
+      <LeadRecipients onChange={() => setRecipientsVersion((v) => v + 1)} />
       <div className="flex items-center gap-2">
         <select aria-label="Filtrar pedidos" className={`${inputClass} w-auto`} value={filter} onChange={(e) => setFilter(e.target.value as LeadStatus | "")}>
           <option value="">Todos</option>

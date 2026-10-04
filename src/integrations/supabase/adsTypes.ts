@@ -97,6 +97,28 @@ export type AdLeadRecipientRow = {
   created_at: string;
 };
 
+export type AdNotifySettingsRow = {
+  id: boolean;
+  enabled: boolean;
+  sender_email: string | null;
+  sender_name: string;
+  updated_at: string;
+};
+
+export type NotifySendResult = "sent" | "disabled" | "no_sender" | "no_key" | "no_recipients" | "rate_limited";
+
+export type AdNotifyStatus = {
+  key_configured: boolean;
+  recipients: number;
+  recent: {
+    created_at: string;
+    kind: "lead" | "test";
+    status_code: number | null;
+    timed_out: boolean | null;
+    error: string | null;
+  }[];
+};
+
 export type ServedAd = {
   id: string;
   image_path: string;
@@ -120,6 +142,7 @@ export type AdsDatabase = {
       ad_stats_daily: Table<AdStatsDailyRow>;
       ad_leads: Table<AdLeadRow>;
       ad_lead_recipients: Table<AdLeadRecipientRow, { user_id: string }>;
+      ad_notify_settings: Table<AdNotifySettingsRow>;
     };
     Views: { [_ in never]: never };
     Functions: {
@@ -128,6 +151,8 @@ export type AdsDatabase = {
         Args: { _campaign_id: string; _placement: string; _kind: "impression" | "click"; _session: string };
         Returns: boolean;
       };
+      ads_notify_status: { Args: Record<string, never>; Returns: AdNotifyStatus };
+      ads_send_test_notification: { Args: Record<string, never>; Returns: NotifySendResult };
       submit_ad_lead: {
         Args: {
           _name: string;

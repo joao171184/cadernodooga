@@ -51,7 +51,33 @@ Enquanto a migração não for aplicada, o site funciona normalmente sem anúnci
 
 O formulário em `/anuncie` grava o pedido no banco pela função `submit_ad_lead`, e os pedidos aparecem na aba **Pedidos** do painel. Não há envio de e-mail.
 
-Na mesma aba, **Quem recebe os avisos de novos pedidos** guarda a lista de usuários do site que devem ser avisados (escolhidos pelo e-mail de cadastro; outros administradores não entram). A lista fica na tabela `ad_lead_recipients` e é removida automaticamente se o usuário for apagado. **O envio de e-mail ainda não existe**: quando for implementado, ele deve usar só essa lista.
+Na mesma aba, **Quem recebe os avisos de novos pedidos** guarda a lista de usuários do site que devem ser avisados (escolhidos pelo e-mail de cadastro; outros administradores não entram). A lista fica na tabela `ad_lead_recipients` e é removida automaticamente se o usuário for apagado.
+
+### Aviso por e-mail (Brevo)
+
+Migração `drizzle/migrations/0006_lead_notifications.sql` (requer a 0005). Os e-mails de login e de redefinição de senha **não mudam**: continuam saindo do Lovable Cloud.
+
+- A cada pedido novo, um trigger no banco chama a API do Brevo pela extensão `pg_net`, com um e-mail separado para cada destinatário.
+- O e-mail traz só nome, empresa e interesse de quem pediu, com link para o painel. Telefone, e-mail e mensagem ficam só no painel (LGPD).
+- O envio é assíncrono: se o Brevo falhar, o pedido é gravado mesmo assim.
+- A chave do Brevo fica no cofre do banco (Supabase Vault) com o nome `brevo_ads_api_key`, nunca no código, no GitHub ou na Vercel.
+- O painel mostra se a chave está guardada (sem revelar o valor), quantos destinatários há e o resultado dos últimos envios. O botão **Enviar e-mail de teste** aceita até 5 testes por hora.
+- A quantidade de avisos é limitada pelo próprio formulário: no máximo 30 pedidos por hora.
+
+**Configuração no Brevo:**
+1. Crie a conta gratuita e, se pedido, complete o perfil para liberar e-mails transacionais.
+2. *Senders, Domains & Dedicated IPs → Domains*: adicione `cadernodooga.com.br` e crie na Cloudflare os registros que o Brevo mostrar (TXT `brevo-code`, CNAME `brevo1._domainkey` e `brevo2._domainkey` em **DNS only**, TXT `_dmarc` se ainda não existir). Se já houver um SPF (`v=spf1`), acrescente `include:spf.brevo.com` nele em vez de criar outro. Não altere registros MX.
+3. *Senders*: crie o remetente, por exemplo `avisos@cadernodooga.com.br`.
+4. *SMTP & API → API Keys*: gere uma chave. Ela aparece uma vez; não a coloque em arquivos nem em chats.
+5. *Security → Authorised IPs*: o banco não tem IP fixo, então o bloqueio por IP precisa ficar desativado, senão o Brevo responde 401/403.
+
+**No editor SQL do Lovable, nesta ordem:**
+1. Rode a 0005 (se ainda não rodou) e depois a 0006.
+2. Guarde a chave (cole-a só no editor):
+   `SELECT vault.create_secret('CHAVE_DO_BREVO', 'brevo_ads_api_key', 'Brevo: avisos do Anuncie conosco');`
+3. No painel, aba **Pedidos**: escolha os destinatários, informe o remetente, ligue os avisos, salve e envie um teste.
+
+Trocar a chave: `SELECT vault.update_secret((SELECT id FROM vault.secrets WHERE name = 'brevo_ads_api_key'), 'CHAVE_NOVA');`. Para desligar tudo de imediato, desligue os avisos no painel ou revogue a chave no Brevo.
 
 Proteções no servidor: campo isca, tempo mínimo de preenchimento (3 s), consentimento obrigatório, validação dos campos, limite de 3 envios por dia por e-mail e 30 por hora no total. Apague os pedidos que não forem mais necessários (LGPD).
 
@@ -79,3 +105,5 @@ O campo `revenue_type` (`direct`, `sponsorship`, `affiliate`) já identifica pat
 - A contagem de impressões e cliques usa uma função pública. Um robô que troque de sessão a cada chamada consegue inflar números; há deduplicação e filtro de User-Agent, mas não é à prova de fraude. Use os números para acompanhamento, não como auditoria.
 - O filtro de robôs depende do User-Agent, que pode ser falsificado.
 - Imagens do bucket `ads` são públicas por natureza (aparecem no site).
+- Avisos por e-mail: a chave do Brevo passa pela fila interna do `pg_net` por alguns segundos e pode ficar no histórico do editor SQL ao ser cadastrada; se houver dúvida, gere outra chave no Brevo. O bloqueio por IP do Brevo precisa ficar desligado, então a chave vale de qualquer lugar até ser revogada.
+- O `pg_net` deixa o banco fazer chamadas HTTP. O schema `net` não é exposto pela API pública do site, mas é um recurso a mais para manter em mente.

@@ -10,7 +10,7 @@ type Profile = { id: string; email: string };
 
 const MAX_SUGGESTIONS = 8;
 
-export function LeadRecipients() {
+export function LeadRecipients({ onChange }: { onChange?: () => void }) {
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [recipientIds, setRecipientIds] = useState<string[]>([]);
   const [query, setQuery] = useState("");
@@ -46,6 +46,7 @@ export function LeadRecipients() {
     if (error) return toast.error(dbErrorMessage(error));
     setRecipientIds((ids) => [...ids, p.id]);
     setQuery("");
+    onChange?.();
   };
 
   const remove = async (id: string) => {
@@ -54,6 +55,7 @@ export function LeadRecipients() {
     setBusy(null);
     if (error) return toast.error(dbErrorMessage(error));
     setRecipientIds((ids) => ids.filter((x) => x !== id));
+    onChange?.();
   };
 
   return (
@@ -64,8 +66,8 @@ export function LeadRecipients() {
           {loading && <Loader2 size={12} className="animate-spin" />}
         </h3>
         <p className="mt-1 text-[11px] text-muted-foreground">
-          Só os usuários escolhidos aqui serão avisados; os demais administradores, não. O envio de e-mail ainda não
-          está ligado: por enquanto, acompanhe os pedidos nesta aba.
+          Só os usuários escolhidos aqui recebem o aviso por e-mail; os demais administradores, não. Cada destinatário
+          recebe um e-mail separado e não vê os outros.
         </p>
       </div>
 
