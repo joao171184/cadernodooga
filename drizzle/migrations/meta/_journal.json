@@ -50,6 +50,13 @@
       "when": 1791147600000,
       "tag": "0006_lead_notifications",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1791154800000,
+      "tag": "0007_notify_log_history",
+      "breakpoints": true
     }
   ]
 }

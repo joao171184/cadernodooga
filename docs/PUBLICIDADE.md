@@ -22,6 +22,14 @@ Para cada espaço, a ordem é: anúncio direto elegível, depois AdSense (se lig
 
 **Orçamento**: campo informativo (valor contratado). O limite que efetivamente encerra a campanha é o de impressões.
 
+## Aba Campanhas
+
+- Contadores por status no topo (clique para filtrar).
+- Faixa "Precisa de atenção" com campanhas perto do fim (botão **Renovar**, que abre a edição) e campanhas já fora do ar (**Renovar** ou **Arquivar**).
+- Filtros: busca por nome, anunciante, espaço, status e **Período** (campanhas no ar em algum momento entre as datas). Arquivadas ficam ocultas até marcar "Mostrar arquivadas" ou filtrar por Arquivado.
+- Visualização em **cards** (imagem, métricas e barra do limite de impressões) ou **tabela** (colunas ordenáveis); a escolha fica salva no navegador.
+- Ações: **Editar** e, no menu "⋯", Pausar/Ativar, **Duplicar** (abre uma cópia como rascunho, reaproveitando as imagens) e Arquivar/Restaurar. Imagens só são apagadas do Storage quando nenhuma outra campanha as usa.
+
 ## Como as métricas são calculadas
 
 São dados próprios, só de anúncios diretos:
@@ -49,9 +57,13 @@ Enquanto a migração não for aplicada, o site funciona normalmente sem anúnci
 
 ## Anuncie conosco
 
-O formulário em `/anuncie` grava o pedido no banco pela função `submit_ad_lead`, e os pedidos aparecem na aba **Pedidos** do painel. Não há envio de e-mail.
+O formulário em `/anuncie` grava o pedido no banco pela função `submit_ad_lead`. A aba **Pedidos** do painel tem três sub-abas:
 
-Na mesma aba, **Quem recebe os avisos de novos pedidos** guarda a lista de usuários do site que devem ser avisados (escolhidos pelo e-mail de cadastro; outros administradores não entram). A lista fica na tabela `ad_lead_recipients` e é removida automaticamente se o usuário for apagado.
+- **Pedidos**: contadores por status (clique para filtrar), busca por nome, empresa ou e-mail, e cards que abrem com contato, mensagem e ações (Responder por e-mail, Em contato, Concluir, Spam, Apagar). Spam fica oculto, a não ser que o filtro Spam esteja selecionado.
+- **Avisos por e-mail**: configuração do Brevo, último envio e destinatários.
+- **Histórico de envios**: filtros por tipo (pedido/teste) e resultado (aceitos, com erro, aguardando), remoção de um registro ou de todos os filtrados, 10 por vez com "Mostrar todos". Requer a migração `0007_notify_log_history.sql`, que guarda o código e a mensagem de resposta do Brevo (a resposta bruta do `pg_net` expira em poucas horas).
+
+Em **Avisos por e-mail**, **Quem recebe os avisos de novos pedidos** guarda a lista de usuários do site que devem ser avisados (escolhidos pelo e-mail de cadastro; outros administradores não entram). A lista fica na tabela `ad_lead_recipients` e é removida automaticamente se o usuário for apagado.
 
 ### Aviso por e-mail (Brevo)
 
@@ -72,10 +84,10 @@ Migração `drizzle/migrations/0006_lead_notifications.sql` (requer a 0005). Os 
 5. *Security → Authorised IPs*: o banco não tem IP fixo, então o bloqueio por IP precisa ficar desativado, senão o Brevo responde 401/403.
 
 **No editor SQL do Lovable, nesta ordem:**
-1. Rode a 0005 (se ainda não rodou) e depois a 0006.
+1. Rode a 0005 (se ainda não rodou), depois a 0006 e a 0007.
 2. Guarde a chave (cole-a só no editor):
    `SELECT vault.create_secret('CHAVE_DO_BREVO', 'brevo_ads_api_key', 'Brevo: avisos do Anuncie conosco');`
-3. No painel, aba **Pedidos**: escolha os destinatários, informe o remetente, ligue os avisos, salve e envie um teste.
+3. No painel, aba **Pedidos → Avisos por e-mail**: escolha os destinatários, informe o remetente, ligue os avisos, salve e envie um teste.
 
 Trocar a chave: `SELECT vault.update_secret((SELECT id FROM vault.secrets WHERE name = 'brevo_ads_api_key'), 'CHAVE_NOVA');`. Para desligar tudo de imediato, desligue os avisos no painel ou revogue a chave no Brevo.
 

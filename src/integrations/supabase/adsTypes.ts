@@ -107,17 +107,23 @@ export type AdNotifySettingsRow = {
 
 export type NotifySendResult = "sent" | "disabled" | "no_sender" | "no_key" | "no_recipients" | "rate_limited";
 
+export type NotifyLogItem = {
+  id?: number;
+  created_at: string;
+  kind: "lead" | "test";
+  status_code: number | null;
+  timed_out: boolean | null;
+  error: string | null;
+};
+
 export type AdNotifyStatus = {
   key_configured: boolean;
   recipients: number;
-  recent: {
-    created_at: string;
-    kind: "lead" | "test";
-    status_code: number | null;
-    timed_out: boolean | null;
-    error: string | null;
-  }[];
+  recent: NotifyLogItem[];
 };
+
+export type NotifyKindFilter = "lead" | "test";
+export type NotifyResultFilter = "ok" | "error" | "pending";
 
 export type ServedAd = {
   id: string;
@@ -153,6 +159,14 @@ export type AdsDatabase = {
       };
       ads_notify_status: { Args: Record<string, never>; Returns: AdNotifyStatus };
       ads_send_test_notification: { Args: Record<string, never>; Returns: NotifySendResult };
+      ads_notify_history: {
+        Args: { _kind?: NotifyKindFilter | null; _result?: NotifyResultFilter | null; _limit?: number | null };
+        Returns: { total: number; items: (NotifyLogItem & { id: number })[] };
+      };
+      ads_notify_delete: {
+        Args: { _ids?: number[] | null; _kind?: NotifyKindFilter | null; _result?: NotifyResultFilter | null };
+        Returns: number;
+      };
       submit_ad_lead: {
         Args: {
           _name: string;

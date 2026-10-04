@@ -45,6 +45,9 @@ export function LeadNotifications({ refreshKey = 0 }: { refreshKey?: number }) {
   useEffect(() => { void load(); }, [load]);
   useEffect(() => { if (refreshKey > 0) void loadStatus(); }, [refreshKey, loadStatus]);
 
+  const last = status?.recent[0];
+  const lastLabel = last ? deliveryLabel(last) : null;
+
   const senderError = senderEmail.trim() && !EMAIL_RE.test(senderEmail.trim()) ? "E-mail inválido." : undefined;
 
   const save = async () => {
@@ -135,24 +138,15 @@ export function LeadNotifications({ refreshKey = 0 }: { refreshKey?: number }) {
         </button>
       </div>
 
-      {status && status.recent.length > 0 && (
-        <div>
-          <p className="mb-1 text-[11px] font-bold uppercase text-muted-foreground">Últimos envios</p>
-          <ul className="divide-y divide-border text-xs">
-            {status.recent.map((d, i) => {
-              const label = deliveryLabel(d);
-              return (
-                <li key={i} className="flex flex-wrap items-center gap-2 py-1.5">
-                  <span className="text-muted-foreground">{formatLocalDateTime(d.created_at)}</span>
-                  <span>{d.kind === "test" ? "Teste" : "Pedido"}</span>
-                  <span className={`ml-auto ${label.ok === false ? "text-destructive" : label.ok ? "text-emerald-600 dark:text-emerald-400" : "text-muted-foreground"}`}>
-                    {label.text}
-                  </span>
-                </li>
-              );
-            })}
-          </ul>
-        </div>
+      {last && (
+        <p className="border-t border-border pt-3 text-xs">
+          <span className="font-bold uppercase text-muted-foreground">Último envio: </span>
+          <span className="text-muted-foreground">{formatLocalDateTime(last.created_at)} · {last.kind === "test" ? "Teste" : "Pedido"} · </span>
+          <span className={lastLabel?.ok === false ? "text-destructive" : lastLabel?.ok ? "text-emerald-600 dark:text-emerald-400" : "text-muted-foreground"}>
+            {lastLabel?.text}
+          </span>
+          <span className="text-muted-foreground"> (lista completa em “Histórico de envios”)</span>
+        </p>
       )}
     </section>
   );

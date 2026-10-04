@@ -77,16 +77,15 @@ describe("LeadNotifications", () => {
     expect(db.rpc).toHaveBeenCalledWith("ads_send_test_notification");
   });
 
-  it("lista o resultado dos últimos envios", async () => {
+  it("mostra só o resultado do último envio", async () => {
     db.status = {
       data: { key_configured: true, recipients: 1, recent: [
-        { created_at: "2026-10-04T17:00:00Z", kind: "test", status_code: 201, timed_out: false, error: null },
-        { created_at: "2026-10-04T16:00:00Z", kind: "lead", status_code: 401, timed_out: false, error: null },
+        { created_at: "2026-10-04T17:00:00Z", kind: "test", status_code: 401, timed_out: false, error: null },
       ] },
       error: null,
     };
     render(<LeadNotifications />);
-    expect(await screen.findByText("Aceito pelo Brevo")).toBeInTheDocument();
-    expect(screen.getByText("Chave do Brevo inválida ou revogada")).toBeInTheDocument();
+    expect(await screen.findByText(/Chave do Brevo inválida ou revogada/)).toBeInTheDocument();
+    expect(screen.getByText(/Histórico de envios/)).toBeInTheDocument();
   });
 });

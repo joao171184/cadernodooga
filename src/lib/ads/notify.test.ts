@@ -11,8 +11,14 @@ describe("deliveryLabel", () => {
     expect(deliveryLabel({ ...base, status_code: 500 }).text).toBe("Erro do Brevo (HTTP 500)");
   });
 
-  it("distingue falha de rede de resposta já expirada", () => {
+  it("distingue falha de rede de envio ainda sem resposta", () => {
     expect(deliveryLabel({ ...base, timed_out: true }).ok).toBe(false);
-    expect(deliveryLabel(base)).toEqual({ text: "Sem resposta registrada", ok: null });
+    expect(deliveryLabel(base)).toEqual({ text: "Aguardando resposta", ok: null });
+  });
+
+  it("identifica bloqueio de IP mesmo com HTTP 401", () => {
+    const d = { ...base, status_code: 401, error: "We have detected you are using an unrecognised IP address 2600:1f13::1" };
+    expect(deliveryLabel(d).text).toMatch(/IP bloqueado/);
+    expect(deliveryLabel({ ...base, status_code: 401, error: "Key not found" }).text).toMatch(/Chave/);
   });
 });

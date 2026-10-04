@@ -26,6 +26,8 @@ import { Field, btnGhost, btnPrimary, inputClass } from "./ui";
 interface Props {
   open: boolean;
   campaign: AdCampaignRow | null;
+  /** Nova campanha pré-preenchida a partir de outra (duplicar). Ignorado quando `campaign` é informado. */
+  template?: AdCampaignRow | null;
   advertisers: AdAdvertiserRow[];
   placements: AdPlacementRow[];
   onClose: () => void;
@@ -74,7 +76,21 @@ async function uploadImage(file: File): Promise<string> {
   return path;
 }
 
-export function CampaignFormDialog({ open, campaign, advertisers, placements, onClose, onSaved }: Props) {
+/** Remove imagens que nenhuma campanha usa mais (cópias compartilham o mesmo arquivo). */
+async function removeUnusedImages(paths: string[]) {
+  const unused: string[] = [];
+  for (const p of paths) {
+    const { count, error } = await adsDb
+      .from("ad_campaigns")
+      .select("id", { count: "exact", head: true })
+      .or(`image_path.eq."${p}",image_mobile_path.eq."${p}"`);
+    if (!error && count === 0) unused.push(p);
+  }
+  if (unused.length) await adsDb.storage.from(AD_BUCKET).remove(unused);
+}
+
+export function CampaignFormDialog({ open, campaign, template = null, advertisers, placements, onClose, onSaved }: Props) {
+  const source = campaign ?? template;
   const [advertiserId, setAdvertiserId] = useState("");
   const [name, setName] = useState("");
   const [placementKey, setPlacementKey] = useState("");
@@ -97,24 +113,24 @@ export function CampaignFormDialog({ open, campaign, advertisers, placements, on
   useEffect(() => {
     if (!open) return;
     const range = defaultRange();
-    setAdvertiserId(campaign?.advertiser_id ?? advertisers.find((a) => !a.archived)?.id ?? "");
-    setName(campaign?.name ?? "");
-    setPlacementKey(campaign?.placement_key ?? placements[0]?.key ?? "");
-    setRevenueType(campaign?.revenue_type ?? "direct");
-    setAltText(campaign?.alt_text ?? "");
-    setTargetUrl(campaign?.target_url ?? "");
+    setAdvertiserId(source?.advertiser_id ?? advertisers.find((a) => !a.archived)?.id ?? "");
+    setName(campaign?.name ?? (template ? `${template.name} (cópia)`.slice(0, 120) : ""));
+    setPlacementKey(source?.placement_key ?? placements[0]?.key ?? "");
+    setRevenueType(source?.revenue_type ?? "direct");
+    setAltText(source?.alt_text ?? "");
+    setTargetUrl(source?.target_url ?? "");
     setStart(campaign ? utcIsoToLocalInput(campaign.starts_at) : range.start);
     setEnd(campaign ? utcIsoToLocalInput(campaign.ends_at) : range.end);
-    setWeight(campaign?.weight ?? 1);
-    setMaxImpressions(campaign?.max_impressions ? String(campaign.max_impressions) : "");
-    setBudget(campaign?.budget_cents != null ? (campaign.budget_cents / 100).toFixed(2).replace(".", ",") : "");
-    setStatus(campaign?.status === "archived" ? "paused" : campaign?.status ?? "draft");
+    setWeight(source?.weight ?? 1);
+    setMaxImpressions(source?.max_impressions ? String(source.max_impressions) : "");
+    setBudget(source?.budget_cents != null ? (source.budget_cents / 100).toFixed(2).replace(".", ",") : "");
+    setStatus(campaign ? (campaign.status === "archived" ? "paused" : campaign.status) : "draft");
     setDesktopImg(null);
     setMobileImg(null);
     setRemoveMobile(false);
     setErrors({});
     setPreviewMobile(false);
-  }, [open, campaign, advertisers, placements]);
+  }, [open, campaign, template, source, advertisers, placements]);
 
   useEffect(() => () => {
     if (desktopImg) URL.revokeObjectURL(desktopImg.url);
@@ -154,12 +170,12 @@ export function CampaignFormDialog({ open, campaign, advertisers, placements, on
     }
   };
 
-  const desktopUrl = desktopImg?.url ?? (campaign ? adImageUrl(campaign.image_path) : null);
-  const mobileUrl = removeMobile ? null : mobileImg?.url ?? (campaign?.image_mobile_path ? adImageUrl(campaign.image_mobile_path) : null);
+  const desktopUrl = desktopImg?.url ?? (source ? adImageUrl(source.image_path) : null);
+  const mobileUrl = removeMobile ? null : mobileImg?.url ?? (source?.image_mobile_path ? adImageUrl(source.image_mobile_path) : null);
   const advertiserName = advertisers.find((a) => a.id === advertiserId)?.name ?? "Anunciante";
   const activeAdvertisers = useMemo(
-    () => advertisers.filter((a) => !a.archived || a.id === campaign?.advertiser_id),
-    [advertisers, campaign],
+    () => advertisers.filter((a) => !a.archived || a.id === source?.advertiser_id),
+    [advertisers, source],
   );
 
   const save = async () => {
@@ -182,9 +198,9 @@ export function CampaignFormDialog({ open, campaign, advertisers, placements, on
     setSaving(true);
     const uploaded: string[] = [];
     try {
-      const imagePath = desktopImg ? await uploadImage(desktopImg.file) : campaign!.image_path;
+      const imagePath = desktopImg ? await uploadImage(desktopImg.file) : source!.image_path;
       if (desktopImg) uploaded.push(imagePath);
-      let mobilePath = removeMobile ? null : campaign?.image_mobile_path ?? null;
+      let mobilePath = removeMobile ? null : source?.image_mobile_path ?? null;
       if (mobileImg) {
         mobilePath = await uploadImage(mobileImg.file);
         uploaded.push(mobilePath);
@@ -216,7 +232,7 @@ export function CampaignFormDialog({ open, campaign, advertisers, placements, on
           desktopImg ? campaign.image_path : null,
           (mobileImg || removeMobile) ? campaign.image_mobile_path : null,
         ].filter((p): p is string => !!p);
-        if (stale.length) void adsDb.storage.from(AD_BUCKET).remove(stale);
+        if (stale.length) void removeUnusedImages(stale);
       }
       toast.success(campaign ? "Campanha atualizada." : "Campanha criada.");
       onSaved();
@@ -234,7 +250,7 @@ export function CampaignFormDialog({ open, campaign, advertisers, placements, on
     <Dialog open={open} onOpenChange={(o) => { if (!o && !saving) onClose(); }}>
       <DialogContent className="max-w-3xl max-h-[92vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="font-display uppercase">{campaign ? "Editar campanha" : "Nova campanha"}</DialogTitle>
+          <DialogTitle className="font-display uppercase">{campaign ? "Editar campanha" : template ? "Duplicar campanha" : "Nova campanha"}</DialogTitle>
           <DialogDescription>Datas e horários no fuso de Brasília. O anúncio sai do ar sozinho no término.</DialogDescription>
         </DialogHeader>
 
