@@ -566,20 +566,51 @@ const Index = () => {
               </div>
             ))
           ) : filtered.length === 0 ? (
-            <div className="text-center py-16 text-muted-foreground col-span-full">
-              <Music size={44} className="mx-auto mb-4 opacity-20" />
-              <p className="text-base font-medium uppercase">Nenhum ponto nesta pasta</p>
-              <p className="text-sm mt-1 opacity-70 uppercase">Tente outra busca ou outro filtro</p>
-              {canAdd && (
-                <button
-                  onClick={() => { setEditingPonto(null); setFormOpen(true); }}
-                  className="mt-4 inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-primary text-primary-foreground text-sm font-bold transition-all active:scale-95 uppercase"
-                >
-                  <Plus size={18} />
-                  Adicionar Ponto
-                </button>
-              )}
-            </div>
+            showFavorites ? (
+              <div className="text-center py-16 text-muted-foreground col-span-full">
+                <Heart size={44} className="mx-auto mb-4 opacity-20" />
+                {isLoggedIn ? (
+                  <>
+                    <p className="text-base font-medium uppercase">Nenhum ponto favorito ainda</p>
+                    <p className="text-sm mt-1 opacity-70 uppercase">Favorite pontos para que eles apareçam aqui</p>
+                    <button
+                      onClick={() => navigate("/")}
+                      className="mt-4 inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-primary text-primary-foreground text-sm font-bold transition-all active:scale-95 uppercase"
+                    >
+                      <Music size={18} />
+                      Ver todos os pontos
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <p className="text-base font-medium uppercase">Faça login para ver seus favoritos</p>
+                    <p className="text-sm mt-1 opacity-70 uppercase">Entre com sua conta para salvar pontos favoritos</p>
+                    <button
+                      onClick={() => navigate("/login")}
+                      className="mt-4 inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-primary text-primary-foreground text-sm font-bold transition-all active:scale-95 uppercase"
+                    >
+                      <LogIn size={18} />
+                      Entrar
+                    </button>
+                  </>
+                )}
+              </div>
+            ) : (
+              <div className="text-center py-16 text-muted-foreground col-span-full">
+                <Music size={44} className="mx-auto mb-4 opacity-20" />
+                <p className="text-base font-medium uppercase">Nenhum ponto nesta pasta</p>
+                <p className="text-sm mt-1 opacity-70 uppercase">Tente outra busca ou outro filtro</p>
+                {canAdd && (
+                  <button
+                    onClick={() => { setEditingPonto(null); setFormOpen(true); }}
+                    className="mt-4 inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-primary text-primary-foreground text-sm font-bold transition-all active:scale-95 uppercase"
+                  >
+                    <Plus size={18} />
+                    Adicionar Ponto
+                  </button>
+                )}
+              </div>
+            )
           ) : (
             visibleList.map((ponto, i) => {
               const nkey = (ponto.categoria || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
