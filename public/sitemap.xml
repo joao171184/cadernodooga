@@ -12,6 +12,12 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://cadernodooga.com.br/ponto/hino-umbanda</loc>
+    <lastmod>2026-10-04</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://cadernodooga.com.br/ponto/ganhei-uma-barraca-velha-foi-a-cigana-que-me-deu</loc>
     <lastmod>2026-08-03</lastmod>
     <changefreq>monthly</changefreq>
@@ -20,12 +26,6 @@
   <url>
     <loc>https://cadernodooga.com.br/ponto/maria-mulambo-6</loc>
     <lastmod>2026-08-05</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://cadernodooga.com.br/ponto/hino-umbanda</loc>
-    <lastmod>2026-10-02</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -73,12 +73,6 @@
   </url>
   <url>
     <loc>https://cadernodooga.com.br/ponto/arriba-meu-povo-cigano-vem-aqui-pra-trabalhar</loc>
-    <lastmod>2026-08-03</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://cadernodooga.com.br/ponto/no-alto-das-oliveiras-no-alto-das-oliveiras</loc>
     <lastmod>2026-08-03</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
@@ -152,6 +146,12 @@
   <url>
     <loc>https://cadernodooga.com.br/ponto/o-sol-brilhou-na-umbanda-choveu-ventou-arco-iris-no-ceu</loc>
     <lastmod>2026-08-03</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://cadernodooga.com.br/ponto/no-alto-das-oliveiras-no-alto-das-oliveiras</loc>
+    <lastmod>2026-10-03</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -318,14 +318,14 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://cadernodooga.com.br/ponto/que-penacho-e-aquele-e-um-penacho-de-arara</loc>
-    <lastmod>2026-07-11</lastmod>
+    <loc>https://cadernodooga.com.br/ponto/eu-abro-a-gira-com-a-licenca-de-ogum</loc>
+    <lastmod>2026-10-04</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://cadernodooga.com.br/ponto/eu-abro-a-gira-com-a-licenca-de-ogum</loc>
-    <lastmod>2026-10-02</lastmod>
+    <loc>https://cadernodooga.com.br/ponto/que-penacho-e-aquele-e-um-penacho-de-arara</loc>
+    <lastmod>2026-07-11</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -367,7 +367,7 @@
   </url>
   <url>
     <loc>https://cadernodooga.com.br/ponto/olorum</loc>
-    <lastmod>2026-10-02</lastmod>
+    <lastmod>2026-10-04</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -410,6 +410,12 @@
   <url>
     <loc>https://cadernodooga.com.br/ponto/mais-um-adeus-aleluia-adeus</loc>
     <lastmod>2026-07-06</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://cadernodooga.com.br/ponto/ja-deu-a-hora-do-relogio-de-nago</loc>
+    <lastmod>2026-10-04</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -464,12 +470,6 @@
   <url>
     <loc>https://cadernodooga.com.br/ponto/meu-pai-nao-gosta-de-mim</loc>
     <lastmod>2026-08-30</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://cadernodooga.com.br/ponto/ja-deu-a-hora-do-relogio-de-nago</loc>
-    <lastmod>2026-10-02</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -542,12 +542,6 @@
   <url>
     <loc>https://cadernodooga.com.br/ponto/cosme-damiao-oi-damiao</loc>
     <lastmod>2026-09-27</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://cadernodooga.com.br/ponto/eu-vi-mamae-oxum-cantando-na-cachoeira</loc>
-    <lastmod>2026-09-19</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -858,14 +852,14 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://cadernodooga.com.br/ponto/oi-salve-a-pemba-tambem-salve-a-toalha</loc>
-    <lastmod>2026-10-02</lastmod>
+    <loc>https://cadernodooga.com.br/ponto/despedida-de-oxum-faz-chorar</loc>
+    <lastmod>2026-08-03</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://cadernodooga.com.br/ponto/despedida-de-oxum-faz-chorar</loc>
-    <lastmod>2026-08-03</lastmod>
+    <loc>https://cadernodooga.com.br/ponto/eu-fecho-a-gira-com-a-licenca-de-ogum</loc>
+    <lastmod>2026-10-04</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -944,12 +938,6 @@
   <url>
     <loc>https://cadernodooga.com.br/ponto/olha-o-veu-do-amanhecer-olha-o-clarao</loc>
     <lastmod>2026-07-21</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://cadernodooga.com.br/ponto/eu-fecho-a-gira-com-a-licenca-de-ogum</loc>
-    <lastmod>2026-10-02</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -1086,12 +1074,6 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://cadernodooga.com.br/ponto/defumacao</loc>
-    <lastmod>2026-10-02</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
     <loc>https://cadernodooga.com.br/ponto/exu-caveira</loc>
     <lastmod>2026-08-05</lastmod>
     <changefreq>monthly</changefreq>
@@ -1130,6 +1112,12 @@
   <url>
     <loc>https://cadernodooga.com.br/ponto/chapeu-de-couro-por-zambi-abencoado</loc>
     <lastmod>2026-08-17</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://cadernodooga.com.br/ponto/defumacao</loc>
+    <lastmod>2026-10-04</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -1399,7 +1387,7 @@
   </url>
   <url>
     <loc>https://cadernodooga.com.br/ponto/guardioes</loc>
-    <lastmod>2026-10-02</lastmod>
+    <lastmod>2026-10-04</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -1626,14 +1614,14 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://cadernodooga.com.br/ponto/quando-ogum-partiu-pra-guerra</loc>
-    <lastmod>2026-08-03</lastmod>
+    <loc>https://cadernodooga.com.br/ponto/que-vento-e-esse-que-vem-la-do-mar</loc>
+    <lastmod>2026-08-21</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://cadernodooga.com.br/ponto/que-vento-e-esse-que-vem-la-do-mar</loc>
-    <lastmod>2026-08-21</lastmod>
+    <loc>https://cadernodooga.com.br/ponto/quando-ogum-partiu-pra-guerra</loc>
+    <lastmod>2026-10-03</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -2010,12 +1998,6 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://cadernodooga.com.br/ponto/nana</loc>
-    <lastmod>2026-07-23</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
     <loc>https://cadernodooga.com.br/ponto/eu-vejo-fogo-chegando-na-calunga</loc>
     <lastmod>2026-08-06</lastmod>
     <changefreq>monthly</changefreq>
@@ -2149,12 +2131,6 @@
   </url>
   <url>
     <loc>https://cadernodooga.com.br/ponto/ori-ori-ori-oh-povo-cigano-e-o-povo-do-amor</loc>
-    <lastmod>2026-08-03</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://cadernodooga.com.br/ponto/sob-o-luar-de-prata-meu-senhor-da-mata</loc>
     <lastmod>2026-08-03</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
@@ -2454,12 +2430,6 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://cadernodooga.com.br/ponto/ele-bradou-na-aldeia-bradou-na-cachoeira-em-noite-de-luar</loc>
-    <lastmod>2026-08-03</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
     <loc>https://cadernodooga.com.br/ponto/exus-e-pomba-giras</loc>
     <lastmod>2026-08-05</lastmod>
     <changefreq>monthly</changefreq>
@@ -2749,7 +2719,7 @@
   </url>
   <url>
     <loc>https://cadernodooga.com.br/ponto/tantas-batalhas</loc>
-    <lastmod>2026-09-05</lastmod>
+    <lastmod>2026-10-03</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -2934,30 +2904,6 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://cadernodooga.com.br/ponto/oxala-oxala-oxala-oxala</loc>
-    <lastmod>2026-10-02</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://cadernodooga.com.br/ponto/eu-toco-barra-vento-pra-poder-rezar</loc>
-    <lastmod>2026-10-02</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://cadernodooga.com.br/ponto/oi-salve-a-umbanda-vamos-saudar</loc>
-    <lastmod>2026-10-02</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://cadernodooga.com.br/ponto/gracas-a-deus</loc>
-    <lastmod>2026-10-02</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
     <loc>https://cadernodooga.com.br/ponto/meu-lirio-branco-que-eu-plantei-aqui</loc>
     <lastmod>2026-10-03</lastmod>
     <changefreq>monthly</changefreq>
@@ -2978,6 +2924,12 @@
   <url>
     <loc>https://cadernodooga.com.br/ponto/naquele-rio-do-lado-de-la-tem-um-feiticeiro-que-jurou-de-me-matar</loc>
     <lastmod>2026-10-03</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://cadernodooga.com.br/ponto/oi-salve-a-umbanda-vamos-saudar</loc>
+    <lastmod>2026-10-04</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -3054,14 +3006,62 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://cadernodooga.com.br/ponto/a-chuva-que-cai-do-ceu-parece-prata</loc>
+    <lastmod>2026-10-03</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://cadernodooga.com.br/ponto/seu-tranca-rua-da-uma-volta-la-fora</loc>
     <lastmod>2026-10-03</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://cadernodooga.com.br/ponto/a-chuva-que-cai-do-ceu-parece-prata</loc>
+    <loc>https://cadernodooga.com.br/ponto/nana</loc>
     <lastmod>2026-10-03</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://cadernodooga.com.br/ponto/sob-o-luar-de-prata-meu-senhor-da-mata</loc>
+    <lastmod>2026-10-03</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://cadernodooga.com.br/ponto/ele-bradou-na-aldeia-bradou-na-cachoeira-em-noite-de-luar</loc>
+    <lastmod>2026-10-03</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://cadernodooga.com.br/ponto/eu-vi-mamae-oxum-cantando-na-cachoeira</loc>
+    <lastmod>2026-10-03</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://cadernodooga.com.br/ponto/oi-salve-a-pemba-tambem-salve-a-toalha</loc>
+    <lastmod>2026-10-04</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://cadernodooga.com.br/ponto/oxala-oxala-oxala-oxala</loc>
+    <lastmod>2026-10-04</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://cadernodooga.com.br/ponto/eu-toco-barra-vento-pra-poder-rezar</loc>
+    <lastmod>2026-10-04</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://cadernodooga.com.br/ponto/gracas-a-deus</loc>
+    <lastmod>2026-10-04</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -3071,17 +3071,22 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://cadernodooga.com.br/?categoria=Guias%20de%20Esquerda</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://cadernodooga.com.br/?categoria=TUVLA</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://cadernodooga.com.br/?categoria=Guias%20de%20Esquerda</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://cadernodooga.com.br/?categoria=Orix%C3%A1s</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://cadernodooga.com.br/?categoria=Esquenta</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -3092,11 +3097,6 @@
   </url>
   <url>
     <loc>https://cadernodooga.com.br/?categoria=Defuma%C3%A7%C3%A3o</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://cadernodooga.com.br/?categoria=Esquenta</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
