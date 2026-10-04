@@ -330,12 +330,12 @@ const Index = () => {
             {isLoggedIn && effectiveIsAdmin && pendentes.length > 0 && (
               <button
                 onClick={() => navigate("/pendentes")}
-                className="relative flex items-center gap-1.5 px-2.5 py-2 rounded-xl bg-amber-500 text-white text-xs font-bold transition-all active:scale-95 shadow-sm uppercase"
+                className="relative flex items-center gap-1.5 px-2.5 py-2 rounded-xl bg-accent text-accent-foreground text-xs font-bold transition-all active:scale-95 shadow-sm uppercase"
                 title="Pontos pendentes de aprovação"
                 aria-label="Pontos pendentes"
               >
                 <Inbox size={14} />
-                <span className="bg-white text-amber-600 rounded-full px-1.5 min-w-[20px] text-center">
+                <span className="bg-background text-accent-strong rounded-full px-1.5 min-w-[20px] text-center">
                   {pendentes.length}
                 </span>
               </button>
@@ -358,7 +358,7 @@ const Index = () => {
                 onClick={() => setVisitorMode((v) => !v)}
                 className={`flex items-center justify-center p-2 rounded-xl transition-all active:scale-95 border ${
                   visitorMode
-                    ? "bg-amber-500 text-white border-amber-500 shadow-sm"
+                    ? "bg-accent text-accent-foreground border-accent shadow-sm"
                     : "bg-primary-foreground/10 hover:bg-primary-foreground/20 text-primary-foreground border-primary-foreground/10"
                 }`}
                 title={visitorMode ? "Voltar ao modo admin" : "Ver como visitante"}
@@ -663,14 +663,14 @@ const Index = () => {
         <div className="px-4 py-5 max-w-2xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
           <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
             <span>Feito com</span>
-            <Heart size={12} className="fill-accent text-accent" />
+            <Heart size={12} className="fill-accent text-accent-strong" />
             <span>por <span className="font-bold text-foreground">João Pedro de Andrade Marques</span></span>
           </div>
           <a
             href="https://www.instagram.com/j_marques.a/"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-accent/15 hover:bg-accent/25 text-accent text-xs font-bold transition-all active:scale-95"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-accent/15 hover:bg-accent/25 text-accent-strong text-xs font-bold transition-all active:scale-95"
           >
             <Instagram size={14} />
             <span>@j_marques.a</span>
