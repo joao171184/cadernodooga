@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useRef, useState, useCallback, ty
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { readCache, writeCache } from "@/lib/offlineCache";
+import { pontoSaveErrorMessage } from "@/lib/pontoValidation";
 import type { Database } from "@/integrations/supabase/types";
 
 export type ToqueTipo = Database["public"]["Enums"]["toque_tipo"];
@@ -193,15 +194,16 @@ export function PontosProvider({ children }: { children: ReactNode }) {
 
     let pontoId: string;
     if (data.id) {
-      const { error } = await supabase.from("pontos").update(payload).eq("id", data.id);
-      if (error) return { error: error.message, pending: false };
+      const { count, error } = await supabase.from("pontos").update(payload, { count: "exact" }).eq("id", data.id);
+      if (error) return { error: pontoSaveErrorMessage(error), pending: false };
+      if (count === 0) return { error: pontoSaveErrorMessage({ code: "42501" }), pending: false };
       pontoId = data.id;
       await supabase.from("ponto_subcategorias").delete().eq("ponto_id", pontoId);
       await supabase.from("ponto_classificacoes").delete().eq("ponto_id", pontoId);
     } else {
       const ordem = pontos.length ? Math.max(...pontos.map((p) => p.ordem)) + 10 : 10;
       const { data: ins, error } = await supabase.from("pontos").insert({ ...payload, ordem }).select("id").single();
-      if (error || !ins) return { error: error?.message ?? "Erro", pending: false };
+      if (error || !ins) return { error: pontoSaveErrorMessage(error), pending: false };
       pontoId = ins.id;
     }
 
@@ -219,8 +221,8 @@ export function PontosProvider({ children }: { children: ReactNode }) {
   }, [user, isAdmin, pontos, refresh]);
 
   const deletePonto = useCallback(async (id: string) => {
-    const { error } = await supabase.from("pontos").delete().eq("id", id);
-    if (error) throw error;
+    const { count, error } = await supabase.from("pontos").delete({ count: "exact" }).eq("id", id);
+    if (error || count === 0) throw new Error("delete_failed");
     await refresh();
   }, [refresh]);
 

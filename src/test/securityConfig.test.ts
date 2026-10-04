@@ -31,7 +31,7 @@ describe("headers de segurança (vercel.json)", () => {
     const csp = h["content-security-policy"];
     expect(csp).toContain("frame-ancestors 'none'");
     expect(csp).toContain("object-src 'none'");
-    expect(csp).toMatch(/script-src 'self'(;|$)/);
+    expect(csp).toMatch(/script-src 'self'( https:\/\/static\.cloudflareinsights\.com)?(;|$)/);
     expect(csp).not.toMatch(/script-src[^;]*'unsafe-(inline|eval)'/);
     expect(csp).not.toMatch(/connect-src[^;]*\s\*/);
   });

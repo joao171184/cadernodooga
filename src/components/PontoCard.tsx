@@ -115,8 +115,8 @@ const PontoCard = ({ ponto, isPlaying, isFavorite, visitorMode = false, showFavo
     >
 
       <div className="p-4 sm:p-5">
-        <div className="flex items-start justify-between gap-2 mb-3">
-          <div className="flex-1 min-w-0">
+        <div className="flex flex-wrap items-start justify-between gap-2 mb-3">
+          <div className="flex-1 min-w-[11rem]">
             <h3 className="font-display text-base sm:text-lg font-bold text-card-foreground leading-tight uppercase">
               {ponto.nome}
             </h3>
@@ -152,7 +152,7 @@ const PontoCard = ({ ponto, isPlaying, isFavorite, visitorMode = false, showFavo
               </div>
             )}
           </div>
-          <div className="flex items-center gap-1 shrink-0">
+          <div className="flex items-center gap-1 shrink-0 ml-auto">
             {isAdmin && !visitorMode && onMoveUp && (
               <button
                 onClick={() => onMoveUp(ponto.id)}

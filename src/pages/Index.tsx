@@ -133,9 +133,10 @@ const Index = () => {
 
   const handleSavePonto = useCallback(async (data: Parameters<typeof savePonto>[0]) => {
     const { error, pending } = await savePonto(data);
-    if (error) { toast.error("Erro: " + error); return; }
+    if (error) { toast.error(error); return false; }
     if (pending) toast.success("Ponto enviado para aprovação do admin");
     else toast.success("Ponto salvo");
+    return true;
   }, [savePonto]);
 
   const handleDeletePonto = useCallback(async (id: string) => {
@@ -144,9 +145,8 @@ const Index = () => {
         await deletePonto(id);
         setPlayingId((curr) => (curr === id ? null : curr));
         toast.success("Ponto excluído");
-      } catch (e) {
-        const msg = (e as { message?: string })?.message ?? "erro";
-        toast.error("Não foi possível excluir: " + msg);
+      } catch {
+        toast.error("Não foi possível excluir o ponto. Tente novamente.");
       }
     }
   }, [deletePonto]);

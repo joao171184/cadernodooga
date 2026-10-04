@@ -10,11 +10,13 @@ import {
   type Classificacao,
 } from "@/contexts/PontosContext";
 import { X, Check } from "lucide-react";
+import { toast } from "sonner";
+import { PONTO_LIMITS, validatePontoFields } from "@/lib/pontoValidation";
 
 interface PontoFormDialogProps {
   open: boolean;
   onClose: () => void;
-  onSave: (ponto: PontoInput) => void | Promise<void>;
+  onSave: (ponto: PontoInput) => void | boolean | Promise<void | boolean>;
   ponto?: Ponto | null;
   defaultCategoria?: string;
   defaultSubcategoria?: string;
@@ -30,6 +32,7 @@ export function PontoFormDialog({ open, onClose, onSave, ponto, defaultCategoria
   const [audio, setAudio] = useState("");
   const [puxador, setPuxador] = useState("");
   const [toque, setToque] = useState<ToqueTipo | "">("");
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     if (ponto) {
@@ -69,8 +72,11 @@ export function PontoFormDialog({ open, onClose, onSave, ponto, defaultCategoria
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!nome.trim() || !letra.trim() || !categoria) return;
-    await onSave({
+    if (!nome.trim() || !letra.trim() || !categoria || saving) return;
+    const invalid = validatePontoFields({ nome: nome.trim(), letra, puxador: puxador.trim(), audio });
+    if (invalid) { toast.error(invalid); return; }
+    setSaving(true);
+    const ok = await Promise.resolve(onSave({
       ...(ponto ? { id: ponto.id } : {}),
       nome: nome.trim(),
       categoria,
@@ -80,8 +86,11 @@ export function PontoFormDialog({ open, onClose, onSave, ponto, defaultCategoria
       audio: audio.trim(),
       puxador: puxador.trim(),
       toque: toque || null,
-    });
-    onClose();
+    })).catch(() => {
+      toast.error("Não foi possível salvar o ponto. Tente novamente.");
+      return false;
+    }).finally(() => setSaving(false));
+    if (ok !== false) onClose();
   };
 
   return (
@@ -102,6 +111,7 @@ export function PontoFormDialog({ open, onClose, onSave, ponto, defaultCategoria
               type="text"
               value={nome}
               onChange={(e) => setNome(e.target.value)}
+              maxLength={PONTO_LIMITS.nome}
               autoComplete="off"
               autoCorrect="off"
               autoCapitalize="characters"
@@ -228,6 +238,7 @@ export function PontoFormDialog({ open, onClose, onSave, ponto, defaultCategoria
               value={letra}
               onChange={(e) => setLetra(e.target.value.toUpperCase())}
               rows={8}
+              maxLength={PONTO_LIMITS.letra}
               autoComplete="off"
               autoCorrect="off"
               autoCapitalize="characters"
@@ -246,6 +257,7 @@ export function PontoFormDialog({ open, onClose, onSave, ponto, defaultCategoria
               type="text"
               value={puxador}
               onChange={(e) => setPuxador(e.target.value)}
+              maxLength={PONTO_LIMITS.puxador}
               className="w-full px-4 py-3 rounded-xl bg-muted text-foreground text-sm outline-none focus:ring-2 focus:ring-accent/50 border border-border"
               placeholder="Ex: Pai João, Mãe Maria, Ogã Pedro..."
             />
@@ -259,6 +271,8 @@ export function PontoFormDialog({ open, onClose, onSave, ponto, defaultCategoria
               type="text"
               value={audio}
               onChange={(e) => setAudio(e.target.value)}
+              maxLength={PONTO_LIMITS.audio}
+              inputMode="url"
               className="w-full px-4 py-3 rounded-xl bg-muted text-foreground text-sm outline-none focus:ring-2 focus:ring-accent/50 border border-border"
               placeholder="https://youtu.be/... · https://open.spotify.com/track/... · https://tiktok.com/@user/video/..."
             />
@@ -274,7 +288,8 @@ export function PontoFormDialog({ open, onClose, onSave, ponto, defaultCategoria
             </button>
             <button
               type="submit"
-              className="flex-1 py-3 rounded-xl text-sm font-bold text-primary-foreground bg-primary hover:bg-primary/90 transition-all active:scale-[0.98] shadow-sm flex items-center justify-center gap-2"
+              disabled={saving}
+              className="flex-1 py-3 rounded-xl text-sm font-bold text-primary-foreground bg-primary hover:bg-primary/90 transition-all active:scale-[0.98] shadow-sm flex items-center justify-center gap-2 disabled:opacity-60"
             >
               <Check size={16} /> {ponto ? "SALVAR" : "ADICIONAR"}
             </button>
