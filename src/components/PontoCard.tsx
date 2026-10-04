@@ -144,7 +144,7 @@ const PontoCard = ({ ponto, isPlaying, isFavorite, visitorMode = false, showFavo
                 {classifLabels.map((c) => (
                   <span
                     key={c.value}
-                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-accent/15 text-accent border border-accent/30"
+                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-accent/15 text-accent-strong border border-accent/30"
                   >
                     {c.label}
                   </span>
@@ -201,7 +201,7 @@ const PontoCard = ({ ponto, isPlaying, isFavorite, visitorMode = false, showFavo
               >
                 <Heart
                   size={18}
-                  className={`transition-colors ${isFavorite ? "fill-accent text-accent" : "text-muted-foreground"}`}
+                  className={`transition-colors ${isFavorite ? "fill-accent text-accent-strong" : "text-muted-foreground"}`}
                 />
               </button>
             )}
