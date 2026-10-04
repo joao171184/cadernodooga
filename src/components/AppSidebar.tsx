@@ -167,7 +167,7 @@ export function AppSidebar() {
                       to="/favoritos"
                       end
                       onClick={handleNavClick}
-                      title="Meu Terreiro"
+                      title="Favoritos"
                       className={`flex items-center gap-2.5 px-3 py-2.5 rounded-xl transition-all text-sm font-semibold ${
                         currentPath === "/favoritos"
                           ? "bg-accent/20 text-accent"
@@ -176,7 +176,7 @@ export function AppSidebar() {
                       activeClassName=""
                     >
                       <Heart size={18} strokeWidth={2} className="shrink-0 fill-white/30 text-white" />
-                      <span className="tracking-wide text-[13px] font-display">Meu Terreiro</span>
+                      <span className="tracking-wide text-[13px] font-display">Favoritos</span>
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
