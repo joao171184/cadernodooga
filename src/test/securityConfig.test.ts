@@ -36,6 +36,17 @@ describe("headers de segurança (vercel.json)", () => {
     expect(csp).not.toMatch(/connect-src[^;]*\s\*/);
   });
 
+  it("CSP não deixa imagens, áudios ou conexões saírem para qualquer site (reduz exfiltração de token em caso de XSS)", () => {
+    const csp = headersFor("/")["content-security-policy"];
+    const directive = (name: string) => csp.match(new RegExp(`${name} ([^;]*)`))?.[1].split(/\s+/) ?? [];
+    for (const name of ["img-src", "media-src", "connect-src", "frame-src"]) {
+      const sources = directive(name);
+      expect(sources.length, name).toBeGreaterThan(0);
+      expect(sources, name).not.toContain("https:");
+      expect(sources, name).not.toContain("*");
+    }
+  });
+
   it("service worker não recebe a CSP de página (precisa buscar áudios de outras origens)", () => {
     expect(headersFor("/sw.js")["content-security-policy"]).toBeUndefined();
   });

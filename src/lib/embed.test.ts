@@ -15,7 +15,7 @@ describe("getEmbedInfo", () => {
     });
     expect(getEmbedInfo("https://www.tiktok.com/@user.name/video/7234567890123456789")).toMatchObject({
       kind: "tiktok",
-      src: "https://www.tiktok.com/embed/v2/7234567890123456789",
+      src: "https://www.tiktok.com/player/v1/7234567890123456789?autoplay=1&music_info=1&description=1&rel=0",
       externalUrl: "https://www.tiktok.com/@user.name/video/7234567890123456789",
     });
     expect(getEmbedInfo("https://vm.tiktok.com/ZMabc123/")).toMatchObject({

@@ -240,7 +240,7 @@ const PontoPage = () => {
           <div className="mt-10">
             {embed.kind === "youtube" && (
               <div className="aspect-video rounded-2xl overflow-hidden bg-black">
-                <iframe src={embed.src} title={ponto.nome} className="w-full h-full" allow="autoplay; encrypted-media; picture-in-picture" allowFullScreen />
+                <iframe src={embed.src} title={ponto.nome} className="w-full h-full" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" />
               </div>
             )}
             {embed.kind === "spotify" && (
@@ -248,7 +248,7 @@ const PontoPage = () => {
             )}
             {embed.kind === "tiktok" && (
               embed.src ? (
-                <TikTokPlayer src={embed.src} title={ponto.nome} />
+                <TikTokPlayer src={embed.src} title={ponto.nome} externalUrl={embed.externalUrl} />
               ) : (
                 <a
                   href={embed.externalUrl}

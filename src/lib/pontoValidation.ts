@@ -1,3 +1,5 @@
+import { getEmbedInfo } from "@/lib/embed";
+
 export const PONTO_LIMITS = {
   nome: 300,
   letra: 50000,
@@ -12,8 +14,11 @@ export function validatePontoFields(input: { nome: string; letra: string; puxado
   if (input.letra.length > PONTO_LIMITS.letra) return `A letra pode ter no máximo ${PONTO_LIMITS.letra} caracteres.`;
   if (input.puxador.length > PONTO_LIMITS.puxador) return `O campo "quem puxa" pode ter no máximo ${PONTO_LIMITS.puxador} caracteres.`;
   const audio = input.audio.trim();
-  if (audio && (audio.length > PONTO_LIMITS.audio || !SAFE_URL.test(audio))) {
-    return "O link precisa começar com https:// (YouTube, Spotify, TikTok ou arquivo de áudio).";
+  if (!audio) return null;
+  const embed = getEmbedInfo(audio);
+  const playable = embed.kind !== "none" && (embed.kind !== "audio" || embed.src.startsWith("/"));
+  if (audio.length > PONTO_LIMITS.audio || !SAFE_URL.test(audio) || !playable) {
+    return "Use um link https:// do YouTube, Spotify ou TikTok.";
   }
   return null;
 }

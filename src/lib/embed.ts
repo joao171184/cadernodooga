@@ -68,7 +68,7 @@ export function getEmbedInfo(url: string): EmbedInfo {
     if (!tt) return NONE;
     return {
       kind: "tiktok",
-      src: `https://www.tiktok.com/embed/v2/${tt[1]}`,
+      src: `https://www.tiktok.com/player/v1/${tt[1]}?autoplay=1&music_info=1&description=1&rel=0`,
       externalUrl: parsed.href,
       videoId: tt[1],
     };

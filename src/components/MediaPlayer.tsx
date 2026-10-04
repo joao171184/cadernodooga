@@ -1,5 +1,6 @@
 import { X, ExternalLink } from "lucide-react";
 import { getEmbedInfo } from "@/lib/embed";
+import { TikTokPlayer } from "@/components/TikTokPlayer";
 
 interface Props {
   url: string;
@@ -31,8 +32,7 @@ export function MediaPlayer({ url, title, onClose }: Props) {
               src={info.src}
               title={title}
               className="w-full h-full"
-              allow="autoplay; encrypted-media; picture-in-picture"
-              allowFullScreen
+              allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
             />
           </div>
         )}
@@ -47,29 +47,7 @@ export function MediaPlayer({ url, title, onClose }: Props) {
         )}
         {info.kind === "tiktok" && (
           info.src ? (
-            <div
-              className="relative w-full mx-auto rounded-xl overflow-hidden bg-black"
-              style={{ maxWidth: 325, height: "min(75vh, 740px)" }}
-            >
-              <iframe
-                src={info.src}
-                title={title}
-                className="w-full h-full border-0"
-                allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
-                allowFullScreen
-                scrolling="no"
-              />
-              {info.externalUrl && (
-                <a
-                  href={info.externalUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="absolute bottom-2 right-2 flex items-center gap-1 px-2 py-1 rounded-md bg-black/70 text-white text-[10px] font-bold uppercase"
-                >
-                  <ExternalLink size={10} /> Abrir TikTok
-                </a>
-              )}
-            </div>
+            <TikTokPlayer src={info.src} title={title} externalUrl={info.externalUrl} className="rounded-xl" />
           ) : (
             <a
               href={info.externalUrl}

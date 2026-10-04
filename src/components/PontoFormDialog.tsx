@@ -274,7 +274,7 @@ export function PontoFormDialog({ open, onClose, onSave, ponto, defaultCategoria
               maxLength={PONTO_LIMITS.audio}
               inputMode="url"
               className="w-full px-4 py-3 rounded-xl bg-muted text-foreground text-sm outline-none focus:ring-2 focus:ring-accent/50 border border-border"
-              placeholder="https://youtu.be/... · https://open.spotify.com/track/... · https://tiktok.com/@user/video/..."
+              placeholder="https://youtu.be/... · https://open.spotify.com/track/... · https://www.tiktok.com/@user/video/..."
             />
           </div>
 
