@@ -21,6 +21,16 @@ function headersFor(path: string): Record<string, string> {
   return out;
 }
 
+/** Únicos scripts externos permitidos: Cloudflare Insights e AdSense (carregado só após consentimento). */
+const SCRIPT_HOSTS = [
+  "https://static.cloudflareinsights.com",
+  "https://pagead2.googlesyndication.com",
+  "https://tpc.googlesyndication.com",
+  "https://googleads.g.doubleclick.net",
+  "https://*.adtrafficquality.google",
+  "https://fundingchoicesmessages.google.com",
+];
+
 describe("headers de segurança (vercel.json)", () => {
   it.each(["/", "/ponto/abc", "/login", "/auth/confirm"])("%s recebe headers e CSP", (path) => {
     const h = headersFor(path);
@@ -31,7 +41,9 @@ describe("headers de segurança (vercel.json)", () => {
     const csp = h["content-security-policy"];
     expect(csp).toContain("frame-ancestors 'none'");
     expect(csp).toContain("object-src 'none'");
-    expect(csp).toMatch(/script-src 'self'( https:\/\/static\.cloudflareinsights\.com)?(;|$)/);
+    const scriptSrc = csp.match(/script-src ([^;]*)/)?.[1].split(/\s+/) ?? [];
+    expect(scriptSrc[0]).toBe("'self'");
+    for (const source of scriptSrc.slice(1)) expect(SCRIPT_HOSTS, source).toContain(source);
     expect(csp).not.toMatch(/script-src[^;]*'unsafe-(inline|eval)'/);
     expect(csp).not.toMatch(/connect-src[^;]*\s\*/);
   });
