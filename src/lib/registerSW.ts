@@ -1,6 +1,7 @@
 import { purgeLegacyApiCaches } from "./pwaCachePolicy";
 
 const SW_URL = "/sw.js";
+const UPDATE_INTERVAL_MS = 30 * 60 * 1000;
 
 function isBlockedContext(): boolean {
   if (!import.meta.env.PROD) return true;
@@ -38,9 +39,28 @@ export function registerServiceWorker() {
     void unregisterAppSW();
     return;
   }
+  // Com skipWaiting/clientsClaim o SW novo assume a aba, mas o JS antigo continua em memória.
+  // Recarrega uma única vez para o visitante já usar o deploy novo.
+  const hadController = !!navigator.serviceWorker.controller;
+  let reloaded = false;
+  navigator.serviceWorker.addEventListener("controllerchange", () => {
+    if (!hadController || reloaded) return;
+    reloaded = true;
+    window.location.reload();
+  });
+
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register(SW_URL, { scope: "/" }).catch(() => {
-      /* ignore */
-    });
+    navigator.serviceWorker
+      .register(SW_URL, { scope: "/", updateViaCache: "none" })
+      .then((reg) => {
+        const check = () => void reg.update().catch(() => {});
+        setInterval(check, UPDATE_INTERVAL_MS);
+        document.addEventListener("visibilitychange", () => {
+          if (document.visibilityState === "visible") check();
+        });
+      })
+      .catch(() => {
+        /* ignore */
+      });
   });
 }
