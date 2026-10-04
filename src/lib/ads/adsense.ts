@@ -35,7 +35,6 @@ export function loadAdSenseScript(client: string): Promise<void> {
       const s = document.createElement("script");
       s.async = true;
       s.src = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${encodeURIComponent(client)}`;
-      s.crossOrigin = "anonymous";
       s.onload = () => resolve();
       s.onerror = () => {
         scriptPromise = null;

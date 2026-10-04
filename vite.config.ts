@@ -44,16 +44,18 @@ export default defineConfig(({ mode }) => ({
         ],
       },
       workbox: {
-        globPatterns: ["**/*.{js,css,html,svg,woff2}"],
-        navigateFallback: "/index.html",
-        navigateFallbackDenylist: [/^\/~oauth/, /^\/sitemap\.xml$/, /^\/robots\.txt$/, /^\/ads\.txt$/],
+        // HTML fora do precache e sem navigateFallback: uma cópia guardada do index.html
+        // levaria junto os headers antigos (CSP) e só seria trocada se o arquivo mudasse.
+        globPatterns: ["**/*.{js,css,svg,woff2}"],
+        navigateFallback: null,
         cleanupOutdatedCaches: true,
         clientsClaim: true,
         skipWaiting: true,
         runtimeCaching: [
           {
-            urlPattern: ({ request, sameOrigin }) =>
-              sameOrigin && request.mode === "navigate",
+            urlPattern: ({ request, url, sameOrigin }) =>
+              sameOrigin && request.mode === "navigate" &&
+              !/^\/(~oauth|sitemap\.xml$|robots\.txt$|ads\.txt$)/.test(url.pathname),
             handler: "NetworkFirst",
             options: {
               cacheName: "html-navigations",

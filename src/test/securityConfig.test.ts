@@ -97,7 +97,15 @@ describe("cache do PWA", () => {
     const escaped = file.replace(".", "\\.");
     const rewrites = (JSON.parse(read("vercel.json")) as { rewrites: { source: string }[] }).rewrites;
     expect(rewrites.some((r) => r.source.includes(`(?!`) && r.source.includes(escaped))).toBe(true);
-    expect(read("vite.config.ts")).toContain(`/^\\/${escaped}$/`);
+    expect(read("vite.config.ts")).toContain(`${escaped}$`);
+  });
+
+  it("service worker não guarda o index.html (levaria a CSP antiga junto)", () => {
+    const vite = read("vite.config.ts");
+    expect(vite).toMatch(/navigateFallback:\s*null/);
+    const glob = vite.match(/globPatterns:\s*\[([^\]]*)\]/)?.[1] ?? "";
+    expect(glob).not.toBe("");
+    expect(glob).not.toMatch(/html/);
   });
 
   it("predicado é autocontido (o Workbox serializa a função)", () => {
