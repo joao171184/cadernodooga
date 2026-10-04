@@ -320,6 +320,19 @@ describe("/reset-password", () => {
     await waitFor(() => expect(toastMock.error).toHaveBeenCalled());
     expect(toastMock.error.mock.calls[0][0]).not.toMatch(/auth\.users|pq:/);
   });
+
+  it("botão de olho mostra e oculta a nova senha", async () => {
+    sessionStorage.setItem(RECOVERY_FLAG_KEY, "1");
+    auth.getSession.mockResolvedValue({ data: { session: { user: CONFIRMED } }, error: null });
+    renderReset();
+    const input = await screen.findByLabelText("Nova senha");
+    expect(input).toHaveAttribute("type", "password");
+    fireEvent.click(screen.getAllByRole("button", { name: "Mostrar senha" })[0]);
+    expect(input).toHaveAttribute("type", "text");
+    expect(screen.getByLabelText("Confirme a nova senha")).toHaveAttribute("type", "text");
+    fireEvent.click(screen.getAllByRole("button", { name: "Ocultar senha" })[0]);
+    expect(input).toHaveAttribute("type", "password");
+  });
 });
 
 describe("AuthContext", () => {

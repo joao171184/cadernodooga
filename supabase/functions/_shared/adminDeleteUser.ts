@@ -2,11 +2,18 @@
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
+export interface AccessLevel {
+  admin: boolean;
+  superAdmin: boolean;
+}
+
 export interface AdminDeleteDeps {
   /** Valida o JWT e devolve o id do usuário, ou null se a sessão for inválida. */
   getCallerId(token: string): Promise<string | null>;
-  /** Executa is_super_admin com o JWT de quem chama (RLS/auth.uid() do próprio usuário). */
-  isCallerSuperAdmin(token: string, callerId: string): Promise<boolean>;
+  /** Papéis de quem chama (super-admin verificado com o JWT do próprio usuário). */
+  getCallerAccess(token: string, callerId: string): Promise<AccessLevel>;
+  /** Papéis da conta alvo, lidos com a service role. */
+  getTargetAccess(userId: string): Promise<AccessLevel>;
   /** Apaga a conta com a service role. */
   deleteUser(userId: string): Promise<{ ok: boolean }>;
   logError(message: string): void;
@@ -29,8 +36,9 @@ export async function handleAdminDelete(
   const callerId = await deps.getCallerId(token);
   if (!callerId) return { status: 401, body: { error: "Sessão inválida" } };
 
-  if (!(await deps.isCallerSuperAdmin(token, callerId))) {
-    return { status: 403, body: { error: "Sem permissão" } };
+  const caller = await deps.getCallerAccess(token, callerId);
+  if (!caller.admin && !caller.superAdmin) {
+    return { status: 403, body: { error: "Apenas administradores podem excluir contas" } };
   }
 
   const userId =
@@ -40,6 +48,14 @@ export async function handleAdminDelete(
   }
   if (userId.toLowerCase() === callerId.toLowerCase()) {
     return { status: 400, body: { error: "Você não pode excluir sua própria conta" } };
+  }
+
+  const target = await deps.getTargetAccess(userId);
+  if (target.superAdmin) {
+    return { status: 403, body: { error: "Esta conta não pode ser excluída" } };
+  }
+  if (target.admin && !caller.superAdmin) {
+    return { status: 403, body: { error: "Apenas o super-admin pode excluir outro administrador" } };
   }
 
   const { ok } = await deps.deleteUser(userId);

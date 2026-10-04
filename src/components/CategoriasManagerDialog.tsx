@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Plus, Pencil, Trash2, Check, X, ChevronDown, ChevronRight, FolderTree, ArrowUp, ArrowDown, ListFilter } from "lucide-react";
 import { useCategorias, type CategoriaNode } from "@/contexts/CategoriasContext";
 import { ICON_CATALOG, resolveIcon } from "@/lib/categoryIcons";
@@ -117,6 +117,7 @@ export function CategoriasManagerDialog({ open, onClose }: Props) {
             <FolderTree size={20} className="text-accent" />
             Painel de Categorias
           </DialogTitle>
+          <DialogDescription className="sr-only">Criar, editar e organizar categorias e subcategorias</DialogDescription>
         </DialogHeader>
 
         {/* Add new top-level */}

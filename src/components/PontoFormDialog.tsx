@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useCategorias } from "@/contexts/CategoriasContext";
 import {
   TOQUE_OPTIONS,
@@ -91,6 +91,7 @@ export function PontoFormDialog({ open, onClose, onSave, ponto, defaultCategoria
           <DialogTitle className="font-display text-lg">
             {ponto ? "Editar Ponto" : "Novo Ponto"}
           </DialogTitle>
+          <DialogDescription className="sr-only">Formulário com os dados do ponto cantado</DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>

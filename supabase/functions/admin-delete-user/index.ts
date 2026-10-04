@@ -14,6 +14,31 @@ const userClient = (token: string) =>
     auth: { persistSession: false, autoRefreshToken: false },
   });
 
+const serviceClient = () =>
+  createClient(SUPABASE_URL, SERVICE_ROLE_KEY, {
+    auth: { persistSession: false, autoRefreshToken: false },
+  });
+
+async function hasAdminRole(userId: string): Promise<boolean> {
+  const { data, error } = await serviceClient()
+    .from("user_roles")
+    .select("role")
+    .eq("user_id", userId)
+    .eq("role", "admin")
+    .limit(1);
+  return !error && (data?.length ?? 0) > 0;
+}
+
+// super_admins só existe após a migração 0002; sem ela, a consulta falha e o alvo fica protegido apenas pelo papel admin.
+async function isListedSuperAdmin(userId: string): Promise<boolean> {
+  const { data, error } = await serviceClient()
+    .from("super_admins")
+    .select("user_id")
+    .eq("user_id", userId)
+    .limit(1);
+  return !error && (data?.length ?? 0) > 0;
+}
+
 Deno.serve(async (req) => {
   const cors = corsHeadersFor(req.headers.get("Origin"), ALLOWED_ORIGINS);
   if (req.method === "OPTIONS") return new Response(null, { headers: cors });
@@ -39,14 +64,19 @@ Deno.serve(async (req) => {
         const { data, error } = await userClient(token).auth.getUser(token);
         return error || !data.user ? null : data.user.id;
       },
-      async isCallerSuperAdmin(token, callerId) {
-        const { data, error } = await userClient(token).rpc("is_super_admin", { _user_id: callerId });
-        return !error && data === true;
+      async getCallerAccess(token, callerId) {
+        const [superRes, admin] = await Promise.all([
+          userClient(token).rpc("is_super_admin", { _user_id: callerId }),
+          hasAdminRole(callerId),
+        ]);
+        return { superAdmin: !superRes.error && superRes.data === true, admin };
+      },
+      async getTargetAccess(userId) {
+        const [admin, superAdmin] = await Promise.all([hasAdminRole(userId), isListedSuperAdmin(userId)]);
+        return { admin, superAdmin };
       },
       async deleteUser(userId) {
-        const admin = createClient(SUPABASE_URL, SERVICE_ROLE_KEY, {
-          auth: { persistSession: false, autoRefreshToken: false },
-        });
+        const admin = serviceClient();
         await admin.from("user_roles").delete().eq("user_id", userId);
         await admin.from("profiles").delete().eq("id", userId);
         const { error } = await admin.auth.admin.deleteUser(userId);

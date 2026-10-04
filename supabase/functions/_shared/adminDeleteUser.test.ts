@@ -5,11 +5,17 @@ import { DEFAULT_ALLOWED_ORIGINS, corsHeadersFor, parseAllowedOrigins } from "./
 
 const ADMIN = "11111111-1111-4111-8111-111111111111";
 const VICTIM = "22222222-2222-4222-8222-222222222222";
+const SUPER = "33333333-3333-4333-8333-333333333333";
+const OTHER_ADMIN = "44444444-4444-4444-8444-444444444444";
+
+const TOKENS: Record<string, string> = { "jwt-admin": ADMIN, "jwt-user": VICTIM, "jwt-super": SUPER };
+const ADMINS = new Set([ADMIN, OTHER_ADMIN, SUPER]);
 
 function deps(overrides: Partial<AdminDeleteDeps> = {}) {
   return {
-    getCallerId: vi.fn(async (t: string) => (t === "jwt-admin" ? ADMIN : t === "jwt-user" ? VICTIM : null)),
-    isCallerSuperAdmin: vi.fn(async (t: string) => t === "jwt-admin"),
+    getCallerId: vi.fn(async (t: string) => TOKENS[t] ?? null),
+    getCallerAccess: vi.fn(async (t: string, id: string) => ({ admin: ADMINS.has(id), superAdmin: t === "jwt-super" })),
+    getTargetAccess: vi.fn(async (id: string) => ({ admin: ADMINS.has(id), superAdmin: id === SUPER })),
     deleteUser: vi.fn(async () => ({ ok: true })),
     logError: vi.fn(),
     ...overrides,
@@ -42,9 +48,22 @@ describe("handleAdminDelete", () => {
     expect(d.deleteUser).not.toHaveBeenCalled();
   });
 
-  it("super-admin exclui e erros internos não vazam", async () => {
+  it("admin exclui usuário comum, mas não outro admin nem o super-admin", async () => {
     const d = deps();
     expect(await handleAdminDelete("Bearer jwt-admin", { userId: VICTIM }, d)).toEqual({ status: 200, body: { ok: true } });
+    expect((await handleAdminDelete("Bearer jwt-admin", { userId: OTHER_ADMIN }, d)).status).toBe(403);
+    expect((await handleAdminDelete("Bearer jwt-admin", { userId: SUPER }, d)).status).toBe(403);
+    expect(d.deleteUser).toHaveBeenCalledTimes(1);
+  });
+
+  it("super-admin exclui outro admin, nunca a conta de super-admin", async () => {
+    const d = deps();
+    expect((await handleAdminDelete("Bearer jwt-super", { userId: OTHER_ADMIN }, d)).status).toBe(200);
+    const twoSupers = deps({ getTargetAccess: vi.fn(async () => ({ admin: true, superAdmin: true })) });
+    expect((await handleAdminDelete("Bearer jwt-super", { userId: OTHER_ADMIN }, twoSupers)).status).toBe(403);
+  });
+
+  it("erros internos não vazam", async () => {
     const failing = deps({ deleteUser: vi.fn(async () => ({ ok: false })) });
     const r = await handleAdminDelete("Bearer jwt-admin", { userId: VICTIM }, failing);
     expect(r).toEqual({ status: 500, body: { error: "Não foi possível excluir a conta" } });

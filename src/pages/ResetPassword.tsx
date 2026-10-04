@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Lock, Loader2 } from "lucide-react";
+import { Lock, Loader2, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { MIN_PASSWORD_LENGTH, translateAuthError } from "@/lib/authErrors";
@@ -10,6 +10,7 @@ export default function ResetPassword() {
   const navigate = useNavigate();
   const [pwd, setPwd] = useState("");
   const [pwd2, setPwd2] = useState("");
+  const [showPwd, setShowPwd] = useState(false);
   const [busy, setBusy] = useState(false);
   const [ready, setReady] = useState(false);
   const [checked, setChecked] = useState(false);
@@ -75,8 +76,8 @@ export default function ResetPassword() {
           )
         ) : (
           <>
-            <PwdInput value={pwd} onChange={setPwd} placeholder="Nova senha" />
-            <PwdInput value={pwd2} onChange={setPwd2} placeholder="Confirme a nova senha" />
+            <PwdInput value={pwd} onChange={setPwd} placeholder="Nova senha" show={showPwd} onToggle={() => setShowPwd((s) => !s)} />
+            <PwdInput value={pwd2} onChange={setPwd2} placeholder="Confirme a nova senha" show={showPwd} onToggle={() => setShowPwd((s) => !s)} />
             <button disabled={busy} className="w-full py-3 rounded-xl bg-primary text-primary-foreground text-sm font-bold uppercase flex items-center justify-center gap-2 disabled:opacity-60">
               {busy && <Loader2 size={14} className="animate-spin" />} Redefinir
             </button>
@@ -87,12 +88,20 @@ export default function ResetPassword() {
   );
 }
 
-function PwdInput({ value, onChange, placeholder }: { value: string; onChange: (v: string) => void; placeholder: string }) {
+function PwdInput({
+  value, onChange, placeholder, show, onToggle,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  placeholder: string;
+  show: boolean;
+  onToggle: () => void;
+}) {
   return (
     <div className="relative">
       <Lock size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
       <input
-        type="password"
+        type={show ? "text" : "password"}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
@@ -100,8 +109,16 @@ function PwdInput({ value, onChange, placeholder }: { value: string; onChange: (
         autoComplete="new-password"
         maxLength={128}
         required
-        className="w-full pl-10 pr-4 py-3 rounded-xl bg-muted text-foreground text-sm border border-border outline-none focus:ring-2 focus:ring-accent/50"
+        className="w-full pl-10 pr-11 py-3 rounded-xl bg-muted text-foreground text-sm border border-border outline-none focus:ring-2 focus:ring-accent/50"
       />
+      <button
+        type="button"
+        onClick={onToggle}
+        aria-label={show ? "Ocultar senha" : "Mostrar senha"}
+        className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-background/50 transition-all"
+      >
+        {show ? <EyeOff size={16} /> : <Eye size={16} />}
+      </button>
     </div>
   );
 }

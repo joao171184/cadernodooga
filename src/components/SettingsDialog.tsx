@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { FolderTree, Eye, ShieldCheck, Loader2, Save, Users, Trash2, Search, X } from "lucide-react";
 import { useAuth, ALL_PERMISSIONS, type AppRole, type PermissionKey } from "@/contexts/AuthContext";
@@ -48,6 +48,7 @@ export function SettingsDialog({ open, onClose }: Props) {
       <DialogContent className="max-w-3xl mx-4 max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="font-display text-lg uppercase">Configurações</DialogTitle>
+          <DialogDescription className="sr-only">Preferências, visibilidade e acessos do aplicativo</DialogDescription>
         </DialogHeader>
 
         <Tabs defaultValue="estrutura" className="w-full">
@@ -290,8 +291,12 @@ function AcessosPanel() {
       body: { userId: u.id },
     });
     if (error || (data && (data as { error?: string }).error)) {
-      const msg = (data as { error?: string } | null)?.error || error?.message || "Erro desconhecido";
-      return toast.error("Erro ao excluir: " + msg);
+      let msg = (data as { error?: string } | null)?.error;
+      const ctx = (error as { context?: unknown } | null)?.context;
+      if (!msg && ctx instanceof Response) {
+        msg = await ctx.json().then((b: { error?: string }) => b?.error).catch(() => undefined);
+      }
+      return toast.error("Erro ao excluir: " + (msg || "não foi possível concluir"));
     }
     setUsers((arr) => arr.filter((x) => x.id !== u.id));
     toast.success("Conta excluída");
