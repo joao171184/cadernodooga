@@ -3,6 +3,7 @@ import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import { componentTagger } from "lovable-tagger";
 import { VitePWA } from "vite-plugin-pwa";
+import { API_CACHE_NAME, isPublicApiRequest } from "./src/lib/pwaCachePolicy";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
@@ -70,12 +71,11 @@ export default defineConfig(({ mode }) => ({
             },
           },
           {
-            // Letras e dados dos pontos (Lovable Cloud / REST)
-            urlPattern: ({ url }) => url.pathname.startsWith("/rest/v1/"),
+            // Letras e dados públicos dos pontos; tabelas privadas nunca entram no cache
+            urlPattern: isPublicApiRequest,
             handler: "StaleWhileRevalidate",
             options: {
-              cacheName: "api-dados",
-              
+              cacheName: API_CACHE_NAME,
               cacheableResponse: { statuses: [0, 200] },
               expiration: { maxEntries: 100, maxAgeSeconds: 60 * 60 * 24 * 30 },
             },

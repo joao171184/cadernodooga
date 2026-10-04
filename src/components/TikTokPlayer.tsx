@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Volume2 } from "lucide-react";
 
+const TIKTOK_ORIGIN = "https://www.tiktok.com";
+
 interface Props {
   src: string;
   title: string;
@@ -14,7 +16,7 @@ export function TikTokPlayer({ src, title }: Props) {
     const win = iframeRef.current?.contentWindow;
     if (!win) return;
     try {
-      messages.forEach((m) => win.postMessage(m, "*"));
+      messages.forEach((m) => win.postMessage(m, TIKTOK_ORIGIN));
     } catch { /* cross-origin fallback */ }
   }, []);
 
@@ -36,8 +38,8 @@ export function TikTokPlayer({ src, title }: Props) {
     const interval = 0 as unknown as ReturnType<typeof setInterval>;
 
     const onMessage = (e: MessageEvent) => {
-      if (e.source !== iframe.contentWindow) return;
-      let data: any = e.data;
+      if (e.source !== iframe.contentWindow || e.origin !== TIKTOK_ORIGIN) return;
+      let data: unknown = e.data;
       if (typeof data === "string") {
         try {
           data = JSON.parse(data);
@@ -45,7 +47,8 @@ export function TikTokPlayer({ src, title }: Props) {
           return;
         }
       }
-      if (data?.muted || data?.volume === 0) setNeedsUnmute(true);
+      const state = data as { muted?: unknown; volume?: unknown } | null;
+      if (state?.muted || state?.volume === 0) setNeedsUnmute(true);
     };
 
     window.addEventListener("message", onMessage);

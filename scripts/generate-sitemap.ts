@@ -1,14 +1,23 @@
 // Runs before `vite dev` and `vite build`; writes public/sitemap.xml.
-import { writeFileSync } from "fs";
+import { existsSync, readFileSync, writeFileSync } from "fs";
 import { resolve } from "path";
 import { createClient } from "@supabase/supabase-js";
 
 const BASE_URL = "https://cadernodooga.com.br";
-const SUPABASE_URL = process.env.VITE_SUPABASE_URL || "https://mqfrmyndqcyosnipjzrg.supabase.co";
-const SUPABASE_KEY =
-  process.env.VITE_SUPABASE_PUBLISHABLE_KEY ||
-  process.env.VITE_SUPABASE_ANON_KEY ||
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1xZnJteW5kcWN5b3NuaXBqenJnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY4ODEyNDcsImV4cCI6MjA5MjQ1NzI0N30.u-jbsRv3dIS93PA3ZkkO-0UNFmfJLY0NUT3JvArtML8";
+loadDotEnv();
+
+const SUPABASE_URL = process.env.VITE_SUPABASE_URL;
+const SUPABASE_KEY = process.env.VITE_SUPABASE_PUBLISHABLE_KEY || process.env.VITE_SUPABASE_ANON_KEY;
+
+/** Lê o .env local (sem sobrescrever variáveis já definidas, como as da Vercel). */
+function loadDotEnv() {
+  const file = resolve(".env");
+  if (!existsSync(file)) return;
+  for (const line of readFileSync(file, "utf8").split(/\r?\n/)) {
+    const m = line.match(/^\s*([A-Z0-9_]+)\s*=\s*"?([^"]*)"?\s*$/);
+    if (m && process.env[m[1]] === undefined) process.env[m[1]] = m[2];
+  }
+}
 
 interface Entry {
   path: string;
@@ -22,9 +31,9 @@ async function build() {
     { path: "/", changefreq: "weekly", priority: "1.0" },
   ];
 
-  const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
-
   try {
+    if (!SUPABASE_URL || !SUPABASE_KEY) throw new Error("VITE_SUPABASE_URL/VITE_SUPABASE_PUBLISHABLE_KEY ausentes");
+    const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
     const { data: pontos } = await supabase
       .from("pontos")
       .select("slug, updated_at, categoria")
@@ -52,7 +61,7 @@ async function build() {
       });
     }
   } catch (e) {
-    console.warn("sitemap: falha ao buscar pontos, gerando apenas home", e);
+    console.warn("sitemap: falha ao buscar pontos, gerando apenas home:", (e as Error).message);
   }
 
   const xml = [

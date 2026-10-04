@@ -1,11 +1,31 @@
 {
   "rewrites": [
     {
-      "source": "/((?!sitemap\\.xml|robots\\.txt|favicon\\.svg|favicon\\.ico|placeholder\\.svg|assets/).*)",
+      "source": "/((?!sitemap\\.xml|robots\\.txt|favicon\\.svg|favicon\\.ico|placeholder\\.svg|legacy-redirect\\.js|sw\\.js|manifest\\.webmanifest|workbox-[^/]*\\.js|assets/).*)",
       "destination": "/index.html"
     }
   ],
   "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "X-Content-Type-Options", "value": "nosniff" },
+        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
+        { "key": "X-Frame-Options", "value": "DENY" },
+        { "key": "Cross-Origin-Opener-Policy", "value": "same-origin" },
+        { "key": "Permissions-Policy", "value": "camera=(), microphone=(), geolocation=(), payment=(), usb=(), interest-cohort=()" },
+        { "key": "Strict-Transport-Security", "value": "max-age=15552000" }
+      ]
+    },
+    {
+      "source": "/((?!sw\\.js$|workbox-[^/]*\\.js$).*)",
+      "headers": [
+        {
+          "key": "Content-Security-Policy",
+          "value": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https:; media-src 'self' blob: https:; connect-src 'self' https://mqfrmyndqcyosnipjzrg.supabase.co wss://mqfrmyndqcyosnipjzrg.supabase.co; frame-src https://www.youtube.com https://www.youtube-nocookie.com https://open.spotify.com https://www.tiktok.com; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests"
+        }
+      ]
+    },
     {
       "source": "/sitemap.xml",
       "headers": [

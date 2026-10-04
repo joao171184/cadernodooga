@@ -3,31 +3,51 @@ import { useNavigate } from "react-router-dom";
 import { Lock, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { MIN_PASSWORD_LENGTH, translateAuthError } from "@/lib/authErrors";
+import { RECOVERY_FLAG_KEY } from "@/lib/authConfirm";
 
 export default function ResetPassword() {
   const navigate = useNavigate();
   const [pwd, setPwd] = useState("");
+  const [pwd2, setPwd2] = useState("");
   const [busy, setBusy] = useState(false);
   const [ready, setReady] = useState(false);
+  const [checked, setChecked] = useState(false);
 
   useEffect(() => {
-    // O Supabase processa o hash de recovery automaticamente; aguarda sessão.
+    // Só libera o formulário para uma sessão aberta pelo link de recuperação,
+    // nunca para uma sessão comum já logada.
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
-      if (event === "PASSWORD_RECOVERY" || event === "SIGNED_IN") setReady(true);
+      if (event === "PASSWORD_RECOVERY") {
+        sessionStorage.setItem(RECOVERY_FLAG_KEY, "1");
+        setReady(true);
+      }
     });
     supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) setReady(true);
+      if (session && sessionStorage.getItem(RECOVERY_FLAG_KEY) === "1") setReady(true);
+      setChecked(true);
     });
-    return () => subscription.unsubscribe();
+    const t = setTimeout(() => setChecked(true), 3000);
+    return () => {
+      subscription.unsubscribe();
+      clearTimeout(t);
+    };
   }, []);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (pwd.length < 6) return toast.error("Mínimo 6 caracteres");
+    if (pwd.length < MIN_PASSWORD_LENGTH) return toast.error(`Mínimo ${MIN_PASSWORD_LENGTH} caracteres`);
+    if (pwd !== pwd2) return toast.error("As senhas não coincidem");
     setBusy(true);
     const { error } = await supabase.auth.updateUser({ password: pwd });
+    if (error) {
+      setBusy(false);
+      return toast.error(translateAuthError(error.message));
+    }
+    sessionStorage.removeItem(RECOVERY_FLAG_KEY);
+    // Encerra as demais sessões abertas com a senha antiga.
+    await supabase.auth.signOut({ scope: "others" }).catch(() => {});
     setBusy(false);
-    if (error) return toast.error(error.message);
     toast.success("Senha redefinida!");
     navigate("/", { replace: true });
   };
@@ -37,26 +57,51 @@ export default function ResetPassword() {
       <form onSubmit={submit} className="w-full max-w-sm bg-card rounded-2xl border border-border p-6 space-y-4">
         <h1 className="font-display text-xl font-bold uppercase">Nova senha</h1>
         {!ready ? (
-          <p className="text-sm text-muted-foreground">Validando link…</p>
+          checked ? (
+            <div className="space-y-3">
+              <p className="text-sm text-muted-foreground">
+                Link inválido ou expirado. Solicite um novo link em "Esqueci minha senha" na tela de login.
+              </p>
+              <button
+                type="button"
+                onClick={() => navigate("/login", { replace: true })}
+                className="w-full py-3 rounded-xl bg-primary text-primary-foreground text-sm font-bold uppercase"
+              >
+                Ir para o login
+              </button>
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground">Validando link…</p>
+          )
         ) : (
           <>
-            <div className="relative">
-              <Lock size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
-              <input
-                type="password"
-                value={pwd}
-                onChange={(e) => setPwd(e.target.value)}
-                placeholder="Nova senha"
-                required
-                className="w-full pl-10 pr-4 py-3 rounded-xl bg-muted text-foreground text-sm border border-border outline-none focus:ring-2 focus:ring-accent/50"
-              />
-            </div>
+            <PwdInput value={pwd} onChange={setPwd} placeholder="Nova senha" />
+            <PwdInput value={pwd2} onChange={setPwd2} placeholder="Confirme a nova senha" />
             <button disabled={busy} className="w-full py-3 rounded-xl bg-primary text-primary-foreground text-sm font-bold uppercase flex items-center justify-center gap-2 disabled:opacity-60">
               {busy && <Loader2 size={14} className="animate-spin" />} Redefinir
             </button>
           </>
         )}
       </form>
+    </div>
+  );
+}
+
+function PwdInput({ value, onChange, placeholder }: { value: string; onChange: (v: string) => void; placeholder: string }) {
+  return (
+    <div className="relative">
+      <Lock size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
+      <input
+        type="password"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        aria-label={placeholder}
+        autoComplete="new-password"
+        maxLength={128}
+        required
+        className="w-full pl-10 pr-4 py-3 rounded-xl bg-muted text-foreground text-sm border border-border outline-none focus:ring-2 focus:ring-accent/50"
+      />
     </div>
   );
 }

@@ -17,6 +17,7 @@ import NotFound from "./pages/NotFound.tsx";
 import Pendentes from "./pages/Pendentes.tsx";
 import PontoPage from "./pages/PontoPage.tsx";
 import ResetPassword from "./pages/ResetPassword.tsx";
+import AuthConfirm from "./pages/AuthConfirm.tsx";
 import type { ReactNode } from "react";
 import { Loader2 } from "lucide-react";
 
@@ -62,6 +63,7 @@ const App = () => (
                 <Routes>
                   <Route path="/login" element={<Login />} />
                   <Route path="/reset-password" element={<ResetPassword />} />
+                  <Route path="/auth/confirm" element={<AuthConfirm />} />
                   <Route path="/ponto/:slug" element={<PontoPage />} />
                   <Route path="/" element={<AppLayout><Index /></AppLayout>} />
                   <Route path="/favoritos" element={<AppLayout><Index /></AppLayout>} />

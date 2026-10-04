@@ -12,6 +12,14 @@ dist
 dist-ssr
 *.local
 
+# Variáveis de ambiente (use .env.example como modelo)
+.env
+.env.*
+!.env.example
+supabase/.env
+supabase/functions/.env
+supabase/.temp
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

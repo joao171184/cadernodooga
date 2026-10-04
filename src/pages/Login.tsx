@@ -1,12 +1,20 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
-import { Mail, Lock, UserPlus, LogIn, Loader2, Instagram, Heart, Eye, EyeOff } from "lucide-react";
+import { Mail, Lock, UserPlus, LogIn, Loader2, Instagram, Heart, Eye, EyeOff, KeyRound } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import {
+  GENERIC_RESEND_MESSAGE,
+  GENERIC_RESET_MESSAGE,
+  GENERIC_SIGNUP_MESSAGE,
+  MIN_PASSWORD_LENGTH,
+} from "@/lib/authErrors";
 import logoImg from "@/assets/logo.png";
 
-type Mode = "signin" | "signup";
+type Mode = "signin" | "signup" | "forgot";
+
+export const RESEND_COOLDOWN_SECONDS = 60;
 
 const FRASES = [
   "“Onde há fé, há axé.”",
@@ -16,7 +24,7 @@ const FRASES = [
 ];
 
 const Login = () => {
-  const { isLoggedIn, signIn, signUp } = useAuth();
+  const { isLoggedIn, signIn, signUp, requestPasswordReset, resendConfirmation } = useAuth();
   const [mode, setMode] = useState<Mode>("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -24,7 +32,15 @@ const Login = () => {
   const [showPwd, setShowPwd] = useState(false);
   const [showPwd2, setShowPwd2] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [showResend, setShowResend] = useState(false);
+  const [cooldown, setCooldown] = useState(0);
   const [frase] = useState(() => FRASES[Math.floor(Math.random() * FRASES.length)]);
+
+  useEffect(() => {
+    if (cooldown <= 0) return;
+    const t = setTimeout(() => setCooldown((c) => c - 1), 1000);
+    return () => clearTimeout(t);
+  }, [cooldown]);
 
   if (isLoggedIn) return <Navigate to="/" replace />;
 
@@ -34,12 +50,8 @@ const Login = () => {
     const { error } = await signIn(email.trim(), password);
     setBusy(false);
     if (error) {
-      const msg = error.toLowerCase().includes("invalid")
-        ? "E-mail ou senha incorretos"
-        : error.toLowerCase().includes("not confirmed")
-        ? "Confirme seu e-mail antes de entrar"
-        : error;
-      toast.error(msg);
+      toast.error(error);
+      if (error.includes("Confirme seu e-mail")) setShowResend(true);
     } else {
       toast.success("Bem-vindo 🪘");
     }
@@ -47,8 +59,8 @@ const Login = () => {
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (password.length < 6) {
-      toast.error("A senha precisa ter no mínimo 6 caracteres");
+    if (password.length < MIN_PASSWORD_LENGTH) {
+      toast.error(`A senha precisa ter no mínimo ${MIN_PASSWORD_LENGTH} caracteres`);
       return;
     }
     if (password !== confirmPassword) {
@@ -59,20 +71,46 @@ const Login = () => {
     const { error, needsConfirm } = await signUp(email.trim(), password);
     setBusy(false);
     if (error) {
-      const msg = error.toLowerCase().includes("registered")
-        ? "Este e-mail já está cadastrado"
-        : error;
-      toast.error(msg);
+      toast.error(error);
       return;
     }
     if (needsConfirm) {
-      toast.success("Conta criada! Faça login para entrar.");
+      toast.success(GENERIC_SIGNUP_MESSAGE, { duration: 8000 });
       setMode("signin");
       setPassword("");
       setConfirmPassword("");
+      setShowResend(true);
+      setCooldown(RESEND_COOLDOWN_SECONDS);
     } else {
       toast.success("Conta criada e login efetuado! 🪘");
     }
+  };
+
+  const handleForgot = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setBusy(true);
+    const { error } = await requestPasswordReset(email.trim());
+    setBusy(false);
+    if (error) {
+      toast.error(error);
+      return;
+    }
+    toast.success(GENERIC_RESET_MESSAGE, { duration: 8000 });
+    setMode("signin");
+  };
+
+  const handleResend = async () => {
+    if (cooldown > 0 || busy) return;
+    if (!email.trim()) {
+      toast.error("Informe seu e-mail");
+      return;
+    }
+    setBusy(true);
+    const { error } = await resendConfirmation(email.trim());
+    setBusy(false);
+    setCooldown(RESEND_COOLDOWN_SECONDS);
+    if (error) toast.error(error);
+    else toast.success(GENERIC_RESEND_MESSAGE, { duration: 8000 });
   };
 
   return (
@@ -132,19 +170,55 @@ const Login = () => {
             </button>
           </div>
 
-          {mode === "signin" ? (
+          {mode === "signin" && (
             <form onSubmit={handleSignIn} className="space-y-4">
               <Field icon={<Mail size={16} />} label="E-mail" type="email" value={email} onChange={setEmail} placeholder="seu@email.com" autoFocus />
-              <PasswordField label="Senha" value={password} onChange={setPassword} show={showPwd} onToggle={() => setShowPwd((s) => !s)} placeholder="••••••••" />
+              <PasswordField label="Senha" value={password} onChange={setPassword} show={showPwd} onToggle={() => setShowPwd((s) => !s)} placeholder="••••••••" autoComplete="current-password" />
               <SubmitButton label="Entrar" busy={busy} icon={<LogIn size={16} />} />
+              <button
+                type="button"
+                onClick={() => setMode("forgot")}
+                className="w-full text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors"
+              >
+                Esqueci minha senha
+              </button>
             </form>
-          ) : (
+          )}
+          {mode === "signup" && (
             <form onSubmit={handleSignUp} className="space-y-4">
               <Field icon={<Mail size={16} />} label="E-mail" type="email" value={email} onChange={setEmail} placeholder="seu@email.com" autoFocus />
-              <PasswordField label="Senha" value={password} onChange={setPassword} show={showPwd} onToggle={() => setShowPwd((s) => !s)} placeholder="MÍNIMO 6 CARACTERES" />
-              <PasswordField label="Confirmar senha" value={confirmPassword} onChange={setConfirmPassword} show={showPwd2} onToggle={() => setShowPwd2((s) => !s)} placeholder="REPITA A SENHA" />
+              <PasswordField label="Senha" value={password} onChange={setPassword} show={showPwd} onToggle={() => setShowPwd((s) => !s)} placeholder={`MÍNIMO ${MIN_PASSWORD_LENGTH} CARACTERES`} autoComplete="new-password" />
+              <PasswordField label="Confirmar senha" value={confirmPassword} onChange={setConfirmPassword} show={showPwd2} onToggle={() => setShowPwd2((s) => !s)} placeholder="REPITA A SENHA" autoComplete="new-password" />
               <SubmitButton label="Criar conta" busy={busy} icon={<UserPlus size={16} />} />
             </form>
+          )}
+          {mode === "forgot" && (
+            <form onSubmit={handleForgot} className="space-y-4">
+              <p className="text-xs text-muted-foreground">
+                Informe o e-mail da sua conta. Se ele estiver cadastrado, enviaremos um link para criar uma nova senha.
+              </p>
+              <Field icon={<Mail size={16} />} label="E-mail" type="email" value={email} onChange={setEmail} placeholder="seu@email.com" autoFocus />
+              <SubmitButton label="Enviar link" busy={busy} icon={<KeyRound size={16} />} />
+              <button
+                type="button"
+                onClick={() => setMode("signin")}
+                className="w-full text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors"
+              >
+                Voltar para o login
+              </button>
+            </form>
+          )}
+          {showResend && mode === "signin" && (
+            <button
+              type="button"
+              onClick={handleResend}
+              disabled={cooldown > 0 || busy}
+              className="mt-4 w-full text-xs font-semibold text-accent hover:underline disabled:opacity-60 disabled:no-underline"
+            >
+              {cooldown > 0
+                ? `Reenviar confirmação em ${cooldown}s`
+                : "Reenviar e-mail de confirmação"}
+            </button>
           )}
         </div>
 
@@ -186,6 +260,9 @@ function Field({
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
           autoFocus={autoFocus}
+          aria-label={label}
+          autoComplete={type === "email" ? "email" : undefined}
+          maxLength={254}
           required
           className="w-full pl-10 pr-4 py-3 rounded-xl bg-muted text-foreground text-sm outline-none focus:ring-2 focus:ring-accent/50 border border-border"
         />
@@ -195,10 +272,10 @@ function Field({
 }
 
 function PasswordField({
-  label, value, onChange, placeholder, show, onToggle,
+  label, value, onChange, placeholder, show, onToggle, autoComplete,
 }: {
   label: string; value: string; onChange: (v: string) => void;
-  placeholder?: string; show: boolean; onToggle: () => void;
+  placeholder?: string; show: boolean; onToggle: () => void; autoComplete?: string;
 }) {
   return (
     <div>
@@ -214,6 +291,9 @@ function PasswordField({
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
+          aria-label={label}
+          autoComplete={autoComplete}
+          maxLength={128}
           required
           className="w-full pl-10 pr-11 py-3 rounded-xl bg-muted text-foreground text-sm outline-none focus:ring-2 focus:ring-accent/50 border border-border"
         />

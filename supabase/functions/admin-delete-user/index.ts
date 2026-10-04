@@ -1,83 +1,63 @@
 // Edge function: super-admin apaga contas de usuários
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { corsHeadersFor, parseAllowedOrigins } from "../_shared/cors.ts";
+import { handleAdminDelete } from "../_shared/adminDeleteUser.ts";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
-};
+const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
+const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_PUBLISHABLE_KEY") ?? Deno.env.get("SUPABASE_ANON_KEY")!;
+const SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+const ALLOWED_ORIGINS = parseAllowedOrigins(Deno.env.get("ALLOWED_ORIGINS"));
 
-const SUPER_ADMIN_EMAIL = "joao.pedro.am@icloud.com";
+const userClient = (token: string) =>
+  createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+    global: { headers: { Authorization: `Bearer ${token}` } },
+    auth: { persistSession: false, autoRefreshToken: false },
+  });
 
 Deno.serve(async (req) => {
-  if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+  const cors = corsHeadersFor(req.headers.get("Origin"), ALLOWED_ORIGINS);
+  if (req.method === "OPTIONS") return new Response(null, { headers: cors });
+
+  const json = (status: number, body: unknown) =>
+    new Response(JSON.stringify(body), {
+      status,
+      headers: { ...cors, "Content-Type": "application/json", "Cache-Control": "no-store" },
+    });
+
+  if (req.method !== "POST") return json(405, { error: "Método não permitido" });
+
+  let body: unknown = null;
+  try {
+    body = await req.json();
+  } catch {
+    body = null;
+  }
 
   try {
-    const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
-    const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_PUBLISHABLE_KEY") ?? Deno.env.get("SUPABASE_ANON_KEY")!;
-    const SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-
-    const authHeader = req.headers.get("Authorization") ?? "";
-    const token = authHeader.replace("Bearer ", "");
-    if (!token) {
-      return new Response(JSON.stringify({ error: "Não autenticado" }), {
-        status: 401,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    // valida quem chama
-    const userClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-      global: { headers: { Authorization: `Bearer ${token}` } },
+    const result = await handleAdminDelete(req.headers.get("Authorization"), body, {
+      async getCallerId(token) {
+        const { data, error } = await userClient(token).auth.getUser(token);
+        return error || !data.user ? null : data.user.id;
+      },
+      async isCallerSuperAdmin(token, callerId) {
+        const { data, error } = await userClient(token).rpc("is_super_admin", { _user_id: callerId });
+        return !error && data === true;
+      },
+      async deleteUser(userId) {
+        const admin = createClient(SUPABASE_URL, SERVICE_ROLE_KEY, {
+          auth: { persistSession: false, autoRefreshToken: false },
+        });
+        await admin.from("user_roles").delete().eq("user_id", userId);
+        await admin.from("profiles").delete().eq("id", userId);
+        const { error } = await admin.auth.admin.deleteUser(userId);
+        if (error) console.error("admin-delete-user: deleteUser falhou", error.status ?? "");
+        return { ok: !error };
+      },
+      logError: (m) => console.error(m),
     });
-    const { data: userData, error: userErr } = await userClient.auth.getUser();
-    if (userErr || !userData.user) {
-      return new Response(JSON.stringify({ error: "Sessão inválida" }), {
-        status: 401,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-    if (userData.user.email !== SUPER_ADMIN_EMAIL) {
-      return new Response(JSON.stringify({ error: "Apenas o super-admin pode excluir contas" }), {
-        status: 403,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    const { userId } = await req.json();
-    if (!userId || typeof userId !== "string") {
-      return new Response(JSON.stringify({ error: "userId obrigatório" }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-    if (userId === userData.user.id) {
-      return new Response(JSON.stringify({ error: "Você não pode excluir sua própria conta" }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    const admin = createClient(SUPABASE_URL, SERVICE_ROLE_KEY);
-    // limpa dados relacionados
-    await admin.from("user_roles").delete().eq("user_id", userId);
-    await admin.from("profiles").delete().eq("id", userId);
-    const { error: delErr } = await admin.auth.admin.deleteUser(userId);
-    if (delErr) {
-      return new Response(JSON.stringify({ error: delErr.message }), {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    return new Response(JSON.stringify({ ok: true }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
-  } catch (e) {
-    return new Response(JSON.stringify({ error: (e as Error).message }), {
-      status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return json(result.status, result.body);
+  } catch {
+    console.error("admin-delete-user: erro inesperado");
+    return json(500, { error: "Erro interno" });
   }
 });

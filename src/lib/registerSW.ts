@@ -1,3 +1,5 @@
+import { purgeLegacyApiCaches } from "./pwaCachePolicy";
+
 const SW_URL = "/sw.js";
 
 function isBlockedContext(): boolean {
@@ -30,6 +32,7 @@ async function unregisterAppSW() {
 }
 
 export function registerServiceWorker() {
+  void purgeLegacyApiCaches();
   if (!("serviceWorker" in navigator)) return;
   if (isBlockedContext()) {
     void unregisterAppSW();
