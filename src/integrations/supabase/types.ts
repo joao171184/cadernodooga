@@ -14,6 +14,353 @@ export type Database = {
   }
   public: {
     Tables: {
+      ad_advertisers: {
+        Row: {
+          archived: boolean
+          contact_email: string
+          contact_name: string
+          contact_phone: string
+          created_at: string
+          id: string
+          name: string
+          notes: string
+          updated_at: string
+        }
+        Insert: {
+          archived?: boolean
+          contact_email?: string
+          contact_name?: string
+          contact_phone?: string
+          created_at?: string
+          id?: string
+          name: string
+          notes?: string
+          updated_at?: string
+        }
+        Update: {
+          archived?: boolean
+          contact_email?: string
+          contact_name?: string
+          contact_phone?: string
+          created_at?: string
+          id?: string
+          name?: string
+          notes?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      ad_campaigns: {
+        Row: {
+          advertiser_id: string
+          alt_text: string
+          budget_cents: number | null
+          clicks_total: number
+          created_at: string
+          created_by: string | null
+          ends_at: string
+          id: string
+          image_mobile_path: string | null
+          image_path: string
+          impressions_total: number
+          max_impressions: number | null
+          name: string
+          placement_key: string
+          revenue_type: string
+          starts_at: string
+          status: string
+          target_url: string
+          updated_at: string
+          weight: number
+        }
+        Insert: {
+          advertiser_id: string
+          alt_text: string
+          budget_cents?: number | null
+          clicks_total?: number
+          created_at?: string
+          created_by?: string | null
+          ends_at: string
+          id?: string
+          image_mobile_path?: string | null
+          image_path: string
+          impressions_total?: number
+          max_impressions?: number | null
+          name: string
+          placement_key: string
+          revenue_type?: string
+          starts_at: string
+          status?: string
+          target_url: string
+          updated_at?: string
+          weight?: number
+        }
+        Update: {
+          advertiser_id?: string
+          alt_text?: string
+          budget_cents?: number | null
+          clicks_total?: number
+          created_at?: string
+          created_by?: string | null
+          ends_at?: string
+          id?: string
+          image_mobile_path?: string | null
+          image_path?: string
+          impressions_total?: number
+          max_impressions?: number | null
+          name?: string
+          placement_key?: string
+          revenue_type?: string
+          starts_at?: string
+          status?: string
+          target_url?: string
+          updated_at?: string
+          weight?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ad_campaigns_advertiser_id_fkey"
+            columns: ["advertiser_id"]
+            isOneToOne: false
+            referencedRelation: "ad_advertisers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ad_campaigns_placement_key_fkey"
+            columns: ["placement_key"]
+            isOneToOne: false
+            referencedRelation: "ad_placements"
+            referencedColumns: ["key"]
+          },
+        ]
+      }
+      ad_event_dedupe: {
+        Row: {
+          campaign_id: string
+          kind: string
+          visitor_hash: string
+          window_start: string
+        }
+        Insert: {
+          campaign_id: string
+          kind: string
+          visitor_hash: string
+          window_start: string
+        }
+        Update: {
+          campaign_id?: string
+          kind?: string
+          visitor_hash?: string
+          window_start?: string
+        }
+        Relationships: []
+      }
+      ad_lead_recipients: {
+        Row: {
+          added_by: string | null
+          created_at: string
+          user_id: string
+        }
+        Insert: {
+          added_by?: string | null
+          created_at?: string
+          user_id: string
+        }
+        Update: {
+          added_by?: string | null
+          created_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      ad_leads: {
+        Row: {
+          company: string
+          created_at: string
+          email: string
+          id: string
+          interest: string
+          message: string
+          name: string
+          phone: string
+          status: string
+        }
+        Insert: {
+          company?: string
+          created_at?: string
+          email: string
+          id?: string
+          interest?: string
+          message: string
+          name: string
+          phone?: string
+          status?: string
+        }
+        Update: {
+          company?: string
+          created_at?: string
+          email?: string
+          id?: string
+          interest?: string
+          message?: string
+          name?: string
+          phone?: string
+          status?: string
+        }
+        Relationships: []
+      }
+      ad_notify_log: {
+        Row: {
+          created_at: string
+          error: string | null
+          id: number
+          kind: string
+          request_id: number | null
+          status_code: number | null
+          timed_out: boolean | null
+        }
+        Insert: {
+          created_at?: string
+          error?: string | null
+          id?: number
+          kind: string
+          request_id?: number | null
+          status_code?: number | null
+          timed_out?: boolean | null
+        }
+        Update: {
+          created_at?: string
+          error?: string | null
+          id?: number
+          kind?: string
+          request_id?: number | null
+          status_code?: number | null
+          timed_out?: boolean | null
+        }
+        Relationships: []
+      }
+      ad_notify_settings: {
+        Row: {
+          enabled: boolean
+          id: boolean
+          sender_email: string | null
+          sender_name: string
+          updated_at: string
+        }
+        Insert: {
+          enabled?: boolean
+          id?: boolean
+          sender_email?: string | null
+          sender_name?: string
+          updated_at?: string
+        }
+        Update: {
+          enabled?: boolean
+          id?: boolean
+          sender_email?: string | null
+          sender_name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      ad_placements: {
+        Row: {
+          adsense_enabled: boolean
+          adsense_slot: string | null
+          description: string
+          desktop_height: number
+          desktop_width: number
+          enabled: boolean
+          key: string
+          mobile_height: number
+          mobile_width: number
+          name: string
+          sort: number
+        }
+        Insert: {
+          adsense_enabled?: boolean
+          adsense_slot?: string | null
+          description?: string
+          desktop_height: number
+          desktop_width: number
+          enabled?: boolean
+          key: string
+          mobile_height: number
+          mobile_width: number
+          name: string
+          sort?: number
+        }
+        Update: {
+          adsense_enabled?: boolean
+          adsense_slot?: string | null
+          description?: string
+          desktop_height?: number
+          desktop_width?: number
+          enabled?: boolean
+          key?: string
+          mobile_height?: number
+          mobile_width?: number
+          name?: string
+          sort?: number
+        }
+        Relationships: []
+      }
+      ad_settings: {
+        Row: {
+          adsense_client: string | null
+          adsense_enabled: boolean
+          id: boolean
+          in_feed_interval: number
+          updated_at: string
+        }
+        Insert: {
+          adsense_client?: string | null
+          adsense_enabled?: boolean
+          id?: boolean
+          in_feed_interval?: number
+          updated_at?: string
+        }
+        Update: {
+          adsense_client?: string | null
+          adsense_enabled?: boolean
+          id?: boolean
+          in_feed_interval?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      ad_stats_daily: {
+        Row: {
+          campaign_id: string
+          clicks: number
+          day: string
+          impressions: number
+          placement_key: string
+        }
+        Insert: {
+          campaign_id: string
+          clicks?: number
+          day: string
+          impressions?: number
+          placement_key: string
+        }
+        Update: {
+          campaign_id?: string
+          clicks?: number
+          day?: string
+          impressions?: number
+          placement_key?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ad_stats_daily_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "ad_campaigns"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       categorias: {
         Row: {
           cor: string | null
@@ -249,6 +596,21 @@ export type Database = {
         }
         Relationships: []
       }
+      super_admins: {
+        Row: {
+          created_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_notas: {
         Row: {
           content: string
@@ -296,6 +658,52 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_delete_user: { Args: { _user_id: string }; Returns: undefined }
+      ads_html_escape: { Args: { _s: string }; Returns: string }
+      ads_notify_delete: {
+        Args: { _ids?: number[]; _kind?: string; _result?: string }
+        Returns: number
+      }
+      ads_notify_history: {
+        Args: { _kind?: string; _limit?: number; _result?: string }
+        Returns: Json
+      }
+      ads_notify_log_matches: {
+        Args: {
+          _kind: string
+          _result: string
+          l: Database["public"]["Tables"]["ad_notify_log"]["Row"]
+        }
+        Returns: boolean
+      }
+      ads_notify_status: { Args: never; Returns: Json }
+      ads_notify_sync_log: { Args: never; Returns: undefined }
+      ads_response_message: {
+        Args: { _content: string; _error: string }
+        Returns: string
+      }
+      ads_send_lead_email: {
+        Args: {
+          _company: string
+          _interest: string
+          _kind: string
+          _name: string
+        }
+        Returns: string
+      }
+      ads_send_test_notification: { Args: never; Returns: string }
+      get_ads_for_placement: {
+        Args: { _count?: number; _placement: string }
+        Returns: {
+          advertiser_name: string
+          alt_text: string
+          id: string
+          image_mobile_path: string
+          image_path: string
+          revenue_type: string
+          target_url: string
+        }[]
+      }
       get_my_role: {
         Args: never
         Returns: Database["public"]["Enums"]["app_role"]
@@ -311,8 +719,32 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_ads_admin: { Args: never; Returns: boolean }
       is_super_admin: { Args: { _user_id: string }; Returns: boolean }
+      record_ad_event: {
+        Args: {
+          _campaign_id: string
+          _kind: string
+          _placement: string
+          _session: string
+        }
+        Returns: boolean
+      }
       slugify: { Args: { _text: string }; Returns: string }
+      submit_ad_lead: {
+        Args: {
+          _company: string
+          _consent: boolean
+          _elapsed_ms: number
+          _email: string
+          _honeypot: string
+          _interest: string
+          _message: string
+          _name: string
+          _phone: string
+        }
+        Returns: string
+      }
     }
     Enums: {
       app_role: "admin" | "oga" | "visitante"
