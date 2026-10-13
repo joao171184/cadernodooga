@@ -24,6 +24,7 @@ interface Ctx {
   setMostrarFiltrosClassificacao: (id: string, value: boolean) => Promise<void>;
   deleteCategoria: (id: string) => Promise<void>;
   moveCategoria: (id: string, dir: -1 | 1, parentId: string | null) => Promise<void>;
+  setCategoriaParent: (id: string, newParentId: string | null) => Promise<{ error: string | null }>;
 }
 
 
@@ -190,10 +191,67 @@ export function CategoriasProvider({ children }: { children: ReactNode }) {
     await refresh();
   }, [categorias, refresh]);
 
+  const setCategoriaParent = useCallback(async (id: string, newParentId: string | null): Promise<{ error: string | null }> => {
+    let node: CategoriaNode | undefined;
+    let oldParent: CategoriaNode | undefined;
+    for (const root of categorias) {
+      if (root.id === id) { node = root; break; }
+      const child = root.filhos.find((f) => f.id === id);
+      if (child) { node = child; oldParent = root; break; }
+    }
+    if (!node) return { error: "Categoria não encontrada" };
+    const newParent = newParentId ? categorias.find((c) => c.id === newParentId) : undefined;
+    if (newParentId && !newParent) return { error: "Categoria de destino não encontrada" };
+    if (newParentId === id) return { error: "Escolha outra categoria" };
+    if (newParent && !oldParent && node.filhos.length > 0) {
+      return { error: "Mova ou apague as subcategorias desta categoria antes" };
+    }
+    if ((oldParent?.id ?? null) === newParentId) return { error: null };
+
+    const ordem = ((newParent ? newParent.filhos.length : categorias.length) + 1) * 10;
+    const { error } = await (supabase.from("categorias") as any)
+      .update({ parent_id: newParentId, ordem }).eq("id", id);
+    if (error) return { error: error.message };
+
+    // Atualizar pontos vinculados
+    if (!oldParent && newParent) {
+      // Categoria principal -> subcategoria
+      const { data: pts } = await supabase.from("pontos").select("id").eq("categoria", node.nome);
+      const ids = (pts ?? []).map((p) => p.id);
+      if (ids.length) {
+        await supabase.from("pontos").update({ categoria: newParent.nome }).in("id", ids);
+        await supabase.from("ponto_subcategorias").delete().in("ponto_id", ids);
+        await supabase.from("ponto_subcategorias").insert(ids.map((ponto_id) => ({ ponto_id, subcategoria: node!.nome })));
+      }
+    } else if (oldParent) {
+      const { data: pts } = await supabase.from("pontos").select("id").eq("categoria", oldParent.nome);
+      const allIds = (pts ?? []).map((p) => p.id);
+      let ids: string[] = [];
+      if (allIds.length) {
+        const { data: subs } = await supabase.from("ponto_subcategorias")
+          .select("ponto_id").in("ponto_id", allIds).eq("subcategoria", node.nome);
+        ids = Array.from(new Set((subs ?? []).map((s) => s.ponto_id)));
+      }
+      if (ids.length) {
+        if (newParent) {
+          // Subcategoria -> outra categoria
+          await supabase.from("pontos").update({ categoria: newParent.nome }).in("id", ids);
+          await supabase.from("ponto_subcategorias").delete().in("ponto_id", ids).neq("subcategoria", node.nome);
+        } else {
+          // Subcategoria -> categoria principal
+          await supabase.from("pontos").update({ categoria: node.nome }).in("id", ids);
+          await supabase.from("ponto_subcategorias").delete().in("ponto_id", ids);
+        }
+      }
+    }
+    await refresh();
+    return { error: null };
+  }, [categorias, refresh]);
+
   return (
     <CategoriasContext.Provider value={{
       categorias, loading, refresh,
-      addCategoria, addSubcategoria, renameCategoria, setCategoriaCor, setMostrarFiltrosClassificacao, deleteCategoria, moveCategoria,
+      addCategoria, addSubcategoria, renameCategoria, setCategoriaCor, setMostrarFiltrosClassificacao, deleteCategoria, moveCategoria, setCategoriaParent,
     }}>
 
       {children}
