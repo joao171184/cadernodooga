@@ -4,6 +4,50 @@ import { Plus, Pencil, Trash2, Check, X, ChevronDown, ChevronRight, FolderTree, 
 import { useCategorias, type CategoriaNode } from "@/contexts/CategoriasContext";
 import { ICON_CATALOG, resolveIcon } from "@/lib/categoryIcons";
 import { toast } from "sonner";
+import { FolderInput } from "lucide-react";
+
+function ParentSelect({ node, currentParentId, small }: { node: CategoriaNode; currentParentId: string | null; small?: boolean }) {
+  const { categorias, setCategoriaParent } = useCategorias();
+  const [busy, setBusy] = useState(false);
+  const others = categorias.filter((c) => c.id !== node.id && c.id !== currentParentId);
+  const onChange = async (value: string) => {
+    if (!value) return;
+    const target = value === "__root__" ? null : value;
+    const targetName = target ? categorias.find((c) => c.id === target)?.nome : null;
+    const msg = target
+      ? `Mover "${node.nome}" para dentro de "${targetName}" como subcategoria? Os pontos dela vão junto.`
+      : `Transformar "${node.nome}" em categoria principal? Os pontos dela vão junto.`;
+    if (!window.confirm(msg)) return;
+    setBusy(true);
+    const { error } = await setCategoriaParent(node.id, target);
+    setBusy(false);
+    if (error) toast.error(error);
+    else toast.success(target ? `Movida para ${targetName}` : "Agora é uma categoria principal");
+  };
+  return (
+    <label
+      className={`relative ${small ? "p-1.5" : "p-1.5"} rounded-lg hover:bg-muted text-muted-foreground cursor-pointer`}
+      title={currentParentId ? "Mover para outra categoria" : "Transformar em subcategoria"}
+    >
+      <FolderInput size={small ? 12 : 14} />
+      <select
+        value=""
+        disabled={busy}
+        onChange={(e) => onChange(e.target.value)}
+        className="absolute inset-0 opacity-0 cursor-pointer"
+        aria-label={currentParentId ? "Mover para outra categoria" : "Transformar em subcategoria"}
+      >
+        <option value="">{currentParentId ? "Mover para…" : "Virar subcategoria de…"}</option>
+        {currentParentId && <option value="__root__">↑ Virar categoria principal</option>}
+        {others.map((c) => (
+          <option key={c.id} value={c.id} disabled={!currentParentId && node.filhos.length > 0}>
+            {c.nome}
+          </option>
+        ))}
+      </select>
+    </label>
+  );
+}
 
 interface Props {
   open: boolean;
@@ -223,6 +267,7 @@ export function CategoriasManagerDialog({ open, onClose }: Props) {
                       >
                         <ArrowDown size={14} />
                       </button>
+                      <ParentSelect node={cat} currentParentId={null} />
                       <button
                         onClick={() => { setAddSubFor(addSubFor === cat.id ? null : cat.id); if (!isOpen) toggle(cat.id); }}
                         className="p-2 rounded-lg hover:bg-muted text-muted-foreground"
@@ -301,6 +346,7 @@ export function CategoriasManagerDialog({ open, onClose }: Props) {
                               >
                                 <ArrowDown size={12} />
                               </button>
+                              <ParentSelect node={sub} currentParentId={cat.id} small />
                               <button
                                 onClick={() => startEdit(sub)}
                                 className="p-1.5 rounded-lg hover:bg-muted text-muted-foreground"
