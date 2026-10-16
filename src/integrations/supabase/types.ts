@@ -708,6 +708,19 @@ export type Database = {
         Args: never
         Returns: Database["public"]["Enums"]["app_role"]
       }
+      get_parceiro_config: { Args: never; Returns: Json }
+      get_parceiros_for_slot: {
+        Args: { _count?: number; _slot: string }
+        Returns: {
+          advertiser_name: string
+          alt_text: string
+          id: string
+          image_mobile_path: string
+          image_path: string
+          revenue_type: string
+          target_url: string
+        }[]
+      }
       has_permission: {
         Args: { _permission: string; _user_id: string }
         Returns: boolean
@@ -722,6 +735,15 @@ export type Database = {
       is_ads_admin: { Args: never; Returns: boolean }
       is_super_admin: { Args: { _user_id: string }; Returns: boolean }
       record_ad_event: {
+        Args: {
+          _campaign_id: string
+          _kind: string
+          _placement: string
+          _session: string
+        }
+        Returns: boolean
+      }
+      record_parceiro_event: {
         Args: {
           _campaign_id: string
           _kind: string
