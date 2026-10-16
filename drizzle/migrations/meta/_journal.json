@@ -57,6 +57,13 @@
       "when": 1791154800000,
       "tag": "0007_notify_log_history",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1792168987820,
+      "tag": "0008_parceiros_policies_functions",
+      "breakpoints": true
     }
   ]
 }
