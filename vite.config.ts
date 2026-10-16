@@ -13,6 +13,15 @@ export default defineConfig(({ mode }) => ({
     hmr: {
       overlay: false,
     },
+    // Proxy neutro: browser vê /media/destaques (sem /ads/), arquivo fica no Storage.
+    proxy: {
+      "/media/destaques": {
+        target: "https://mqfrmyndqcyosnipjzrg.supabase.co",
+        changeOrigin: true,
+        rewrite: (p) =>
+          p.replace(/^\/media\/destaques/, "/storage/v1/object/public/ads/campaigns"),
+      },
+    },
   },
   plugins: [
     react(),
@@ -55,7 +64,7 @@ export default defineConfig(({ mode }) => ({
           {
             urlPattern: ({ request, url, sameOrigin }) =>
               sameOrigin && request.mode === "navigate" &&
-              !/^\/(~oauth|sitemap\.xml$|robots\.txt$|ads\.txt$)/.test(url.pathname),
+              !/^\/(~oauth|sitemap\.xml$|robots\.txt$|ads\.txt$|media\/)/.test(url.pathname),
             handler: "NetworkFirst",
             options: {
               cacheName: "html-navigations",

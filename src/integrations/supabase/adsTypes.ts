@@ -153,7 +153,13 @@ export type AdsDatabase = {
     Views: { [_ in never]: never };
     Functions: {
       get_ads_for_placement: { Args: { _placement: string; _count?: number }; Returns: ServedAd[] };
+      get_parceiros_for_slot: { Args: { _slot: string; _count?: number }; Returns: ServedAd[] };
+      get_parceiro_config: { Args: Record<string, never>; Returns: unknown };
       record_ad_event: {
+        Args: { _campaign_id: string; _placement: string; _kind: "impression" | "click"; _session: string };
+        Returns: boolean;
+      };
+      record_parceiro_event: {
         Args: { _campaign_id: string; _placement: string; _kind: "impression" | "click"; _session: string };
         Returns: boolean;
       };

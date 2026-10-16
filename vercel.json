@@ -1,7 +1,11 @@
 {
   "rewrites": [
     {
-      "source": "/((?!sitemap\\.xml|robots\\.txt|ads\\.txt|favicon\\.svg|favicon\\.ico|placeholder\\.svg|legacy-redirect\\.js|sw\\.js|manifest\\.webmanifest|workbox-[^/]*\\.js|assets/).*)",
+      "source": "/media/destaques/:path*",
+      "destination": "https://mqfrmyndqcyosnipjzrg.supabase.co/storage/v1/object/public/ads/campaigns/:path*"
+    },
+    {
+      "source": "/((?!sitemap\\.xml|robots\\.txt|ads\\.txt|favicon\\.svg|favicon\\.ico|placeholder\\.svg|legacy-redirect\\.js|sw\\.js|manifest\\.webmanifest|workbox-[^/]*\\.js|assets/|media/).*)",
       "destination": "/index.html"
     }
   ],

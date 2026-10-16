@@ -11,7 +11,7 @@ import {
   type RevenueType,
 } from "@/integrations/supabase/adsTypes";
 import { AdCreative, REVENUE_LABEL } from "@/components/ads/AdCreative";
-import { AD_BUCKET, adImageUrl } from "@/lib/ads/client";
+import { AD_BUCKET, AD_STORAGE_DIR, adImageUrl, dbPathFromUpload, storagePathFromDb } from "@/lib/ads/client";
 import { localInputToUtcIso, utcIsoToLocalInput } from "@/lib/ads/time";
 import {
   AD_IMAGE_TYPES,
@@ -66,14 +66,15 @@ function readDimensions(url: string): Promise<{ width: number; height: number }>
 
 async function uploadImage(file: File): Promise<string> {
   const ext = AD_IMAGE_TYPES[file.type];
-  const path = `campaigns/${crypto.randomUUID()}.${ext}`;
-  const { error } = await adsDb.storage.from(AD_BUCKET).upload(path, file, {
+  // Arquivo físico em campaigns/; path lógico destaques/ (URL pública via /media/destaques/).
+  const storagePath = `${AD_STORAGE_DIR}/${crypto.randomUUID()}.${ext}`;
+  const { error } = await adsDb.storage.from(AD_BUCKET).upload(storagePath, file, {
     contentType: file.type,
     cacheControl: "31536000",
     upsert: false,
   });
   if (error) throw error;
-  return path;
+  return dbPathFromUpload(storagePath);
 }
 
 /** Remove imagens que nenhuma campanha usa mais (cópias compartilham o mesmo arquivo). */
@@ -86,7 +87,9 @@ async function removeUnusedImages(paths: string[]) {
       .or(`image_path.eq."${p}",image_mobile_path.eq."${p}"`);
     if (!error && count === 0) unused.push(p);
   }
-  if (unused.length) await adsDb.storage.from(AD_BUCKET).remove(unused);
+  if (unused.length) {
+    await adsDb.storage.from(AD_BUCKET).remove(unused.map(storagePathFromDb));
+  }
 }
 
 export function CampaignFormDialog({ open, campaign, template = null, advertisers, placements, onClose, onSaved }: Props) {
@@ -238,7 +241,7 @@ export function CampaignFormDialog({ open, campaign, template = null, advertiser
       onSaved();
       onClose();
     } catch (err) {
-      if (uploaded.length) void adsDb.storage.from(AD_BUCKET).remove(uploaded);
+      if (uploaded.length) void adsDb.storage.from(AD_BUCKET).remove(uploaded.map(storagePathFromDb));
       const e = err as { code?: string; message?: string; statusCode?: string };
       toast.error(e?.statusCode === "413" ? "Imagem grande demais (máximo 1 MB)." : dbErrorMessage(e));
     } finally {

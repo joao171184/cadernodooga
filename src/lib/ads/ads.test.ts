@@ -5,6 +5,7 @@ import { imageRatioWarning, validateCampaign, validateImageFile, validateLead, v
 import { ctr, formatCtr, groupMetrics, totals } from "./reports";
 import { adsenseConfigured, canShowAdSense } from "./adsense";
 import { shuffleAds } from "./shuffle";
+import { adImageUrl, dbPathFromUpload, storagePathFromDb } from "./client";
 
 describe("horário de Brasília", () => {
   it("converte datetime-local para UTC e volta", () => {
@@ -144,5 +145,17 @@ describe("shuffleAds", () => {
     const input = [1, 2, 3, 4, 5];
     expect(shuffleAds(input).slice().sort()).toEqual(input);
     expect(input).toEqual([1, 2, 3, 4, 5]);
+  });
+});
+
+describe("URLs neutras de imagem", () => {
+  it("expõe /media/destaques sem /ads/ na URL do browser", () => {
+    expect(adImageUrl("destaques/abc.png")).toBe("/media/destaques/abc.png");
+    expect(adImageUrl("campaigns/abc.png")).toBe("/media/destaques/abc.png");
+  });
+
+  it("converte path lógico ↔ físico do Storage", () => {
+    expect(storagePathFromDb("destaques/x.webp")).toBe("campaigns/x.webp");
+    expect(dbPathFromUpload("campaigns/x.webp")).toBe("destaques/x.webp");
   });
 });

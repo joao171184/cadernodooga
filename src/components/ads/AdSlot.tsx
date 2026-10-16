@@ -15,8 +15,10 @@ interface Props {
 }
 
 /**
- * Espaço publicitário: tenta AdSense; se o Google não preencher, carrossel dos anúncios próprios.
- * Sem AdSense (ou sem consentimento): só os anúncios próprios. Formato reservado no criativo.
+ * Espaço publicitário por posição:
+ * 1) anúncios próprios ativos → carrossel
+ * 2) senão AdSense (se configurado + consentimento)
+ * 3) se o Google não preencher → esconde (sem quadro vazio)
  */
 export function AdSlot({ placement, ad: provided, variant = "banner", className = "" }: Props) {
   const config = useAdConfig();
@@ -25,28 +27,13 @@ export function AdSlot({ placement, ad: provided, variant = "banner", className 
   const enabled = !!placementRow?.enabled;
   const [adsenseFailed, setAdsenseFailed] = useState(false);
 
-  // Sempre busca anúncios do espaço (carrossel e fallback quando o AdSense vem vazio).
+  // Busca sempre que o espaço está ligado (carrossel; e também quando o pai passa null).
   const fetched = usePlacementAds(placement, ADS_FETCH_LIMIT, enabled);
   const ownAds: ServedAd[] | undefined =
     provided === undefined ? fetched : provided ? [provided] : fetched;
 
   if (!config || !placementRow?.enabled) return null;
   if (ownAds === undefined) return null;
-
-  const tryAdSense = canShowAdSense(config.settings, placementRow, consent) && !adsenseFailed;
-
-  if (tryAdSense) {
-    return (
-      <AdSenseUnit
-        client={config.settings.adsense_client!}
-        slot={placementRow.adsense_slot!}
-        minHeight={Math.min(placementRow.desktop_height, 280)}
-        variant={variant}
-        className={className}
-        onUnavailable={() => setAdsenseFailed(true)}
-      />
-    );
-  }
 
   if (ownAds.length > 0) {
     return (
@@ -56,6 +43,19 @@ export function AdSlot({ placement, ad: provided, variant = "banner", className 
         format={placementRow}
         variant={variant}
         className={className}
+      />
+    );
+  }
+
+  if (canShowAdSense(config.settings, placementRow, consent) && !adsenseFailed) {
+    return (
+      <AdSenseUnit
+        client={config.settings.adsense_client!}
+        slot={placementRow.adsense_slot!}
+        minHeight={Math.min(placementRow.desktop_height, 280)}
+        variant={variant}
+        className={className}
+        onUnavailable={() => setAdsenseFailed(true)}
       />
     );
   }

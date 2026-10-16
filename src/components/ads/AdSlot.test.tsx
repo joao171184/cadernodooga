@@ -22,7 +22,7 @@ vi.mock("./useAds", () => ({
 vi.mock("@/contexts/AuthContext", () => ({ useAuth: () => ({ isAdmin: state.isAdmin }) }));
 vi.mock("@/lib/ads/client", () => ({
   ADS_FETCH_LIMIT: 10,
-  adImageUrl: (p: string) => `https://cdn.test/${p}`,
+  adImageUrl: (p: string) => `/media/destaques/${p.replace(/^(campaigns|destaques)\//, "")}`,
   recordAdEvent: (...args: unknown[]) => state.record(...args),
 }));
 vi.mock("./AdSenseUnit", () => ({
@@ -45,12 +45,12 @@ function config(adsense: boolean, enabled = true): AdConfig {
 }
 
 const ad: ServedAd = {
-  id: "c1", image_path: "campaigns/a.png", image_mobile_path: null, alt_text: "Loja de velas",
+  id: "c1", image_path: "destaques/a.png", image_mobile_path: null, alt_text: "Loja de velas",
   target_url: "https://loja.com", advertiser_name: "Loja", revenue_type: "direct",
 };
 
 const ad2: ServedAd = {
-  id: "c2", image_path: "campaigns/b.png", image_mobile_path: null, alt_text: "Ateliê",
+  id: "c2", image_path: "destaques/b.png", image_mobile_path: null, alt_text: "Ateliê",
   target_url: "https://atelie.com", advertiser_name: "Ateliê", revenue_type: "sponsorship",
 };
 
@@ -83,14 +83,14 @@ describe("AdSlot", () => {
     expect(container).toBeEmptyDOMElement();
   });
 
-  it("mostra o anúncio direto identificado, com link patrocinado, e conta o clique", () => {
+  it("mostra o destaque do parceiro com link e conta o clique", () => {
     state.ads = [ad];
     render(<AdSlot placement="topo-lista" />);
-    expect(screen.getByText("Publicidade")).toBeInTheDocument();
+    expect(screen.getByText("Parceiro")).toBeInTheDocument();
     const link = screen.getByRole("link");
     expect(link).toHaveAttribute("href", "https://loja.com");
-    expect(link.getAttribute("rel")).toContain("sponsored");
-    expect(screen.getByAltText("Loja de velas")).toBeInTheDocument();
+    expect(link.getAttribute("rel")).toBe("noopener noreferrer");
+    expect(screen.getByAltText("Loja de velas")).toHaveAttribute("src", "/media/destaques/a.png");
     fireEvent.click(link);
     expect(state.record).toHaveBeenCalledWith("c1", "topo-lista", "click");
   });
@@ -103,29 +103,27 @@ describe("AdSlot", () => {
     expect(state.record).not.toHaveBeenCalled();
   });
 
-  it("usa AdSense quando configurado e com consentimento", () => {
-    state.ads = [];
-    state.config = config(true);
-    const { rerender } = render(<AdSlot placement="topo-lista" />);
-    expect(screen.queryByTestId("adsense")).toBeNull();
-    state.consent = "granted";
-    rerender(<AdSlot placement="topo-lista" />);
-    expect(screen.getByTestId("adsense")).toBeInTheDocument();
-  });
-
-  it("tenta AdSense antes do anúncio direto e cai no direto se o Google não preencher", () => {
+  it("prefere o anúncio próprio ao AdSense", () => {
     state.ads = [ad];
     state.config = config(true);
     state.consent = "granted";
     render(<AdSlot placement="topo-lista" />);
+    expect(screen.queryByTestId("adsense")).toBeNull();
+    expect(screen.getByRole("link")).toHaveAttribute("href", "https://loja.com");
+  });
+
+  it("usa AdSense só sem anúncio próprio, e some se o Google não preencher", () => {
+    state.ads = [];
+    state.config = config(true);
+    state.consent = "granted";
+    render(<AdSlot placement="topo-lista" />);
     expect(screen.getByTestId("adsense")).toBeInTheDocument();
-    expect(screen.queryByRole("link")).toBeNull();
 
     act(() => {
       state.adsenseUnavailable?.();
     });
     expect(screen.queryByTestId("adsense")).toBeNull();
-    expect(screen.getByRole("link")).toHaveAttribute("href", "https://loja.com");
+    expect(screen.queryByRole("link")).toBeNull();
   });
 
   it("mostra controles do carrossel quando há mais de um anúncio próprio", () => {

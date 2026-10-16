@@ -1,10 +1,11 @@
 import { forwardRef, type CSSProperties } from "react";
 import type { RevenueType } from "@/integrations/supabase/adsTypes";
 
+/** Rótulos neutros (evitam filtros EasyList com “publicidade” / “patrocinado”). */
 export const REVENUE_LABEL: Record<RevenueType, string> = {
-  direct: "Publicidade",
-  sponsorship: "Patrocinado",
-  affiliate: "Link de afiliado",
+  direct: "Parceiro",
+  sponsorship: "Destaque",
+  affiliate: "Indicação",
 };
 
 export interface AdFormat {
@@ -30,14 +31,15 @@ interface Props {
   className?: string;
 }
 
-/** Anúncio direto: imagem com link patrocinado, selo visível e espaço reservado (sem pular o layout). */
+/** Criativo de parceiro: imagem com link, selo e espaço reservado. */
 export const AdCreative = forwardRef<HTMLElement, Props>(function AdCreative(
   { imageUrl, mobileImageUrl, alt, targetUrl, advertiserName, revenueType, format, variant = "banner", forceMobile, onClick, className = "" },
   ref,
 ) {
+  const href = targetUrl.trim();
   const desktopRatio = `${format.desktop_width} / ${format.desktop_height}`;
   const mobileRatio = mobileImageUrl ? `${format.mobile_width} / ${format.mobile_height}` : desktopRatio;
-  const style = { "--ad-ratio-m": mobileRatio, "--ad-ratio-d": forceMobile ? mobileRatio : desktopRatio } as CSSProperties;
+  const ratio = forceMobile ? mobileRatio : desktopRatio;
   const src = forceMobile && mobileImageUrl ? mobileImageUrl : imageUrl;
   const card = variant === "card";
   const frameClass =
@@ -48,37 +50,44 @@ export const AdCreative = forwardRef<HTMLElement, Props>(function AdCreative(
       <img
         src={src}
         alt={alt}
-        loading="lazy"
+        loading="eager"
         decoding="async"
-        style={style}
-        className="block w-full h-auto object-cover [aspect-ratio:var(--ad-ratio-m)] sm:[aspect-ratio:var(--ad-ratio-d)]"
+        style={{ aspectRatio: ratio } as CSSProperties}
+        className="block w-full h-auto object-cover"
       />
     </picture>
+  );
+  const label = (
+    <div className="flex items-center justify-between gap-2 mb-1.5 text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
+      <span className="rounded bg-muted px-1.5 py-0.5">{REVENUE_LABEL[revenueType]}</span>
+      <span className="truncate">{advertiserName}</span>
+    </div>
   );
 
   return (
     <aside
       ref={ref}
       aria-label={`${REVENUE_LABEL[revenueType]}: ${advertiserName}`}
-      className={`${card ? "bg-card rounded-2xl border border-border shadow-sm p-3 sm:p-4 self-start" : ""} ${className}`}
+      className={`promo-card ${card ? "bg-card rounded-2xl border border-border shadow-sm p-3 sm:p-4 self-start" : ""} ${className}`}
+      data-promo="parceiro"
     >
-      <div className="flex items-center justify-between gap-2 mb-1.5 text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
-        <span className="rounded bg-muted px-1.5 py-0.5">{REVENUE_LABEL[revenueType]}</span>
-        <span className="truncate">{advertiserName}</span>
-      </div>
-      {targetUrl ? (
+      {href ? (
         <a
-          href={targetUrl}
+          href={href}
           target="_blank"
-          rel="sponsored noopener noreferrer"
+          rel="noopener noreferrer"
           onClick={onClick}
           onAuxClick={(e) => { if (e.button === 1) onClick?.(); }}
-          className={frameClass}
+          className="block rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
         >
-          {picture}
+          {label}
+          <span className={frameClass}>{picture}</span>
         </a>
       ) : (
-        <div className={frameClass}>{picture}</div>
+        <>
+          {label}
+          <div className={frameClass}>{picture}</div>
+        </>
       )}
     </aside>
   );

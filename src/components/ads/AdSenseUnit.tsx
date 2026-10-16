@@ -17,7 +17,16 @@ interface Props {
   onUnavailable?: () => void;
 }
 
-/** Bloco oficial do AdSense. Sem rastreamento próprio de cliques ou impressões (política do Google). */
+/** Espera o Google marcar filled; unfilled/erro esconde. Timeout só como rede de segurança. */
+const FILL_TIMEOUT_MS = 12_000;
+
+function devLog(slot: string, status: string) {
+  if (import.meta.env.DEV) {
+    console.info(`[AdSense] slot=${slot} status=${status}`);
+  }
+}
+
+/** Bloco oficial do AdSense (`adsbygoogle` é exigido pelo Google). */
 export function AdSenseUnit({
   client,
   slot,
@@ -33,9 +42,10 @@ export function AdSenseUnit({
   const onUnavailableRef = useRef(onUnavailable);
   onUnavailableRef.current = onUnavailable;
 
-  const markUnavailable = () => {
+  const markUnavailable = (reason: string) => {
     if (unavailable.current) return;
     unavailable.current = true;
+    devLog(slot, reason);
     setHidden(true);
     onUnavailableRef.current?.();
   };
@@ -47,41 +57,69 @@ export function AdSenseUnit({
         if (!alive || pushed.current) return;
         pushed.current = true;
         (window.adsbygoogle = window.adsbygoogle || []).push({});
+        devLog(slot, "pushed");
       })
       .catch(() => {
-        if (alive) markUnavailable();
+        if (alive) markUnavailable("script-error");
       });
     return () => {
       alive = false;
     };
   }, [client, slot]);
 
-  // O Google marca data-ad-status="unfilled" quando não tem anúncio.
   useEffect(() => {
     const ins = insRef.current;
-    if (!ins || typeof MutationObserver === "undefined") return;
-    const check = () => {
-      if (ins.getAttribute("data-ad-status") === "unfilled") markUnavailable();
+    if (!ins) return;
+    let done = false;
+    const finish = () => {
+      done = true;
+      mo?.disconnect();
+      window.clearTimeout(timer);
     };
+    const check = () => {
+      const status = ins.getAttribute("data-ad-status");
+      if (!status) return;
+      if (status === "unfilled") {
+        markUnavailable("unfilled");
+        finish();
+        return;
+      }
+      if (status === "filled") {
+        devLog(slot, "filled");
+        finish();
+      }
+    };
+    const mo =
+      typeof MutationObserver !== "undefined"
+        ? new MutationObserver(check)
+        : null;
+    mo?.observe(ins, { attributes: true, attributeFilter: ["data-ad-status"] });
+    const timer = window.setTimeout(() => {
+      if (!done && ins.getAttribute("data-ad-status") !== "filled") {
+        markUnavailable(ins.getAttribute("data-ad-status") ?? "timeout");
+      }
+    }, FILL_TIMEOUT_MS);
     check();
-    const mo = new MutationObserver(check);
-    mo.observe(ins, { attributes: true, attributeFilter: ["data-ad-status"] });
-    return () => mo.disconnect();
-  }, []);
+    return () => {
+      mo?.disconnect();
+      window.clearTimeout(timer);
+    };
+  }, [slot]);
 
   return (
     <aside
-      aria-label="Publicidade do Google"
+      aria-label="Conteúdo Google"
       hidden={hidden}
       className={`${variant === "card" ? "bg-card rounded-2xl border border-border shadow-sm p-3 sm:p-4 self-start" : ""} ${className}`}
+      data-promo="google"
     >
       <div className="mb-1.5 text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
-        <span className="rounded bg-muted px-1.5 py-0.5">Publicidade · Google</span>
+        <span className="rounded bg-muted px-1.5 py-0.5">Google</span>
       </div>
       <ins
         ref={insRef}
         className="adsbygoogle"
-        style={{ display: "block", minHeight }}
+        style={{ display: "block", minHeight, width: "100%" }}
         data-ad-client={client}
         data-ad-slot={slot}
         data-ad-format="auto"

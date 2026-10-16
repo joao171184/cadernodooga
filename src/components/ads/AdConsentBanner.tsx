@@ -3,8 +3,8 @@ import { setAdConsent } from "@/lib/ads/consent";
 import { useAdConfig, useAdConsent } from "./useAds";
 
 /**
- * Pede consentimento antes de carregar o AdSense (cookies de publicidade).
- * Só aparece quando o AdSense está ligado no painel; anúncios diretos não usam cookies.
+ * Pedido de preferência antes de carregar o script do Google.
+ * Parceiros diretos não usam cookies de medição do Google.
  */
 export function AdConsentBanner() {
   const config = useAdConfig();
@@ -15,14 +15,15 @@ export function AdConsentBanner() {
     <div
       role="dialog"
       aria-live="polite"
-      aria-label="Consentimento de publicidade"
+      aria-label="Preferências de conteúdo"
       className="fixed inset-x-3 bottom-3 z-[60] mx-auto max-w-xl rounded-2xl border border-border bg-card p-4 text-card-foreground shadow-2xl sm:inset-x-auto sm:right-4"
+      data-promo="consent"
     >
-      <p className="text-sm font-semibold">Anúncios e cookies</p>
+      <p className="text-sm font-semibold">Conteúdo e cookies</p>
       <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
-        Para manter o Caderno do Ogã gratuito, exibimos anúncios do Google, que podem usar cookies para medir e
-        personalizar a publicidade. Você pode recusar: o site continua funcionando normalmente.
-        Anúncios diretos de parceiros não usam cookies.
+        Para manter o Caderno do Ogã gratuito, podemos exibir conteúdo do Google, que pode usar cookies para medir e
+        personalizar a experiência. Você pode recusar: o site continua funcionando normalmente.
+        Destaques de parceiros não usam esses cookies.
       </p>
       <div className="mt-3 flex justify-end gap-2">
         <button
@@ -42,13 +43,13 @@ export function AdConsentBanner() {
   );
 }
 
-/** Link para rever a escolha (rodapé). Só aparece com o AdSense ligado. */
+/** Link para rever a escolha (rodapé). Só aparece com o Google ligado no painel. */
 export function AdConsentReset({ className = "" }: { className?: string }) {
   const config = useAdConfig();
   if (!config || !adsenseConfigured(config.settings)) return null;
   return (
     <button onClick={() => setAdConsent(null)} className={className}>
-      Preferências de anúncios
+      Preferências de conteúdo
     </button>
   );
 }

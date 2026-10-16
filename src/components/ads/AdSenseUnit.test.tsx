@@ -1,5 +1,5 @@
 import { act, render, screen, waitFor } from "@testing-library/react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { AdSenseUnit } from "./AdSenseUnit";
 
 const load = vi.hoisted(() => ({ result: Promise.resolve() as Promise<void> }));
@@ -8,6 +8,11 @@ vi.mock("@/lib/ads/adsense", () => ({ loadAdSenseScript: () => load.result }));
 beforeEach(() => {
   load.result = Promise.resolve();
   window.adsbygoogle = [];
+  vi.useFakeTimers({ shouldAdvanceTime: true });
+});
+
+afterEach(() => {
+  vi.useRealTimers();
 });
 
 const renderUnit = (onUnavailable?: () => void) =>
@@ -27,7 +32,7 @@ describe("AdSenseUnit", () => {
     expect(ins).toHaveAttribute("data-ad-slot", "6660811452");
     expect(ins).toHaveAttribute("data-full-width-responsive", "true");
     await waitFor(() => expect(window.adsbygoogle).toHaveLength(1));
-    expect(screen.getByLabelText("Publicidade do Google")).toBeVisible();
+    expect(screen.getByLabelText("Conteúdo Google")).toBeVisible();
   });
 
   it("esconde o espaço e avisa quando o Google não tem anúncio", async () => {
@@ -46,6 +51,16 @@ describe("AdSenseUnit", () => {
     const { container } = renderUnit(onUnavailable);
     await waitFor(() => expect(container.querySelector("aside")).toHaveAttribute("hidden"));
     expect(window.adsbygoogle).toHaveLength(0);
+    expect(onUnavailable).toHaveBeenCalledTimes(1);
+  });
+
+  it("esconde após o prazo se o Google não marcar filled", async () => {
+    const onUnavailable = vi.fn();
+    const { container } = renderUnit(onUnavailable);
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(12_000);
+    });
+    expect(container.querySelector("aside")).toHaveAttribute("hidden");
     expect(onUnavailable).toHaveBeenCalledTimes(1);
   });
 });

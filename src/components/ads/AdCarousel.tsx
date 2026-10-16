@@ -7,8 +7,8 @@ import { Button } from "@/components/ui/button";
 import { AdCreative, type AdFormat } from "./AdCreative";
 import { useViewableOnce } from "./useAds";
 
-const ROTATE_MIN_MS = 6000;
-const ROTATE_SPAN_MS = 2000;
+/** Intervalo fixo de troca do carrossel. */
+const ROTATE_MS = 7000;
 
 interface Props {
   ads: ServedAd[];
@@ -18,12 +18,14 @@ interface Props {
   className?: string;
 }
 
-/** Um anúncio fixo, ou carrossel com ordem já sorteada, troca automática e controles acessíveis. */
+/**
+ * Um anúncio fixo, ou carrossel na ordem já sorteada (peso no SQL).
+ * Controles abaixo da imagem para não bloquear o clique no link.
+ */
 export function AdCarousel({ ads, placement, format, variant = "banner", className = "" }: Props) {
   const { isAdmin } = useAuth();
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
-  const intervalMs = useRef(ROTATE_MIN_MS + Math.floor(Math.random() * (ROTATE_SPAN_MS + 1)));
   const multi = ads.length > 1;
   const ad = ads[index] ?? ads[0];
 
@@ -31,7 +33,7 @@ export function AdCarousel({ ads, placement, format, variant = "banner", classNa
     if (!multi || paused) return;
     const id = window.setInterval(() => {
       setIndex((i) => (i + 1) % ads.length);
-    }, intervalMs.current);
+    }, ROTATE_MS);
     return () => window.clearInterval(id);
   }, [multi, paused, ads.length]);
 
@@ -41,7 +43,11 @@ export function AdCarousel({ ads, placement, format, variant = "banner", classNa
 
   return (
     <div
-      className="relative"
+      className="min-w-0"
+      style={{
+        ["--promo-slot-ratio" as string]: `${format.desktop_width} / ${format.desktop_height}`,
+      }}
+      data-promo="carousel"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
       onFocusCapture={() => setPaused(true)}
@@ -59,33 +65,31 @@ export function AdCarousel({ ads, placement, format, variant = "banner", classNa
         track={!isAdmin}
       />
       {multi && (
-        <div className="pointer-events-none absolute inset-x-0 top-1/2 z-[1] flex -translate-y-1/2 justify-between px-1">
+        <div className="mt-1.5 flex items-center justify-center gap-2">
           <Button
             type="button"
-            variant="secondary"
+            variant="outline"
             size="icon"
-            className="pointer-events-auto h-8 w-8 rounded-full border border-border bg-background/90 shadow-sm"
+            className="h-8 w-8"
             aria-label="Anúncio anterior"
             onClick={() => go(-1)}
           >
             <ChevronLeft className="h-4 w-4" aria-hidden />
           </Button>
+          <span className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground tabular-nums" aria-live="polite">
+            {index + 1} / {ads.length}
+          </span>
           <Button
             type="button"
-            variant="secondary"
+            variant="outline"
             size="icon"
-            className="pointer-events-auto h-8 w-8 rounded-full border border-border bg-background/90 shadow-sm"
+            className="h-8 w-8"
             aria-label="Próximo anúncio"
             onClick={() => go(1)}
           >
             <ChevronRight className="h-4 w-4" aria-hidden />
           </Button>
         </div>
-      )}
-      {multi && (
-        <p className="sr-only" aria-live="polite">
-          Anúncio {index + 1} de {ads.length}
-        </p>
       )}
     </div>
   );

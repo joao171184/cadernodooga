@@ -84,7 +84,7 @@ describe("cache do PWA", () => {
     for (const t of [
       "user_notas", "profiles", "user_roles", "role_permissions", "favoritos", "super_admins",
       "ad_campaigns", "ad_advertisers", "ad_leads", "ad_stats_daily", "ad_settings", "ad_placements",
-      "rpc/get_ads_for_placement",
+      "rpc/get_ads_for_placement", "rpc/get_parceiros_for_slot", "rpc/get_parceiro_config",
     ]) {
       expect(isPublicApiRequest(req(`/rest/v1/${t}`))).toBe(false);
     }

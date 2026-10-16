@@ -246,7 +246,7 @@ export function CampaignsTab({ advertisers, campaigns, placements, reload }: Pro
             return (
               <li key={c.id} className="flex flex-col overflow-hidden rounded-xl border border-border bg-card">
                 <div className="relative aspect-[3/1] bg-muted">
-                  <img src={adImageUrl(c.image_path)} alt="" loading="lazy" className="h-full w-full object-cover" />
+                  <img src={adImageUrl(c.image_path)} alt="" loading="eager" decoding="async" className="h-full w-full object-cover" />
                   <span className="absolute left-2 top-2"><StatusBadge status={status} /></span>
                 </div>
                 <div className="flex flex-1 flex-col gap-1.5 p-3">
@@ -293,7 +293,7 @@ export function CampaignsTab({ advertisers, campaigns, placements, reload }: Pro
                 <tr key={c.id} className="border-b border-border last:border-0 hover:bg-muted/40">
                   <td className="px-3 py-2">
                     <div className="flex items-center gap-2">
-                      <img src={adImageUrl(c.image_path)} alt="" loading="lazy" className="h-8 w-14 shrink-0 rounded border border-border object-cover" />
+                      <img src={adImageUrl(c.image_path)} alt="" loading="eager" decoding="async" className="h-8 w-14 shrink-0 rounded border border-border object-cover" />
                       <div className="min-w-0">
                         <p className="max-w-[220px] truncate font-bold text-foreground" title={c.name}>{c.name}</p>
                         <p className="max-w-[220px] truncate text-[10px] text-muted-foreground">{advName(c.advertiser_id)}</p>
