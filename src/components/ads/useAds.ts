@@ -19,12 +19,16 @@ export function useAdConsent(): AdConsent | null {
   return consent;
 }
 
-/** Anúncios sorteados para o espaço; novo sorteio a cada montagem (carregamento da página). */
-export function usePlacementAds(placement: string, count = 1, enabled = true): ServedAd[] | undefined {
+/** Anúncios do espaço (ordem já embaralhada em fetchAds); novo sorteio a cada montagem. */
+export function usePlacementAds(placement: string, count = 10, enabled = true): ServedAd[] | undefined {
   const [ads, setAds] = useState<ServedAd[] | undefined>(undefined);
   useEffect(() => {
-    if (!enabled) return;
+    if (!enabled) {
+      setAds(undefined);
+      return;
+    }
     let alive = true;
+    setAds(undefined);
     fetchAds(placement, count).then((list) => { if (alive) setAds(list); });
     return () => { alive = false; };
   }, [placement, count, enabled]);

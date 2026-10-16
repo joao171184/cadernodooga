@@ -10,8 +10,15 @@ beforeEach(() => {
   window.adsbygoogle = [];
 });
 
-const renderUnit = () =>
-  render(<AdSenseUnit client="ca-pub-1234567890123456" slot="6660811452" minHeight={150} />);
+const renderUnit = (onUnavailable?: () => void) =>
+  render(
+    <AdSenseUnit
+      client="ca-pub-1234567890123456"
+      slot="6660811452"
+      minHeight={150}
+      onUnavailable={onUnavailable}
+    />,
+  );
 
 describe("AdSenseUnit", () => {
   it("monta o bloco oficial e pede um anúncio ao Google", async () => {
@@ -23,18 +30,22 @@ describe("AdSenseUnit", () => {
     expect(screen.getByLabelText("Publicidade do Google")).toBeVisible();
   });
 
-  it("esconde o espaço quando o Google não tem anúncio", async () => {
-    const { container } = renderUnit();
+  it("esconde o espaço e avisa quando o Google não tem anúncio", async () => {
+    const onUnavailable = vi.fn();
+    const { container } = renderUnit(onUnavailable);
     await act(async () => {
       container.querySelector("ins")!.setAttribute("data-ad-status", "unfilled");
     });
     await waitFor(() => expect(container.querySelector("aside")).toHaveAttribute("hidden"));
+    expect(onUnavailable).toHaveBeenCalledTimes(1);
   });
 
-  it("esconde o espaço quando o script não carrega", async () => {
+  it("esconde o espaço e avisa quando o script não carrega", async () => {
+    const onUnavailable = vi.fn();
     load.result = Promise.reject(new Error("bloqueado"));
-    const { container } = renderUnit();
+    const { container } = renderUnit(onUnavailable);
     await waitFor(() => expect(container.querySelector("aside")).toHaveAttribute("hidden"));
     expect(window.adsbygoogle).toHaveLength(0);
+    expect(onUnavailable).toHaveBeenCalledTimes(1);
   });
 });

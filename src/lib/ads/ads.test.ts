@@ -4,6 +4,7 @@ import { computeCampaignStatus, isEndingSoon, needsArchiving } from "./status";
 import { imageRatioWarning, validateCampaign, validateImageFile, validateLead, validateTargetUrl } from "./validation";
 import { ctr, formatCtr, groupMetrics, totals } from "./reports";
 import { adsenseConfigured, canShowAdSense } from "./adsense";
+import { shuffleAds } from "./shuffle";
 
 describe("horário de Brasília", () => {
   it("converte datetime-local para UTC e volta", () => {
@@ -135,5 +136,13 @@ describe("AdSense", () => {
     expect(canShowAdSense(settings, placement, "denied")).toBe(false);
     expect(canShowAdSense(settings, { ...placement, adsense_slot: null }, "granted")).toBe(false);
     expect(canShowAdSense(settings, { ...placement, enabled: false }, "granted")).toBe(false);
+  });
+});
+
+describe("shuffleAds", () => {
+  it("mantém os mesmos itens", () => {
+    const input = [1, 2, 3, 4, 5];
+    expect(shuffleAds(input).slice().sort()).toEqual(input);
+    expect(input).toEqual([1, 2, 3, 4, 5]);
   });
 });

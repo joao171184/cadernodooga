@@ -1,11 +1,10 @@
-import { useRef } from "react";
+import { useState } from "react";
 import type { ServedAd } from "@/integrations/supabase/adsTypes";
-import { useAuth } from "@/contexts/AuthContext";
-import { adImageUrl, recordAdEvent } from "@/lib/ads/client";
+import { ADS_FETCH_LIMIT } from "@/lib/ads/client";
 import { canShowAdSense } from "@/lib/ads/adsense";
-import { AdCreative } from "./AdCreative";
+import { AdCarousel } from "./AdCarousel";
 import { AdSenseUnit } from "./AdSenseUnit";
-import { useAdConfig, useAdConsent, usePlacementAds, useViewableOnce } from "./useAds";
+import { useAdConfig, useAdConsent, usePlacementAds } from "./useAds";
 
 interface Props {
   placement: string;
@@ -16,21 +15,27 @@ interface Props {
 }
 
 /**
- * Espaço publicitário: anúncio direto elegível → AdSense (se configurado e com consentimento) → nada.
- * Nunca deixa um buraco vazio no layout.
+ * Espaço publicitário: tenta AdSense; se o Google não preencher, carrossel dos anúncios próprios.
+ * Sem AdSense (ou sem consentimento): só os anúncios próprios. Formato reservado no criativo.
  */
 export function AdSlot({ placement, ad: provided, variant = "banner", className = "" }: Props) {
   const config = useAdConfig();
   const consent = useAdConsent();
   const placementRow = config?.placements.get(placement);
-  const ownAds = usePlacementAds(placement, 1, provided === undefined && !!placementRow?.enabled);
-  const ad = provided === undefined ? ownAds?.[0] ?? (ownAds ? null : undefined) : provided;
+  const enabled = !!placementRow?.enabled;
+  const [adsenseFailed, setAdsenseFailed] = useState(false);
 
-  if (!config || !placementRow?.enabled || ad === undefined) return null;
+  // Sempre busca anúncios do espaço (carrossel e fallback quando o AdSense vem vazio).
+  const fetched = usePlacementAds(placement, ADS_FETCH_LIMIT, enabled);
+  const ownAds: ServedAd[] | undefined =
+    provided === undefined ? fetched : provided ? [provided] : fetched;
 
-  if (ad) return <DirectAd ad={ad} placement={placement} format={placementRow} variant={variant} className={className} />;
+  if (!config || !placementRow?.enabled) return null;
+  if (ownAds === undefined) return null;
 
-  if (canShowAdSense(config.settings, placementRow, consent)) {
+  const tryAdSense = canShowAdSense(config.settings, placementRow, consent) && !adsenseFailed;
+
+  if (tryAdSense) {
     return (
       <AdSenseUnit
         client={config.settings.adsense_client!}
@@ -38,38 +43,22 @@ export function AdSlot({ placement, ad: provided, variant = "banner", className 
         minHeight={Math.min(placementRow.desktop_height, 280)}
         variant={variant}
         className={className}
+        onUnavailable={() => setAdsenseFailed(true)}
       />
     );
   }
+
+  if (ownAds.length > 0) {
+    return (
+      <AdCarousel
+        ads={ownAds}
+        placement={placement}
+        format={placementRow}
+        variant={variant}
+        className={className}
+      />
+    );
+  }
+
   return null;
-}
-
-function DirectAd({
-  ad, placement, format, variant, className,
-}: {
-  ad: ServedAd;
-  placement: string;
-  format: { desktop_width: number; desktop_height: number; mobile_width: number; mobile_height: number };
-  variant: "banner" | "card";
-  className: string;
-}) {
-  const { isAdmin } = useAuth();
-  const ref = useRef<HTMLElement>(null);
-  useViewableOnce(ref, () => recordAdEvent(ad.id, placement, "impression"), !isAdmin);
-
-  return (
-    <AdCreative
-      ref={ref}
-      imageUrl={adImageUrl(ad.image_path)}
-      mobileImageUrl={ad.image_mobile_path ? adImageUrl(ad.image_mobile_path) : null}
-      alt={ad.alt_text}
-      targetUrl={ad.target_url}
-      advertiserName={ad.advertiser_name}
-      revenueType={ad.revenue_type}
-      format={format}
-      variant={variant}
-      className={className}
-      onClick={isAdmin ? undefined : () => recordAdEvent(ad.id, placement, "click")}
-    />
-  );
 }

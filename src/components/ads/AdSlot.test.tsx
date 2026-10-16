@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { ServedAd } from "@/integrations/supabase/adsTypes";
 import type { AdConfig } from "@/lib/ads/client";
@@ -10,6 +10,7 @@ const state = vi.hoisted(() => ({
   ads: undefined as unknown,
   isAdmin: false,
   record: vi.fn(),
+  adsenseUnavailable: null as null | (() => void),
 }));
 
 vi.mock("./useAds", () => ({
@@ -20,10 +21,16 @@ vi.mock("./useAds", () => ({
 }));
 vi.mock("@/contexts/AuthContext", () => ({ useAuth: () => ({ isAdmin: state.isAdmin }) }));
 vi.mock("@/lib/ads/client", () => ({
+  ADS_FETCH_LIMIT: 10,
   adImageUrl: (p: string) => `https://cdn.test/${p}`,
   recordAdEvent: (...args: unknown[]) => state.record(...args),
 }));
-vi.mock("./AdSenseUnit", () => ({ AdSenseUnit: () => <div data-testid="adsense" /> }));
+vi.mock("./AdSenseUnit", () => ({
+  AdSenseUnit: ({ onUnavailable }: { onUnavailable?: () => void }) => {
+    state.adsenseUnavailable = onUnavailable ?? null;
+    return <div data-testid="adsense" />;
+  },
+}));
 
 const placement = {
   key: "topo-lista", name: "Topo", description: "", enabled: true, desktop_width: 1200, desktop_height: 150,
@@ -42,12 +49,18 @@ const ad: ServedAd = {
   target_url: "https://loja.com", advertiser_name: "Loja", revenue_type: "direct",
 };
 
+const ad2: ServedAd = {
+  id: "c2", image_path: "campaigns/b.png", image_mobile_path: null, alt_text: "Ateliê",
+  target_url: "https://atelie.com", advertiser_name: "Ateliê", revenue_type: "sponsorship",
+};
+
 beforeEach(() => {
   state.config = config(false);
   state.consent = null;
   state.ads = undefined;
   state.isAdmin = false;
   state.record.mockReset();
+  state.adsenseUnavailable = null;
 });
 
 describe("AdSlot", () => {
@@ -90,7 +103,7 @@ describe("AdSlot", () => {
     expect(state.record).not.toHaveBeenCalled();
   });
 
-  it("usa AdSense só quando configurado e com consentimento", () => {
+  it("usa AdSense quando configurado e com consentimento", () => {
     state.ads = [];
     state.config = config(true);
     const { rerender } = render(<AdSlot placement="topo-lista" />);
@@ -100,12 +113,27 @@ describe("AdSlot", () => {
     expect(screen.getByTestId("adsense")).toBeInTheDocument();
   });
 
-  it("prefere o anúncio direto ao AdSense", () => {
+  it("tenta AdSense antes do anúncio direto e cai no direto se o Google não preencher", () => {
     state.ads = [ad];
     state.config = config(true);
     state.consent = "granted";
     render(<AdSlot placement="topo-lista" />);
+    expect(screen.getByTestId("adsense")).toBeInTheDocument();
+    expect(screen.queryByRole("link")).toBeNull();
+
+    act(() => {
+      state.adsenseUnavailable?.();
+    });
     expect(screen.queryByTestId("adsense")).toBeNull();
-    expect(screen.getByRole("link")).toBeInTheDocument();
+    expect(screen.getByRole("link")).toHaveAttribute("href", "https://loja.com");
+  });
+
+  it("mostra controles do carrossel quando há mais de um anúncio próprio", () => {
+    state.ads = [ad, ad2];
+    render(<AdSlot placement="topo-lista" />);
+    expect(screen.getByRole("button", { name: "Anúncio anterior" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Próximo anúncio" })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Próximo anúncio" }));
+    expect(screen.getByAltText("Ateliê")).toBeInTheDocument();
   });
 });

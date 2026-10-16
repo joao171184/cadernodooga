@@ -1,5 +1,8 @@
 import { adsDb, type AdPlacementRow, type AdSettingsRow, type ServedAd } from "@/integrations/supabase/adsTypes";
 import { adSessionId, isLikelyBot } from "./session";
+import { shuffleAds } from "./shuffle";
+
+export { shuffleAds } from "./shuffle";
 
 export const AD_BUCKET = "ads";
 
@@ -30,11 +33,17 @@ export function resetAdConfigCache() {
   configPromise = null;
 }
 
-export async function fetchAds(placement: string, count = 1): Promise<ServedAd[]> {
+/** Máximo aceito por get_ads_for_placement no banco. */
+export const ADS_FETCH_LIMIT = 10;
+
+export async function fetchAds(placement: string, count = ADS_FETCH_LIMIT): Promise<ServedAd[]> {
   try {
-    const { data, error } = await adsDb.rpc("get_ads_for_placement", { _placement: placement, _count: count });
+    const { data, error } = await adsDb.rpc("get_ads_for_placement", {
+      _placement: placement,
+      _count: Math.min(Math.max(count, 1), ADS_FETCH_LIMIT),
+    });
     if (error || !Array.isArray(data)) return [];
-    return data;
+    return shuffleAds(data);
   } catch {
     return [];
   }

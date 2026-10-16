@@ -13,13 +13,32 @@ interface Props {
   minHeight: number;
   variant?: "banner" | "card";
   className?: string;
+  /** Chamado quando o Google não preenche o bloco ou o script falha. */
+  onUnavailable?: () => void;
 }
 
 /** Bloco oficial do AdSense. Sem rastreamento próprio de cliques ou impressões (política do Google). */
-export function AdSenseUnit({ client, slot, minHeight, variant = "banner", className = "" }: Props) {
+export function AdSenseUnit({
+  client,
+  slot,
+  minHeight,
+  variant = "banner",
+  className = "",
+  onUnavailable,
+}: Props) {
   const pushed = useRef(false);
+  const unavailable = useRef(false);
   const insRef = useRef<HTMLModElement>(null);
   const [hidden, setHidden] = useState(false);
+  const onUnavailableRef = useRef(onUnavailable);
+  onUnavailableRef.current = onUnavailable;
+
+  const markUnavailable = () => {
+    if (unavailable.current) return;
+    unavailable.current = true;
+    setHidden(true);
+    onUnavailableRef.current?.();
+  };
 
   useEffect(() => {
     let alive = true;
@@ -29,15 +48,21 @@ export function AdSenseUnit({ client, slot, minHeight, variant = "banner", class
         pushed.current = true;
         (window.adsbygoogle = window.adsbygoogle || []).push({});
       })
-      .catch(() => { if (alive) setHidden(true); });
-    return () => { alive = false; };
+      .catch(() => {
+        if (alive) markUnavailable();
+      });
+    return () => {
+      alive = false;
+    };
   }, [client, slot]);
 
-  // O Google marca data-ad-status="unfilled" quando não tem anúncio: esconde o espaço todo.
+  // O Google marca data-ad-status="unfilled" quando não tem anúncio.
   useEffect(() => {
     const ins = insRef.current;
     if (!ins || typeof MutationObserver === "undefined") return;
-    const check = () => { if (ins.getAttribute("data-ad-status") === "unfilled") setHidden(true); };
+    const check = () => {
+      if (ins.getAttribute("data-ad-status") === "unfilled") markUnavailable();
+    };
     check();
     const mo = new MutationObserver(check);
     mo.observe(ins, { attributes: true, attributeFilter: ["data-ad-status"] });
