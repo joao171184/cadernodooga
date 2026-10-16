@@ -77,15 +77,21 @@ async function uploadImage(file: File): Promise<string> {
   return dbPathFromUpload(storagePath);
 }
 
-/** Remove imagens que nenhuma campanha usa mais (cópias compartilham o mesmo arquivo). */
-async function removeUnusedImages(paths: string[]) {
+/**
+ * Remove do Storage só paths que nenhuma campanha referencia.
+ * `keep` = paths da campanha recém-salva (nunca apagar).
+ */
+async function removeUnusedImages(paths: string[], keep: string[] = []) {
+  const keepSet = new Set(keep.filter(Boolean));
   const unused: string[] = [];
   for (const p of paths) {
-    const { count, error } = await adsDb
-      .from("ad_campaigns")
-      .select("id", { count: "exact", head: true })
-      .or(`image_path.eq."${p}",image_mobile_path.eq."${p}"`);
-    if (!error && count === 0) unused.push(p);
+    if (!p || keepSet.has(p)) continue;
+    const [byDesktop, byMobile] = await Promise.all([
+      adsDb.from("ad_campaigns").select("id", { count: "exact", head: true }).eq("image_path", p),
+      adsDb.from("ad_campaigns").select("id", { count: "exact", head: true }).eq("image_mobile_path", p),
+    ]);
+    if (byDesktop.error || byMobile.error) continue;
+    if ((byDesktop.count ?? 0) + (byMobile.count ?? 0) === 0) unused.push(p);
   }
   if (unused.length) {
     await adsDb.storage.from(AD_BUCKET).remove(unused.map(storagePathFromDb));
@@ -230,17 +236,21 @@ export function CampaignFormDialog({ open, campaign, template = null, advertiser
         : await adsDb.from("ad_campaigns").insert(row);
       if (error) throw error;
 
+      // Só depois do save: apaga a imagem antiga substituída — nunca a atual (`uploaded` / row).
       if (campaign) {
         const stale = [
           desktopImg ? campaign.image_path : null,
           (mobileImg || removeMobile) ? campaign.image_mobile_path : null,
-        ].filter((p): p is string => !!p);
-        if (stale.length) void removeUnusedImages(stale);
+        ].filter((p): p is string => !!p && !uploaded.includes(p) && p !== imagePath && p !== mobilePath);
+        if (stale.length) {
+          await removeUnusedImages(stale, [imagePath, mobilePath].filter((p): p is string => !!p));
+        }
       }
       toast.success(campaign ? "Campanha atualizada." : "Campanha criada.");
       onSaved();
       onClose();
     } catch (err) {
+      // Save falhou: remove só o que acabamos de enviar (não havia referência no banco).
       if (uploaded.length) void adsDb.storage.from(AD_BUCKET).remove(uploaded.map(storagePathFromDb));
       const e = err as { code?: string; message?: string; statusCode?: string };
       toast.error(e?.statusCode === "413" ? "Imagem grande demais (máximo 1 MB)." : dbErrorMessage(e));

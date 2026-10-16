@@ -22,7 +22,7 @@ vi.mock("./useAds", () => ({
 vi.mock("@/contexts/AuthContext", () => ({ useAuth: () => ({ isAdmin: state.isAdmin }) }));
 vi.mock("@/lib/ads/client", () => ({
   ADS_FETCH_LIMIT: 10,
-  adImageUrl: (p: string) => `/media/destaques/${p.replace(/^(campaigns|destaques)\//, "")}`,
+  adImageUrl: (p: string) => `https://cdn.test/storage/v1/object/public/ads/campaigns/${p.replace(/^(campaigns|destaques)\//, "")}`,
   recordAdEvent: (...args: unknown[]) => state.record(...args),
 }));
 vi.mock("./AdSenseUnit", () => ({
@@ -90,7 +90,10 @@ describe("AdSlot", () => {
     const link = screen.getByRole("link");
     expect(link).toHaveAttribute("href", "https://loja.com");
     expect(link.getAttribute("rel")).toBe("noopener noreferrer");
-    expect(screen.getByAltText("Loja de velas")).toHaveAttribute("src", "/media/destaques/a.png");
+    expect(screen.getByAltText("Loja de velas")).toHaveAttribute(
+      "src",
+      "https://cdn.test/storage/v1/object/public/ads/campaigns/a.png",
+    );
     fireEvent.click(link);
     expect(state.record).toHaveBeenCalledWith("c1", "topo-lista", "click");
   });

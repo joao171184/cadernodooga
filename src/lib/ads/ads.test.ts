@@ -148,10 +148,10 @@ describe("shuffleAds", () => {
   });
 });
 
-describe("URLs neutras de imagem", () => {
-  it("expõe /media/destaques sem /ads/ na URL do browser", () => {
-    expect(adImageUrl("destaques/abc.png")).toBe("/media/destaques/abc.png");
-    expect(adImageUrl("campaigns/abc.png")).toBe("/media/destaques/abc.png");
+describe("URLs de imagem", () => {
+  it("em localhost usa proxy /media/destaques", () => {
+    expect(adImageUrl("destaques/abc.png")).toMatch(/\/media\/destaques\/abc\.png$/);
+    expect(adImageUrl("campaigns/abc.png")).toMatch(/\/media\/destaques\/abc\.png$/);
   });
 
   it("converte path lógico ↔ físico do Storage", () => {

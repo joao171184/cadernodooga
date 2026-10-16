@@ -77,15 +77,30 @@ export function dbPathFromUpload(storagePath: string): string {
   return storagePath.replace(/^\/+/, "").replace(new RegExp(`^${AD_STORAGE_DIR}/`), `${AD_IMAGE_DIR}/`);
 }
 
+function mediaProxyHost(): boolean {
+  if (typeof window === "undefined") return false;
+  const h = window.location.hostname;
+  return (
+    h === "localhost" ||
+    h === "127.0.0.1" ||
+    h === "cadernodooga.com.br" ||
+    h === "www.cadernodooga.com.br"
+  );
+}
+
 /**
- * URL da imagem para o visitante: same-origin `/media/destaques/...`
- * (o proxy no Vite/Vercel busca o arquivo no Storage sem `/ads/` na URL do browser).
+ * URL da imagem:
+ * - em localhost / produção com rewrite: `/media/destaques/...` (evita `/ads/` no browser)
+ * - no admin/preview (Lovable etc.): URL pública direta do Storage (sempre carrega)
  */
 export function adImageUrl(path: string): string {
   if (!path) return "";
   if (/^https?:\/\//i.test(path)) return path;
-  const file = path.replace(/^\/+/, "").replace(/^(campaigns|destaques)\//, "");
-  return `/media/destaques/${file}`;
+  const logical = path.replace(/^\/+/, "");
+  const physical = logical.startsWith(`${AD_STORAGE_DIR}/`) ? logical : storagePathFromDb(logical);
+  const file = physical.replace(new RegExp(`^${AD_STORAGE_DIR}/`), "");
+  if (mediaProxyHost()) return `/media/destaques/${file}`;
+  return adsDb.storage.from(AD_BUCKET).getPublicUrl(physical).data.publicUrl;
 }
 
 /** Envia impressão/clique. O banco deduplica e ignora robôs e admins. */
