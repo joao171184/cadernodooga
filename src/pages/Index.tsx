@@ -688,6 +688,8 @@ const Index = () => {
                   <AdSlot
                     placement="lista-entre-cards"
                     ad={feedSlot < feedAds.length ? feedAds[feedSlot] : null}
+                    reservePool={feedAds}
+                    reserveIndex={feedSlot}
                     variant="card"
                   />
                 )}

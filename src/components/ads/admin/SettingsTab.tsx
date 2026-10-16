@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { AlertTriangle, Loader2, MapPin, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { Switch } from "@/components/ui/switch";
@@ -29,7 +29,23 @@ export function SettingsTab({ settings, placements, reload }: AdsAdminData & { r
 
   const clientError = client && !CLIENT_RE.test(client.trim()) ? "Formato esperado: ca-pub- seguido de números." : undefined;
   const slotError = (r: AdPlacementRow) =>
-    r.adsense_slot && !SLOT_RE.test(r.adsense_slot) ? "Só números (ID do bloco)." : undefined;
+    r.adsense_slot && !SLOT_RE.test(r.adsense_slot.trim()) ? "Só números (ID do bloco)." : undefined;
+
+  const duplicateSlots = useMemo(() => {
+    const counts = new Map<string, string[]>();
+    for (const r of rows) {
+      const slot = r.adsense_slot?.trim();
+      if (!slot || !SLOT_RE.test(slot)) continue;
+      const list = counts.get(slot) ?? [];
+      list.push(r.name);
+      counts.set(slot, list);
+    }
+    const dups = new Map<string, string[]>();
+    for (const [slot, names] of counts) {
+      if (names.length > 1) dups.set(slot, names);
+    }
+    return dups;
+  }, [rows]);
 
   const save = async () => {
     if (clientError || rows.some(slotError)) return toast.error("Confira os campos destacados.");
@@ -89,38 +105,70 @@ export function SettingsTab({ settings, placements, reload }: AdsAdminData & { r
           />
         </Field>
 
-        <ul className="divide-y divide-panel-border rounded-panel border border-panel-border bg-panel-raised/40">
-          {rows.map((r) => (
-            <li key={r.key} className="grid gap-3 p-3 md:grid-cols-[1fr_auto] md:items-start">
-              <div>
-                <p className="text-sm font-bold text-foreground">{r.name}</p>
-                <p className="text-[11px] text-muted-foreground">
-                  {r.description} Imagem: {r.desktop_width}×{r.desktop_height} (celular {r.mobile_width}×{r.mobile_height}).
-                </p>
-                <code className="mt-1 inline-block text-[10px] text-muted-foreground">{r.key}</code>
-              </div>
-              <div className="flex flex-col gap-2 sm:items-end">
-                <label className="flex items-center gap-2 text-xs font-semibold">
-                  <Switch checked={r.enabled} onCheckedChange={(v) => patchRow(r.key, { enabled: v })} aria-label={`Espaço ${r.name} ligado`} />
-                  Espaço ligado
-                </label>
-                <div className="flex flex-wrap items-center gap-2">
-                  <label className="flex items-center gap-2 text-xs font-semibold">
-                    <Switch checked={r.adsense_enabled} onCheckedChange={(v) => patchRow(r.key, { adsense_enabled: v })} aria-label={`AdSense em ${r.name}`} />
+        <ul className="grid gap-3">
+          {rows.map((r) => {
+            const slot = r.adsense_slot?.trim() ?? "";
+            const dupNames = slot && SLOT_RE.test(slot) ? duplicateSlots.get(slot) : undefined;
+            const isDup = !!dupNames && dupNames.length > 1;
+            return (
+              <li
+                key={r.key}
+                className="rounded-panel border border-panel-border bg-panel-raised/50 p-4 space-y-4"
+              >
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                  <div className="min-w-0 space-y-1">
+                    <p className="text-sm font-bold text-foreground">{r.name}</p>
+                    <p className="text-[11px] text-muted-foreground leading-relaxed">{r.description}</p>
+                    <p className="text-[11px] text-muted-foreground">
+                      Imagem: {r.desktop_width}×{r.desktop_height} (celular {r.mobile_width}×{r.mobile_height})
+                    </p>
+                    <code className="inline-block text-[10px] text-muted-foreground">{r.key}</code>
+                  </div>
+                  <label className="flex shrink-0 items-center gap-2 text-xs font-semibold sm:pt-0.5">
+                    <Switch
+                      checked={r.enabled}
+                      onCheckedChange={(v) => patchRow(r.key, { enabled: v })}
+                      aria-label={`Espaço ${r.name} ligado`}
+                    />
+                    Espaço ligado
+                  </label>
+                </div>
+
+                <div className="grid gap-3 border-t border-panel-border pt-4 sm:grid-cols-[auto_1fr] sm:items-end">
+                  <label className="flex items-center gap-2 text-xs font-semibold pb-2 sm:pb-2.5">
+                    <Switch
+                      checked={r.adsense_enabled}
+                      onCheckedChange={(v) => patchRow(r.key, { adsense_enabled: v })}
+                      aria-label={`AdSense em ${r.name}`}
+                    />
                     AdSense
                   </label>
-                  <input
-                    aria-label={`ID do bloco AdSense de ${r.name}`}
-                    placeholder="ID do bloco"
-                    className={`${inputClass} w-36`}
-                    value={r.adsense_slot ?? ""}
-                    onChange={(e) => patchRow(r.key, { adsense_slot: e.target.value })}
-                  />
+                  <Field
+                    label="ID do bloco (data-ad-slot)"
+                    htmlFor={`cfg-slot-${r.key}`}
+                    error={slotError(r)}
+                    hint="Somente números, como no painel do Google. Pode ser o mesmo formato do snippet oficial."
+                  >
+                    <input
+                      id={`cfg-slot-${r.key}`}
+                      inputMode="numeric"
+                      autoComplete="off"
+                      placeholder="Ex.: 1234567890"
+                      className={inputClass}
+                      value={r.adsense_slot ?? ""}
+                      onChange={(e) => patchRow(r.key, { adsense_slot: e.target.value.replace(/[^\d]/g, "") })}
+                    />
+                  </Field>
                 </div>
-                {slotError(r) && <p className="text-[11px] text-feedback-danger-fg">{slotError(r)}</p>}
-              </div>
-            </li>
-          ))}
+                {isDup && (
+                  <p className="flex items-start gap-1.5 text-[11px] text-feedback-warning-fg">
+                    <AlertTriangle size={12} className="mt-0.5 shrink-0" aria-hidden />
+                    Este ID também está em: {dupNames!.filter((n) => n !== r.name).join(", ")}. Não bloqueia o salvamento.
+                  </p>
+                )}
+              </li>
+            );
+          })}
         </ul>
       </section>
 

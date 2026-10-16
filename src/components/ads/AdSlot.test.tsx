@@ -153,4 +153,25 @@ describe("AdSlot", () => {
     expect(screen.getByTestId("adsense")).toBeInTheDocument();
     expect(screen.queryByRole("link")).toBeNull();
   });
+
+  it("com ad=null e reserva, repete o próprio se o Google não preencher", () => {
+    state.ads = [];
+    state.config = config(true);
+    state.consent = "granted";
+    render(<AdSlot placement="topo-lista" ad={null} reservePool={[ad, ad2]} reserveIndex={1} />);
+    expect(screen.getByTestId("adsense")).toBeInTheDocument();
+    act(() => {
+      state.adsenseUnavailable?.();
+    });
+    expect(screen.queryByTestId("adsense")).toBeNull();
+    expect(screen.getByAltText("Ateliê")).toBeInTheDocument();
+  });
+
+  it("com ad=null e reserva, usa reserva se AdSense não estiver disponível", () => {
+    state.ads = [];
+    state.config = config(false);
+    render(<AdSlot placement="topo-lista" ad={null} reservePool={[ad]} reserveIndex={0} />);
+    expect(screen.queryByTestId("adsense")).toBeNull();
+    expect(screen.getByAltText("Loja de velas")).toBeInTheDocument();
+  });
 });
