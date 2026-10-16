@@ -1,14 +1,12 @@
 import { useEffect, useRef, useState } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
 import type { ServedAd } from "@/integrations/supabase/adsTypes";
 import { useAuth } from "@/contexts/AuthContext";
 import { adImageUrl, recordAdEvent } from "@/lib/ads/client";
-import { Button } from "@/components/ui/button";
 import { AdCreative, type AdFormat } from "./AdCreative";
 import { useViewableOnce } from "./useAds";
 
-/** Intervalo fixo de troca do carrossel. */
-const ROTATE_MS = 7000;
+const ROTATE_MS = 6000;
+const FADE_MS = 400;
 
 interface Props {
   ads: ServedAd[];
@@ -19,41 +17,70 @@ interface Props {
 }
 
 /**
- * Um anúncio fixo, ou carrossel na ordem já sorteada (peso no SQL).
- * Controles abaixo da imagem para não bloquear o clique no link.
+ * Um anúncio fixo, ou carrossel automático (6s) com fade.
+ * Ordem já vem sorteada com peso do SQL. Sem setas/contador.
  */
 export function AdCarousel({ ads, placement, format, variant = "banner", className = "" }: Props) {
   const { isAdmin } = useAuth();
   const [index, setIndex] = useState(0);
-  const [paused, setPaused] = useState(false);
+  const [opaque, setOpaque] = useState(true);
+  const [hoverPaused, setHoverPaused] = useState(false);
+  const [tabHidden, setTabHidden] = useState(
+    () => typeof document !== "undefined" && document.hidden,
+  );
+  const [reducedMotion, setReducedMotion] = useState(false);
+  const seen = useRef(new Set<string>());
   const multi = ads.length > 1;
+  const paused = !multi || hoverPaused || tabHidden || reducedMotion;
   const ad = ads[index] ?? ads[0];
 
   useEffect(() => {
-    if (!multi || paused) return;
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const syncMq = () => setReducedMotion(mq.matches);
+    syncMq();
+    mq.addEventListener("change", syncMq);
+    const onVis = () => setTabHidden(document.hidden);
+    document.addEventListener("visibilitychange", onVis);
+    return () => {
+      mq.removeEventListener("change", syncMq);
+      document.removeEventListener("visibilitychange", onVis);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (paused) {
+      setOpaque(true);
+      return;
+    }
+    let fadeTimer: ReturnType<typeof setTimeout> | undefined;
     const id = window.setInterval(() => {
-      setIndex((i) => (i + 1) % ads.length);
+      setOpaque(false);
+      fadeTimer = setTimeout(() => {
+        setIndex((i) => (i + 1) % ads.length);
+        setOpaque(true);
+      }, FADE_MS);
     }, ROTATE_MS);
-    return () => window.clearInterval(id);
-  }, [multi, paused, ads.length]);
+    return () => {
+      window.clearInterval(id);
+      if (fadeTimer) clearTimeout(fadeTimer);
+    };
+  }, [paused, ads.length]);
 
   if (!ad) return null;
 
-  const go = (delta: number) => setIndex((i) => (i + delta + ads.length) % ads.length);
+  const onImpression = () => {
+    if (isAdmin || seen.current.has(ad.id)) return;
+    seen.current.add(ad.id);
+    recordAdEvent(ad.id, placement, "impression");
+  };
 
   return (
     <div
-      className="min-w-0"
-      style={{
-        ["--promo-slot-ratio" as string]: `${format.desktop_width} / ${format.desktop_height}`,
-      }}
+      className="min-w-0 transition-opacity duration-500 ease-in-out"
+      style={{ opacity: opaque ? 1 : 0 }}
       data-promo="carousel"
-      onMouseEnter={() => setPaused(true)}
-      onMouseLeave={() => setPaused(false)}
-      onFocusCapture={() => setPaused(true)}
-      onBlurCapture={(e) => {
-        if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setPaused(false);
-      }}
+      onMouseEnter={() => setHoverPaused(true)}
+      onMouseLeave={() => setHoverPaused(false)}
     >
       <DirectAd
         key={ad.id}
@@ -62,35 +89,9 @@ export function AdCarousel({ ads, placement, format, variant = "banner", classNa
         format={format}
         variant={variant}
         className={className}
-        track={!isAdmin}
+        trackClick={!isAdmin}
+        onImpression={onImpression}
       />
-      {multi && (
-        <div className="mt-1.5 flex items-center justify-center gap-2">
-          <Button
-            type="button"
-            variant="outline"
-            size="icon"
-            className="h-8 w-8"
-            aria-label="Anúncio anterior"
-            onClick={() => go(-1)}
-          >
-            <ChevronLeft className="h-4 w-4" aria-hidden />
-          </Button>
-          <span className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground tabular-nums" aria-live="polite">
-            {index + 1} / {ads.length}
-          </span>
-          <Button
-            type="button"
-            variant="outline"
-            size="icon"
-            className="h-8 w-8"
-            aria-label="Próximo anúncio"
-            onClick={() => go(1)}
-          >
-            <ChevronRight className="h-4 w-4" aria-hidden />
-          </Button>
-        </div>
-      )}
     </div>
   );
 }
@@ -101,17 +102,19 @@ function DirectAd({
   format,
   variant,
   className,
-  track,
+  trackClick,
+  onImpression,
 }: {
   ad: ServedAd;
   placement: string;
   format: AdFormat;
   variant: "banner" | "card";
   className: string;
-  track: boolean;
+  trackClick: boolean;
+  onImpression: () => void;
 }) {
   const ref = useRef<HTMLElement>(null);
-  useViewableOnce(ref, () => recordAdEvent(ad.id, placement, "impression"), track);
+  useViewableOnce(ref, onImpression, true);
 
   return (
     <AdCreative
@@ -125,7 +128,7 @@ function DirectAd({
       format={format}
       variant={variant}
       className={className}
-      onClick={track ? () => recordAdEvent(ad.id, placement, "click") : undefined}
+      onClick={trackClick ? () => recordAdEvent(ad.id, placement, "click") : undefined}
     />
   );
 }

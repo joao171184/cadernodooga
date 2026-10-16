@@ -129,12 +129,12 @@ describe("AdSlot", () => {
     expect(screen.queryByRole("link")).toBeNull();
   });
 
-  it("mostra controles do carrossel quando há mais de um anúncio próprio", () => {
+  it("com vários anúncios próprios mostra o primeiro sem setas nem contador", () => {
     state.ads = [ad, ad2];
     render(<AdSlot placement="topo-lista" />);
-    expect(screen.getByRole("button", { name: "Anúncio anterior" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Próximo anúncio" })).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "Próximo anúncio" }));
-    expect(screen.getByAltText("Ateliê")).toBeInTheDocument();
+    expect(screen.getByAltText("Loja de velas")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Anúncio anterior" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "Próximo anúncio" })).toBeNull();
+    expect(screen.queryByText(/^\d+\s*\/\s*\d+$/)).toBeNull();
   });
 });
