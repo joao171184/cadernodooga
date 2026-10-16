@@ -137,4 +137,20 @@ describe("AdSlot", () => {
     expect(screen.queryByRole("button", { name: "Próximo anúncio" })).toBeNull();
     expect(screen.queryByText(/^\d+\s*\/\s*\d+$/)).toBeNull();
   });
+
+  it("com ad definido pelo pai usa só esse anúncio", () => {
+    state.ads = [ad, ad2];
+    render(<AdSlot placement="topo-lista" ad={ad2} />);
+    expect(screen.getByAltText("Ateliê")).toBeInTheDocument();
+    expect(screen.queryByAltText("Loja de velas")).toBeNull();
+  });
+
+  it("com ad=null pula o próprio e vai ao AdSense", () => {
+    state.ads = [ad];
+    state.config = config(true);
+    state.consent = "granted";
+    render(<AdSlot placement="topo-lista" ad={null} />);
+    expect(screen.getByTestId("adsense")).toBeInTheDocument();
+    expect(screen.queryByRole("link")).toBeNull();
+  });
 });

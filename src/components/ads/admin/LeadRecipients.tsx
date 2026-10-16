@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Bell, Loader2, Plus, X } from "lucide-react";
 import { toast } from "sonner";
+import { Skeleton } from "@/components/ui/skeleton";
 import { supabase } from "@/integrations/supabase/client";
 import { adsDb } from "@/integrations/supabase/adsTypes";
 import { dbErrorMessage } from "./useAdsAdmin";
@@ -46,6 +47,7 @@ export function LeadRecipients({ onChange }: { onChange?: () => void }) {
     if (error) return toast.error(dbErrorMessage(error));
     setRecipientIds((ids) => [...ids, p.id]);
     setQuery("");
+    toast.success("Destinatário adicionado.");
     onChange?.();
   };
 
@@ -55,36 +57,49 @@ export function LeadRecipients({ onChange }: { onChange?: () => void }) {
     setBusy(null);
     if (error) return toast.error(dbErrorMessage(error));
     setRecipientIds((ids) => ids.filter((x) => x !== id));
+    toast.success("Destinatário removido.");
     onChange?.();
   };
 
   return (
-    <section className="space-y-3 rounded-xl border border-border bg-card p-4">
-      <div>
-        <h3 className="flex items-center gap-1.5 text-[11px] font-bold uppercase text-muted-foreground">
-          <Bell size={13} /> Quem recebe os avisos de novos pedidos
-          {loading && <Loader2 size={12} className="animate-spin" />}
-        </h3>
-        <p className="mt-1 text-[11px] text-muted-foreground">
-          Só os usuários escolhidos aqui recebem o aviso por e-mail; os demais administradores, não. Cada destinatário
-          recebe um e-mail separado e não vê os outros.
-        </p>
-      </div>
+    <section className="space-y-4 rounded-panel border border-panel-border bg-panel-card p-4 shadow-sm">
+      <header className="flex gap-3">
+        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-panel bg-status-paused text-status-paused-fg">
+          <Bell size={18} aria-hidden />
+        </span>
+        <div>
+          <h3 className="text-sm font-semibold text-foreground">Quem recebe os avisos</h3>
+          <p className="mt-0.5 text-xs text-muted-foreground leading-relaxed">
+            Só os usuários escolhidos aqui recebem o aviso por e-mail. Cada um recebe um e-mail separado e não vê os outros.
+          </p>
+        </div>
+      </header>
 
-      {recipientIds.length === 0 ? (
-        <p className="text-xs text-muted-foreground">Nenhum destinatário escolhido.</p>
+      {loading ? (
+        <div className="flex flex-wrap gap-2">
+          <Skeleton className="h-8 w-40 rounded-full" />
+          <Skeleton className="h-8 w-48 rounded-full" />
+        </div>
+      ) : recipientIds.length === 0 ? (
+        <p className="rounded-panel border border-dashed border-panel-border bg-panel-raised px-3 py-4 text-center text-xs text-muted-foreground">
+          Nenhum destinatário escolhido ainda.
+        </p>
       ) : (
         <ul className="flex flex-wrap gap-2">
           {recipientIds.map((id) => (
-            <li key={id} className="flex items-center gap-1 rounded-full border border-border bg-muted px-3 py-1 text-xs">
+            <li
+              key={id}
+              className="flex items-center gap-1 rounded-full border border-panel-border bg-panel-raised px-3 py-1.5 text-xs text-foreground"
+            >
               {byId.get(id)?.email ?? "Usuário sem e-mail visível"}
               <button
-                className="rounded-full p-0.5 hover:bg-background disabled:opacity-50"
-                onClick={() => remove(id)}
+                type="button"
+                className="rounded-full p-0.5 text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50"
+                onClick={() => void remove(id)}
                 disabled={busy === id}
                 aria-label={`Remover ${byId.get(id)?.email ?? "destinatário"}`}
               >
-                <X size={12} />
+                {busy === id ? <Loader2 size={12} className="animate-spin" /> : <X size={12} />}
               </button>
             </li>
           ))}
@@ -92,7 +107,11 @@ export function LeadRecipients({ onChange }: { onChange?: () => void }) {
       )}
 
       <div className="relative max-w-md">
+        <label className="mb-1 block text-[11px] font-bold uppercase tracking-wide text-foreground" htmlFor="recipient-search">
+          Adicionar destinatário
+        </label>
         <input
+          id="recipient-search"
           type="search"
           aria-label="Buscar usuário cadastrado por e-mail"
           placeholder="Buscar usuário cadastrado por e-mail…"
@@ -101,19 +120,20 @@ export function LeadRecipients({ onChange }: { onChange?: () => void }) {
           onChange={(e) => setQuery(e.target.value)}
         />
         {query.trim() && (
-          <ul className="absolute z-10 mt-1 w-full overflow-hidden rounded-lg border border-border bg-popover shadow-lg">
+          <ul className="absolute z-10 mt-1 w-full overflow-hidden rounded-panel border border-panel-border bg-popover shadow-lg">
             {suggestions.length === 0 ? (
               <li className="px-3 py-2 text-xs text-muted-foreground">Nenhum usuário encontrado.</li>
             ) : (
               suggestions.map((p) => (
                 <li key={p.id}>
                   <button
-                    className="flex w-full items-center justify-between gap-2 px-3 py-2 text-left text-xs text-foreground hover:bg-muted disabled:opacity-60"
-                    onClick={() => add(p)}
+                    type="button"
+                    className="flex w-full items-center justify-between gap-2 px-3 py-2 text-left text-xs text-foreground hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-60"
+                    onClick={() => void add(p)}
                     disabled={busy === p.id}
                   >
                     <span className="truncate">{p.email}</span>
-                    <Plus size={12} />
+                    {busy === p.id ? <Loader2 size={12} className="animate-spin" /> : <Plus size={12} />}
                   </button>
                 </li>
               ))

@@ -11,15 +11,15 @@ export function LeadsTab() {
 
   return (
     <Tabs defaultValue="pedidos">
-      <TabsList className="h-auto flex-wrap justify-start bg-transparent p-0 gap-1">
-        <TabsTrigger value="pedidos" className="gap-1.5 rounded-full border border-border text-xs data-[state=active]:border-primary">
-          <Inbox size={13} /> Pedidos
+      <TabsList className="h-auto flex-wrap justify-start gap-1.5 bg-transparent p-0">
+        <TabsTrigger value="pedidos" className="gap-1.5 rounded-panel border border-panel-border text-xs font-semibold data-[state=active]:border-primary data-[state=active]:bg-panel-raised">
+          <Inbox size={13} aria-hidden /> Pedidos
         </TabsTrigger>
-        <TabsTrigger value="avisos" className="gap-1.5 rounded-full border border-border text-xs data-[state=active]:border-primary">
-          <Mail size={13} /> Avisos por e-mail
+        <TabsTrigger value="avisos" className="gap-1.5 rounded-panel border border-panel-border text-xs font-semibold data-[state=active]:border-primary data-[state=active]:bg-panel-raised">
+          <Mail size={13} aria-hidden /> Avisos por e-mail
         </TabsTrigger>
-        <TabsTrigger value="historico" className="gap-1.5 rounded-full border border-border text-xs data-[state=active]:border-primary">
-          <History size={13} /> Histórico de envios
+        <TabsTrigger value="historico" className="gap-1.5 rounded-panel border border-panel-border text-xs font-semibold data-[state=active]:border-primary data-[state=active]:bg-panel-raised">
+          <History size={13} aria-hidden /> Histórico de envios
         </TabsTrigger>
       </TabsList>
       <TabsContent value="pedidos" className="mt-4"><LeadsList /></TabsContent>

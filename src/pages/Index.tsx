@@ -687,7 +687,7 @@ const Index = () => {
                 {showFeedAd && (
                   <AdSlot
                     placement="lista-entre-cards"
-                    ad={feedAds.length ? feedAds[feedSlot % feedAds.length] : null}
+                    ad={feedSlot < feedAds.length ? feedAds[feedSlot] : null}
                     variant="card"
                   />
                 )}

@@ -27,10 +27,10 @@ export function AdSlot({ placement, ad: provided, variant = "banner", className 
   const enabled = !!placementRow?.enabled;
   const [adsenseFailed, setAdsenseFailed] = useState(false);
 
-  // Busca sempre que o espaço está ligado (carrossel; e também quando o pai passa null).
-  const fetched = usePlacementAds(placement, ADS_FETCH_LIMIT, enabled);
+  // Busca só quando o pai não sorteou: `undefined` = fetch; `null` = sem próprio (AdSense ou esconde).
+  const fetched = usePlacementAds(placement, ADS_FETCH_LIMIT, enabled && provided === undefined);
   const ownAds: ServedAd[] | undefined =
-    provided === undefined ? fetched : provided ? [provided] : fetched;
+    provided === undefined ? fetched : provided ? [provided] : [];
 
   if (!config || !placementRow?.enabled) return null;
   if (ownAds === undefined) return null;

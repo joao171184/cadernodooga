@@ -263,7 +263,7 @@ export function CampaignFormDialog({ open, campaign, template = null, advertiser
     <Dialog open={open} onOpenChange={(o) => { if (!o && !saving) onClose(); }}>
       <DialogContent className="max-w-3xl max-h-[92vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="font-display uppercase">{campaign ? "Editar campanha" : template ? "Duplicar campanha" : "Nova campanha"}</DialogTitle>
+          <DialogTitle className="text-lg font-semibold tracking-normal normal-case">{campaign ? "Editar campanha" : template ? "Duplicar campanha" : "Nova campanha"}</DialogTitle>
           <DialogDescription>Datas e horários no fuso de Brasília. O anúncio sai do ar sozinho no término.</DialogDescription>
         </DialogHeader>
 

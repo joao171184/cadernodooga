@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { AlertTriangle, Loader2 } from "lucide-react";
+import { AlertTriangle, Loader2, MapPin, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { Switch } from "@/components/ui/switch";
 import { adsDb, type AdPlacementRow } from "@/integrations/supabase/adsTypes";
@@ -29,7 +29,7 @@ export function SettingsTab({ settings, placements, reload }: AdsAdminData & { r
 
   const clientError = client && !CLIENT_RE.test(client.trim()) ? "Formato esperado: ca-pub- seguido de números." : undefined;
   const slotError = (r: AdPlacementRow) =>
-    r.adsense_slot && !SLOT_RE.test(r.adsense_slot) ? "Só números (ID do bloco de anúncios)." : undefined;
+    r.adsense_slot && !SLOT_RE.test(r.adsense_slot) ? "Só números (ID do bloco)." : undefined;
 
   const save = async () => {
     if (clientError || rows.some(slotError)) return toast.error("Confira os campos destacados.");
@@ -59,65 +59,112 @@ export function SettingsTab({ settings, placements, reload }: AdsAdminData & { r
   };
 
   return (
-    <div className="space-y-6">
-      <section className="space-y-3 rounded-xl border border-border bg-card p-4">
-        <h3 className="text-[11px] font-bold uppercase text-muted-foreground">Espaços publicitários</h3>
-        <Field label="Intervalo dos cards patrocinados" htmlFor="s-interval" hint="Um anúncio a cada N pontos na lista (máximo de 6 por página).">
-          <input id="s-interval" type="number" min={4} max={50} className={`${inputClass} w-28`} value={interval}
-            onChange={(e) => setIntervalValue(Number(e.target.value))} />
+    <div className="relative space-y-panel pb-20">
+      <section className="space-y-4 rounded-panel border border-panel-border bg-panel-card p-4 shadow-sm">
+        <header className="flex gap-3">
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-panel bg-status-scheduled text-status-scheduled-fg">
+            <MapPin size={18} aria-hidden />
+          </span>
+          <div>
+            <h3 className="text-sm font-semibold text-foreground">Espaços do site</h3>
+            <p className="mt-0.5 text-xs text-muted-foreground leading-relaxed">
+              Ligue ou desligue cada posição e defina com que frequência os cards aparecem na lista de pontos.
+            </p>
+          </div>
+        </header>
+
+        <Field
+          label="Intervalo dos cards na lista"
+          htmlFor="cfg-interval"
+          hint="Um destaque a cada N pontos na lista (máximo de 6 por página)."
+        >
+          <input
+            id="cfg-interval"
+            type="number"
+            min={4}
+            max={50}
+            className={`${inputClass} w-28`}
+            value={interval}
+            onChange={(e) => setIntervalValue(Number(e.target.value))}
+          />
         </Field>
-        <ul className="divide-y divide-border">
+
+        <ul className="divide-y divide-panel-border rounded-panel border border-panel-border bg-panel-raised/40">
           {rows.map((r) => (
-            <li key={r.key} className="grid gap-3 py-3 md:grid-cols-[1fr_auto_auto] md:items-center">
+            <li key={r.key} className="grid gap-3 p-3 md:grid-cols-[1fr_auto] md:items-start">
               <div>
-                <p className="text-sm font-bold text-foreground">{r.name} <code className="text-[11px] font-normal text-muted-foreground">{r.key}</code></p>
-                <p className="text-[11px] text-muted-foreground">{r.description} Imagem: {r.desktop_width}×{r.desktop_height} (celular {r.mobile_width}×{r.mobile_height}).</p>
+                <p className="text-sm font-bold text-foreground">{r.name}</p>
+                <p className="text-[11px] text-muted-foreground">
+                  {r.description} Imagem: {r.desktop_width}×{r.desktop_height} (celular {r.mobile_width}×{r.mobile_height}).
+                </p>
+                <code className="mt-1 inline-block text-[10px] text-muted-foreground">{r.key}</code>
               </div>
-              <label className="flex items-center gap-2 text-xs font-semibold">
-                <Switch checked={r.enabled} onCheckedChange={(v) => patchRow(r.key, { enabled: v })} aria-label={`Espaço ${r.name} ligado`} />
-                Espaço ligado
-              </label>
-              <div className="flex items-center gap-2">
+              <div className="flex flex-col gap-2 sm:items-end">
                 <label className="flex items-center gap-2 text-xs font-semibold">
-                  <Switch checked={r.adsense_enabled} onCheckedChange={(v) => patchRow(r.key, { adsense_enabled: v })} aria-label={`AdSense em ${r.name}`} />
-                  AdSense
+                  <Switch checked={r.enabled} onCheckedChange={(v) => patchRow(r.key, { enabled: v })} aria-label={`Espaço ${r.name} ligado`} />
+                  Espaço ligado
                 </label>
-                <input aria-label={`ID do bloco AdSense de ${r.name}`} placeholder="ID do bloco" className={`${inputClass} w-36`}
-                  value={r.adsense_slot ?? ""} onChange={(e) => patchRow(r.key, { adsense_slot: e.target.value })} />
+                <div className="flex flex-wrap items-center gap-2">
+                  <label className="flex items-center gap-2 text-xs font-semibold">
+                    <Switch checked={r.adsense_enabled} onCheckedChange={(v) => patchRow(r.key, { adsense_enabled: v })} aria-label={`AdSense em ${r.name}`} />
+                    AdSense
+                  </label>
+                  <input
+                    aria-label={`ID do bloco AdSense de ${r.name}`}
+                    placeholder="ID do bloco"
+                    className={`${inputClass} w-36`}
+                    value={r.adsense_slot ?? ""}
+                    onChange={(e) => patchRow(r.key, { adsense_slot: e.target.value })}
+                  />
+                </div>
+                {slotError(r) && <p className="text-[11px] text-feedback-danger-fg">{slotError(r)}</p>}
               </div>
-              {slotError(r) && <p className="text-[11px] text-destructive md:col-span-3">{slotError(r)}</p>}
             </li>
           ))}
         </ul>
       </section>
 
-      <section className="space-y-3 rounded-xl border border-border bg-card p-4">
-        <h3 className="text-[11px] font-bold uppercase text-muted-foreground">Google AdSense</h3>
-        <p className="text-xs text-muted-foreground leading-relaxed">
-          Usado só quando não há anúncio direto elegível no espaço, e só depois que o visitante aceita os cookies de
-          publicidade. O ID de editor e os IDs de bloco são públicos (aparecem no código de qualquer site com AdSense);
-          não são senhas.
-        </p>
+      <section className="space-y-4 rounded-panel border border-panel-border bg-panel-card p-4 shadow-sm">
+        <header className="flex gap-3">
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-panel bg-status-draft text-status-draft-fg">
+            <Sparkles size={18} aria-hidden />
+          </span>
+          <div>
+            <h3 className="text-sm font-semibold text-foreground">Google AdSense</h3>
+            <p className="mt-0.5 text-xs text-muted-foreground leading-relaxed">
+              Usado só quando não há destaque direto elegível no espaço, e só depois que o visitante aceita cookies.
+              O ID de editor e os IDs de bloco são públicos; não são senhas.
+            </p>
+          </div>
+        </header>
+
         <label className="flex items-center gap-2 text-xs font-semibold">
           <Switch checked={adsenseEnabled} onCheckedChange={setAdsenseEnabled} aria-label="Ligar AdSense" />
           AdSense ligado
         </label>
-        <Field label="ID de editor (ca-pub-…)" htmlFor="s-client" error={clientError}>
-          <input id="s-client" className={`${inputClass} max-w-sm`} value={client} placeholder="ca-pub-0000000000000000"
-            onChange={(e) => setClient(e.target.value)} />
+        <Field label="ID de editor (ca-pub-…)" htmlFor="cfg-client" error={clientError}>
+          <input
+            id="cfg-client"
+            className={`${inputClass} max-w-sm`}
+            value={client}
+            placeholder="ca-pub-0000000000000000"
+            onChange={(e) => setClient(e.target.value)}
+          />
         </Field>
-        <div className="flex gap-2 rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 text-[11px] text-amber-800 dark:text-amber-200">
-          <AlertTriangle size={14} className="shrink-0" />
+        <div className="flex gap-2 rounded-panel border border-feedback-warning-fg/30 bg-feedback-warning p-3 text-[11px] text-feedback-warning-fg">
+          <AlertTriangle size={14} className="shrink-0 mt-0.5" aria-hidden />
           <p>
-            Antes de ligar: a conta precisa estar aprovada pelo Google, o arquivo <code>public/ads.txt</code> precisa
-            estar publicado e a política de segurança (CSP) do <code>vercel.json</code> precisa liberar os domínios do
-            Google. Sem isso o AdSense não carrega. Veja o passo a passo em <code>docs/PUBLICIDADE.md</code>.
+            Antes de ligar: conta aprovada no Google, arquivo <code>public/ads.txt</code> publicado e CSP do{" "}
+            <code>vercel.json</code> liberando os domínios do Google. Veja o passo a passo em{" "}
+            <code>docs/PUBLICIDADE.md</code>.
           </p>
         </div>
       </section>
 
-      <div className="flex justify-end">
-        <button className={btnPrimary} onClick={save} disabled={saving}>{saving && <Loader2 size={14} className="animate-spin" />} Salvar configurações</button>
+      <div className="sticky bottom-4 z-10 flex justify-end rounded-panel border border-panel-border bg-panel-raised/95 p-3 shadow-lg backdrop-blur-md">
+        <button type="button" className={btnPrimary} onClick={() => void save()} disabled={saving}>
+          {saving && <Loader2 size={14} className="animate-spin" aria-hidden />} Salvar configurações
+        </button>
       </div>
     </div>
   );
