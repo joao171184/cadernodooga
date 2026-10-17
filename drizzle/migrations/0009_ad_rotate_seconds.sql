@@ -1,0 +1,1 @@
+ALTER TABLE public.ad_settings ADD COLUMN IF NOT EXISTS rotate_seconds integer NOT NULL DEFAULT 6 CHECK (rotate_seconds BETWEEN 2 AND 60);
