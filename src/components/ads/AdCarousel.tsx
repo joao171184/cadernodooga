@@ -33,7 +33,6 @@ export function AdCarousel({ ads, placement, format, variant = "banner", classNa
   );
   const [reducedMotion, setReducedMotion] = useState(false);
   const seen = useRef(new Set<string>());
-  const swipe = useRef<{ x: number; y: number; moved: boolean } | null>(null);
   const multi = ads.length > 1;
   const paused = !multi || hoverPaused || tabHidden || reducedMotion;
   const ad = ads[index] ?? ads[0];
@@ -68,7 +67,7 @@ export function AdCarousel({ ads, placement, format, variant = "banner", classNa
       window.clearInterval(id);
       if (fadeTimer) clearTimeout(fadeTimer);
     };
-  }, [paused, ads.length, ROTATE_MS, index]);
+  }, [paused, ads.length, ROTATE_MS]);
 
   if (!ad) return null;
 
@@ -78,43 +77,13 @@ export function AdCarousel({ ads, placement, format, variant = "banner", classNa
     recordAdEvent(ad.id, placement, "impression");
   };
 
-  const go = (dir: 1 | -1) => {
-    setOpaque(true);
-    setIndex((i) => (i + dir + ads.length) % ads.length);
-  };
-
   return (
     <div
       className="min-w-0 transition-opacity duration-500 ease-in-out"
-      style={{ opacity: opaque ? 1 : 0, touchAction: multi ? "pan-y" : undefined }}
+      style={{ opacity: opaque ? 1 : 0 }}
       data-promo="carousel"
       onMouseEnter={() => setHoverPaused(true)}
       onMouseLeave={() => setHoverPaused(false)}
-      onPointerDown={(e) => {
-        if (!multi) return;
-        swipe.current = { x: e.clientX, y: e.clientY, moved: false };
-      }}
-      onPointerUp={(e) => {
-        const s = swipe.current;
-        if (!s) return;
-        const dx = e.clientX - s.x;
-        const dy = e.clientY - s.y;
-        if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) {
-          s.moved = true;
-          go(dx < 0 ? 1 : -1);
-        } else {
-          swipe.current = null;
-        }
-      }}
-      onPointerCancel={() => { swipe.current = null; }}
-      onClickCapture={(e) => {
-        if (swipe.current?.moved) {
-          e.preventDefault();
-          e.stopPropagation();
-        }
-        swipe.current = null;
-      }}
-      onDragStart={(e) => e.preventDefault()}
     >
       <DirectAd
         key={ad.id}
