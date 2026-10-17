@@ -48,7 +48,7 @@ export async function signWebhook(
 ): Promise<string> {
   const key = await crypto.subtle.importKey(
     "raw",
-    secret,
+    secret as BufferSource,
     { name: "HMAC", hash: "SHA-256" },
     false,
     ["sign"],
