@@ -3,9 +3,9 @@ import type { ServedAd } from "@/integrations/supabase/adsTypes";
 import { useAuth } from "@/contexts/AuthContext";
 import { adImageUrl, recordAdEvent } from "@/lib/ads/client";
 import { AdCreative, type AdFormat } from "./AdCreative";
-import { useViewableOnce } from "./useAds";
+import { useAdConfig, useViewableOnce } from "./useAds";
 
-const ROTATE_MS = 6000;
+const DEFAULT_ROTATE_MS = 6000;
 const FADE_MS = 400;
 
 interface Props {
@@ -22,6 +22,9 @@ interface Props {
  */
 export function AdCarousel({ ads, placement, format, variant = "banner", className = "" }: Props) {
   const { isAdmin } = useAuth();
+  const config = useAdConfig();
+  const secs = config?.settings.rotate_seconds;
+  const ROTATE_MS = (secs && secs >= 2 && secs <= 60 ? secs : DEFAULT_ROTATE_MS / 1000) * 1000;
   const [index, setIndex] = useState(0);
   const [opaque, setOpaque] = useState(true);
   const [hoverPaused, setHoverPaused] = useState(false);
@@ -64,7 +67,7 @@ export function AdCarousel({ ads, placement, format, variant = "banner", classNa
       window.clearInterval(id);
       if (fadeTimer) clearTimeout(fadeTimer);
     };
-  }, [paused, ads.length]);
+  }, [paused, ads.length, ROTATE_MS]);
 
   if (!ad) return null;
 
