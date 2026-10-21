@@ -6,10 +6,11 @@
 - Desde a mudança de leitura, tocar na letra abre o ponto em **tela cheia por cima da lista**, e essa tela cheia não tem o espaço de anúncio. Por isso, na prática, quase ninguém vê o anúncio.
 
 ## O que fazer
-1. Colocar o mesmo espaço de anúncio "após a letra" no fim da letra na tela cheia, igual à página do ponto (mesmo carrossel, troca por segundos, setas ao passar o mouse no computador, arrastar no celular).
-2. Não mudar mais nada.
-3. Conferir no navegador: abrir um ponto em tela cheia, rolar até o fim da letra e ver o anúncio; conferir também em /ponto/... que continua aparecendo.
+1. Colocar o anúncio na tela cheia **entre a letra e o vídeo**, igual já está na página do ponto (mesmo carrossel, troca por segundos, setas ao passar o mouse, arrastar no celular).
+2. Na página do ponto (/ponto/...) o anúncio já fica entre a letra e o vídeo; manter assim.
+3. Não mudar mais nada.
+4. Conferir no navegador: abrir um ponto em tela cheia e ver o anúncio logo abaixo da letra e acima do vídeo.
 
 ## Detalhes técnicos
-- Adicionar `<AdSlot placement="ponto-apos-letra" className="mt-10" />` em `src/components/PontoFullscreen.tsx`, logo após o bloco da letra.
-- Verificar com Playwright (desktop e celular) que o slot renderiza imagem.
+- Adicionar `<AdSlot placement="ponto-apos-letra" className="mt-10" />` em `src/components/PontoFullscreen.tsx`, logo após o bloco da letra e antes do bloco do player.
+- Verificar com Playwright (desktop e celular) que o slot aparece nessa posição.
