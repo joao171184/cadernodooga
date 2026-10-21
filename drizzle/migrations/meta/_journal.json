@@ -64,6 +64,13 @@
       "when": 1792168987820,
       "tag": "0008_parceiros_policies_functions",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1792240583882,
+      "tag": "0009_ad_rotate_seconds",
+      "breakpoints": true
     }
   ]
 }
