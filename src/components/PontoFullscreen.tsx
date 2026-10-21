@@ -4,6 +4,7 @@ import { NotasWidget } from "@/components/NotasWidget";
 import { type Ponto, TOQUE_OPTIONS, CLASSIFICACAO_OPTIONS } from "@/contexts/PontosContext";
 import { getEmbedInfo } from "@/lib/embed";
 import { TikTokPlayer } from "@/components/TikTokPlayer";
+import { AdSlot } from "@/components/ads/AdSlot";
 import { useEffect, useRef, useState } from "react";
 
 interface Props {
@@ -180,6 +181,10 @@ export function PontoFullscreen({ ponto, isFavorite, onClose, onToggleFavorite, 
             {ponto.letra}
           </pre>
         </div>
+
+        <AdSlot placement="ponto-apos-letra" className="mt-10" />
+
+
 
         {embed.kind !== "none" && (
           <div className="mt-10">
