@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import type { ServedAd } from "@/integrations/supabase/adsTypes";
 import { useAuth } from "@/contexts/AuthContext";
 import { adImageUrl, recordAdEvent } from "@/lib/ads/client";
@@ -7,6 +8,8 @@ import { useAdConfig, useViewableOnce } from "./useAds";
 
 const DEFAULT_ROTATE_MS = 6000;
 const FADE_MS = 400;
+const NAV_PLACEMENTS = new Set(["topo-lista", "ponto-apos-letra"]);
+const SWIPE_PX = 40;
 
 interface Props {
   ads: ServedAd[];
@@ -36,6 +39,19 @@ export function AdCarousel({ ads, placement, format, variant = "banner", classNa
   const multi = ads.length > 1;
   const paused = !multi || hoverPaused || tabHidden || reducedMotion;
   const ad = ads[index] ?? ads[0];
+  const [navTick, setNavTick] = useState(0);
+  const showNav = multi && NAV_PLACEMENTS.has(placement);
+  const touchStart = useRef<{ x: number; y: number } | null>(null);
+  const swiped = useRef(false);
+
+  const go = (delta: number) => {
+    setOpaque(false);
+    setTimeout(() => {
+      setIndex((i) => (i + delta + ads.length) % ads.length);
+      setOpaque(true);
+    }, 150);
+    setNavTick((t) => t + 1); // reinicia o tempo da troca automática
+  };
 
   useEffect(() => {
     const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -67,7 +83,7 @@ export function AdCarousel({ ads, placement, format, variant = "banner", classNa
       window.clearInterval(id);
       if (fadeTimer) clearTimeout(fadeTimer);
     };
-  }, [paused, ads.length, ROTATE_MS]);
+  }, [paused, ads.length, ROTATE_MS, navTick]);
 
   if (!ad) return null;
 
@@ -79,12 +95,37 @@ export function AdCarousel({ ads, placement, format, variant = "banner", classNa
 
   return (
     <div
-      className="min-w-0 transition-opacity duration-500 ease-in-out"
-      style={{ opacity: opaque ? 1 : 0 }}
+      className="group relative min-w-0"
       data-promo="carousel"
       onMouseEnter={() => setHoverPaused(true)}
       onMouseLeave={() => setHoverPaused(false)}
+      onTouchStart={showNav ? (e) => {
+        const t = e.touches[0];
+        touchStart.current = { x: t.clientX, y: t.clientY };
+        swiped.current = false;
+      } : undefined}
+      onTouchEnd={showNav ? (e) => {
+        const s0 = touchStart.current;
+        touchStart.current = null;
+        if (!s0) return;
+        const t = e.changedTouches[0];
+        const dx = t.clientX - s0.x;
+        const dy = t.clientY - s0.y;
+        if (Math.abs(dx) > SWIPE_PX && Math.abs(dx) > Math.abs(dy)) {
+          swiped.current = true;
+          go(dx < 0 ? 1 : -1);
+        }
+      } : undefined}
+      onClickCapture={showNav ? (e) => {
+        if (swiped.current) {
+          e.preventDefault();
+          e.stopPropagation();
+          swiped.current = false;
+        }
+      } : undefined}
+      style={showNav ? { touchAction: "pan-y" } : undefined}
     >
+      <div className="transition-opacity duration-500 ease-in-out" style={{ opacity: opaque ? 1 : 0 }}>
       <DirectAd
         key={ad.id}
         ad={ad}
@@ -95,6 +136,27 @@ export function AdCarousel({ ads, placement, format, variant = "banner", classNa
         trackClick={!isAdmin}
         onImpression={onImpression}
       />
+      </div>
+      {showNav && (
+        <>
+          <button
+            type="button"
+            onClick={() => go(-1)}
+            aria-label="Anúncio anterior"
+            className="hidden [@media(hover:hover)_and_(pointer:fine)]:flex absolute left-2 top-1/2 -translate-y-1/2 z-10 h-9 w-9 items-center justify-center rounded-full bg-background/80 text-foreground border border-border shadow-md backdrop-blur hover:bg-background transition-colors"
+          >
+            <ChevronLeft size={20} />
+          </button>
+          <button
+            type="button"
+            onClick={() => go(1)}
+            aria-label="Próximo anúncio"
+            className="hidden [@media(hover:hover)_and_(pointer:fine)]:flex absolute right-2 top-1/2 -translate-y-1/2 z-10 h-9 w-9 items-center justify-center rounded-full bg-background/80 text-foreground border border-border shadow-md backdrop-blur hover:bg-background transition-colors"
+          >
+            <ChevronRight size={20} />
+          </button>
+        </>
+      )}
     </div>
   );
 }
