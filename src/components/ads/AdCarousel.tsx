@@ -143,7 +143,7 @@ export function AdCarousel({ ads, placement, format, variant = "banner", classNa
             type="button"
             onClick={() => go(-1)}
             aria-label="Anúncio anterior"
-            className="hidden [@media(hover:hover)_and_(pointer:fine)]:flex absolute left-2 top-1/2 -translate-y-1/2 z-10 h-9 w-9 items-center justify-center rounded-full bg-background/80 text-foreground border border-border shadow-md backdrop-blur hover:bg-background transition-colors"
+            className="hidden [@media(hover:hover)_and_(pointer:fine)]:flex absolute left-2 top-1/2 -translate-y-1/2 z-10 h-9 w-9 items-center justify-center rounded-full bg-background/80 text-foreground border border-border shadow-md backdrop-blur hover:bg-background transition-all duration-200 opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto focus-visible:opacity-100 focus-visible:pointer-events-auto"
           >
             <ChevronLeft size={20} />
           </button>
@@ -151,7 +151,7 @@ export function AdCarousel({ ads, placement, format, variant = "banner", classNa
             type="button"
             onClick={() => go(1)}
             aria-label="Próximo anúncio"
-            className="hidden [@media(hover:hover)_and_(pointer:fine)]:flex absolute right-2 top-1/2 -translate-y-1/2 z-10 h-9 w-9 items-center justify-center rounded-full bg-background/80 text-foreground border border-border shadow-md backdrop-blur hover:bg-background transition-colors"
+            className="hidden [@media(hover:hover)_and_(pointer:fine)]:flex absolute right-2 top-1/2 -translate-y-1/2 z-10 h-9 w-9 items-center justify-center rounded-full bg-background/80 text-foreground border border-border shadow-md backdrop-blur hover:bg-background transition-all duration-200 opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto focus-visible:opacity-100 focus-visible:pointer-events-auto"
           >
             <ChevronRight size={20} />
           </button>
