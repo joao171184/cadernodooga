@@ -11,6 +11,7 @@ import {
   MIN_PASSWORD_LENGTH,
 } from "@/lib/authErrors";
 import logoImg from "@/assets/logo.png";
+import { TikTokGlyph } from "@/components/MediaIcons";
 
 type Mode = "signin" | "signup" | "forgot";
 
@@ -234,6 +235,7 @@ const Login = () => {
           >
             Feito com <Heart size={11} className="fill-accent text-accent" /> por João Pedro Marques
             <Instagram size={11} />
+            <TikTokGlyph size={11} />
           </a>
         </div>
       </div>

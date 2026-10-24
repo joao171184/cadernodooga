@@ -15,6 +15,7 @@ import { MediaPlayer } from "@/components/MediaPlayer";
 import { PontoFullscreen } from "@/components/PontoFullscreen";
 import { AutoScrollControl } from "@/components/AutoScrollControl";
 import { Skeleton } from "@/components/ui/skeleton";
+import { TikTokGlyph } from "@/components/MediaIcons";
 
 import {
   DropdownMenu,
@@ -755,15 +756,26 @@ const Index = () => {
             </Link>
             <AdConsentReset className="text-muted-foreground hover:text-foreground hover:underline" />
           </div>
-          <a
-            href="https://www.instagram.com/j_marques.a/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-accent/15 hover:bg-accent/25 text-accent-strong text-xs font-bold transition-all active:scale-95"
-          >
-            <Instagram size={14} />
-            <span>@j_marques.a</span>
-          </a>
+          <div className="flex flex-wrap items-center justify-center gap-2">
+            <a
+              href="https://www.instagram.com/j_marques.a/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-accent/15 hover:bg-accent/25 text-accent-strong text-xs font-bold transition-all active:scale-95"
+            >
+              <Instagram size={14} />
+              <span>@j_marques.a</span>
+            </a>
+            <a
+              href="https://www.tiktok.com/@chicode_oxossi"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-accent/15 hover:bg-accent/25 text-accent-strong text-xs font-bold transition-all active:scale-95"
+            >
+              <TikTokGlyph size={14} />
+              <span>@chicode_oxossi</span>
+            </a>
+          </div>
         </div>
       </footer>
     </div>
