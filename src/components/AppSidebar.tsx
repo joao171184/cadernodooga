@@ -18,6 +18,7 @@ import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCategorias } from "@/contexts/CategoriasContext";
 import { resolveIcon } from "@/lib/categoryIcons";
+import { TikTokGlyph } from "@/components/MediaIcons";
 import logoImg from "@/assets/logo.png";
 
 export function AppSidebar() {
@@ -224,6 +225,15 @@ export function AppSidebar() {
         >
           <Instagram size={12} />
           <span className="truncate">por João Pedro Marques</span>
+        </a>
+        <a
+          href="https://www.tiktok.com/@chicode_oxossi"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center gap-2 px-3 py-2 rounded-xl text-[11px] text-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent transition-all"
+        >
+          <TikTokGlyph size={12} />
+          <span className="truncate">@chicode_oxossi</span>
         </a>
       </SidebarFooter>
     </Sidebar>

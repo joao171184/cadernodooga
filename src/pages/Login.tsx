@@ -11,6 +11,7 @@ import {
   MIN_PASSWORD_LENGTH,
 } from "@/lib/authErrors";
 import logoImg from "@/assets/logo.png";
+import { TikTokGlyph } from "@/components/MediaIcons";
 
 type Mode = "signin" | "signup" | "forgot";
 
@@ -234,6 +235,15 @@ const Login = () => {
           >
             Feito com <Heart size={11} className="fill-accent text-accent" /> por João Pedro Marques
             <Instagram size={11} />
+          </a>
+          <a
+            href="https://www.tiktok.com/@chicode_oxossi"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-1.5 text-[11px] text-primary-foreground/70 hover:text-primary-foreground transition-colors"
+          >
+            <TikTokGlyph size={11} />
+            <span>@chicode_oxossi</span>
           </a>
         </div>
       </div>
