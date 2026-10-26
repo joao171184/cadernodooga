@@ -1,3 +1,4 @@
+import { LockedLetra } from "@/components/LockedLetra";
 import { X, Heart, Share2, Drum, Mic2, Copy, Sun, SunDim, ChevronsDown, Pause } from "lucide-react";
 import { toast } from "sonner";
 import { NotasWidget } from "@/components/NotasWidget";
