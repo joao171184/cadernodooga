@@ -71,6 +71,13 @@
       "when": 1792240583882,
       "tag": "0009_ad_rotate_seconds",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1793045949155,
+      "tag": "0010_user_logins_daily",
+      "breakpoints": true
     }
   ]
 }

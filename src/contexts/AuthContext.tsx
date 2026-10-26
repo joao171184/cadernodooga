@@ -114,6 +114,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(sess?.user ?? null);
       if (sess?.user && isConfirmed(sess.user)) {
         const uid = sess.user.id;
+        setTimeout(() => { void supabase.rpc("record_login"); }, 0);
         setTimeout(() => { ensureRoleAndPerms(uid).finally(() => setLoading(false)); }, 0);
       } else {
         roleLoad.current = null;

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Eye, Info, Loader2, MousePointerClick, Percent, Trophy } from "lucide-react";
+import { Eye, FileDown, Info, Loader2, MousePointerClick, Percent, Trophy } from "lucide-react";
+import { brDate, buildReportPdf, downloadBlob } from "@/lib/pdfReport";
 import {
   Area, AreaChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip as RechartsTooltip, XAxis, YAxis,
 } from "recharts";
@@ -168,6 +169,39 @@ export function ReportsTab({ campaigns, advertisers, placements, focusCampaignId
           </select>
         </label>
         {loading && <Loader2 size={16} className="mb-2 animate-spin text-muted-foreground shrink-0" aria-label="Carregando" />}
+        <button
+          type="button"
+          disabled={loading}
+          onClick={() => {
+            const camp = campaignId ? campaignById.get(campaignId) : undefined;
+            const byPlacement = groupMetrics(rows, (r) => r.placement_key);
+            const byCamp = groupMetrics(rows, (r) => r.campaign_id);
+            const plName = (k: string) => placements.find((p) => p.key === k)?.name ?? k;
+            const blob = buildReportPdf({
+              title: "RELATÓRIO DE PUBLICIDADE",
+              subtitle: `Período: ${brDate(from)} a ${brDate(to)}`,
+              summary: [
+                ["Campanha", camp ? camp.name : "Todas as campanhas"],
+                ...(camp ? [["Anunciante", advName(camp.advertiser_id)] as [string, string]] : []),
+                ["Impressões", sum.impressions.toLocaleString("pt-BR")],
+                ["Cliques", sum.clicks.toLocaleString("pt-BR")],
+                ["CTR", formatCtr(sum.ctr)],
+              ],
+              sections: [
+                { title: "Por dia", head: ["Data", "Impressões", "Cliques", "CTR"],
+                  body: byDay.map((d) => [brDate(d.key), d.impressions, d.clicks, formatCtr(d.ctr)]) },
+                { title: "Por espaço", head: ["Espaço", "Impressões", "Cliques", "CTR"],
+                  body: byPlacement.map((d) => [plName(d.key), d.impressions, d.clicks, formatCtr(d.ctr)]) },
+                ...(camp ? [] : [{ title: "Por campanha", head: ["Campanha", "Impressões", "Cliques", "CTR"],
+                  body: byCamp.map((d) => [campaignById.get(d.key)?.name ?? "—", d.impressions, d.clicks, formatCtr(d.ctr)]) }]),
+              ],
+            });
+            downloadBlob(blob, `publicidade_${camp ? camp.name.replace(/\W+/g, "_") + "_" : ""}${from}_a_${to}.pdf`);
+          }}
+          className="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-md bg-primary px-3 py-2 text-xs font-bold uppercase text-primary-foreground disabled:opacity-50"
+        >
+          <FileDown size={14} /> Baixar PDF
+        </button>
       </div>
 
       {failed && (
