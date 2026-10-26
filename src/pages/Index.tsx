@@ -758,6 +758,15 @@ const Index = () => {
           </div>
           <div className="flex flex-wrap items-center justify-center gap-2">
             <a
+              href="https://www.instagram.com/cadernodo_oga/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-accent/15 hover:bg-accent/25 text-accent-strong text-xs font-bold transition-all active:scale-95"
+            >
+              <Instagram size={14} />
+              <span>@cadernodo_oga</span>
+            </a>
+            <a
               href="https://www.instagram.com/j_marques.a/"
               target="_blank"
               rel="noopener noreferrer"
