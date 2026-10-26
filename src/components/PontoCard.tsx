@@ -1,3 +1,4 @@
+import { LockedLetra } from "@/components/LockedLetra";
 import { Heart, Pencil, Trash2, Mic2, ArrowUp, ArrowDown, Volume2, Pause, Drum, Share2, Copy } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
@@ -238,9 +239,11 @@ const PontoCard = ({ ponto, isPlaying, isFavorite, visitorMode = false, showFavo
           >
             <Copy size={14} />
           </button>
-          <pre className="text-sm sm:text-base text-card-foreground/80 whitespace-pre-wrap font-[inherit] leading-relaxed pl-4 pr-10 py-1 uppercase">
-            {renderHighlighted(ponto.letra, highlight)}
-          </pre>
+          <LockedLetra
+            letra={ponto.letra}
+            render={(t) => renderHighlighted(t, highlight)}
+            className="text-sm sm:text-base text-card-foreground/80 whitespace-pre-wrap font-[inherit] leading-relaxed pl-4 pr-10 py-1 uppercase"
+          />
         </div>
       </div>
     </div>
