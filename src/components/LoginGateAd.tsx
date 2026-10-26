@@ -15,12 +15,13 @@ export function LoginGateAd() {
   const [left, setLeft] = useState(SKIP_SECONDS);
   const onLogin = pathname.startsWith("/login");
 
+  const [seen, setSeen] = useState(false);
   useEffect(() => {
     if (loading || isLoggedIn || onLogin) { setOpen(false); return; }
-    if (sessionStorage.getItem("login-gate-seen")) return;
-    const t = setTimeout(() => { setOpen(true); setLeft(SKIP_SECONDS); sessionStorage.setItem("login-gate-seen", "1"); }, SHOW_AFTER_MS);
+    if (seen) return;
+    const t = setTimeout(() => { setOpen(true); setLeft(SKIP_SECONDS); setSeen(true); }, SHOW_AFTER_MS);
     return () => clearTimeout(t);
-  }, [loading, isLoggedIn, onLogin]);
+  }, [loading, isLoggedIn, onLogin, seen]);
 
   useEffect(() => {
     if (!open || left <= 0) return;
