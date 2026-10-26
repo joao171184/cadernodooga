@@ -1,6 +1,5 @@
 import { ReactNode } from "react";
-import { Link } from "react-router-dom";
-import { Lock } from "lucide-react";
+
 import { useAuth } from "@/contexts/AuthContext";
 
 /** Mostra a letra inteira para quem está logado; para visitantes, metade fica borrada. */
