@@ -44,9 +44,14 @@ export function LoginGateAd() {
         <div className="w-16 h-16 rounded-full bg-accent/15 flex items-center justify-center">
           <Lock size={30} className="text-accent" />
         </div>
-        <h2 className="font-display text-xl font-bold uppercase text-foreground">Quer ter uma imersão completa?</h2>
-        <p className="text-sm text-muted-foreground uppercase leading-relaxed">
-          Ver os pontos inteiros, favoritar pontos e muito mais — grátis. É só fazer o login!
+        <div className="flex flex-col gap-1">
+          <h2 className="font-display text-2xl font-bold uppercase text-accent">100% gratuito</h2>
+          <p className="text-sm font-bold uppercase text-foreground leading-snug">
+            Cadastre-se ou entre para liberar todos os pontos e recursos
+          </p>
+        </div>
+        <p className="text-xs text-muted-foreground uppercase leading-relaxed">
+          Quer ter uma imersão completa? Veja os pontos inteiros, favorite pontos e muito mais.
         </p>
         <button
           onClick={() => { setOpen(false); navigate("/login"); }}
