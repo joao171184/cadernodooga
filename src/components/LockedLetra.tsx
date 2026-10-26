@@ -20,7 +20,6 @@ export function LockedLetra({
         <pre className={`${className} blur-[6px] pointer-events-none`}>{hidden}</pre>
       </div>
     </div>
-    </div>
   );
 }
 
