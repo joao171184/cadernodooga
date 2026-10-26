@@ -30,28 +30,28 @@ export function LoginGateAd() {
 
   if (!open) return null;
   return (
-    <div className="fixed inset-0 z-[300] flex items-center justify-center bg-background/95 backdrop-blur-md p-6" role="dialog" aria-modal="true">
-      <button
-        onClick={() => left <= 0 && setOpen(false)}
-        disabled={left > 0}
-        className="absolute top-4 right-4 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-muted text-foreground text-sm font-bold uppercase disabled:opacity-60"
-        aria-label="Pular anúncio"
-      >
-        {left > 0 ? `Pular em ${left}s` : <>Pular <X size={16} /></>}
-      </button>
-      <div className="max-w-md text-center space-y-6">
-        <div className="mx-auto w-20 h-20 rounded-full bg-accent/15 flex items-center justify-center">
-          <Lock size={36} className="text-accent" />
+    <div className="fixed inset-0 z-[300] flex items-center justify-center bg-background/40 backdrop-blur-md p-6" role="dialog" aria-modal="true">
+      <div className="relative w-full max-w-[320px] aspect-[3/4.6] max-h-[85vh] flex flex-col items-center justify-center gap-5 text-center rounded-3xl border border-border bg-card shadow-2xl p-6">
+        <button
+          onClick={() => left <= 0 && setOpen(false)}
+          disabled={left > 0}
+          className="absolute top-3 right-3 inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-muted text-foreground text-xs font-bold uppercase disabled:opacity-60"
+          aria-label="Pular anúncio"
+        >
+          {left > 0 ? `Pular em ${left}s` : <>Pular <X size={14} /></>}
+        </button>
+        <div className="w-16 h-16 rounded-full bg-accent/15 flex items-center justify-center">
+          <Lock size={30} className="text-accent" />
         </div>
-        <h2 className="font-display text-2xl sm:text-3xl font-bold uppercase text-foreground">Veja os pontos inteiros</h2>
-        <p className="text-base sm:text-lg text-muted-foreground uppercase">
-          Faça login e veja todos os pontos completos gratuitamente. É só entrar!
+        <h2 className="font-display text-xl font-bold uppercase text-foreground">Quer ter uma imersão completa?</h2>
+        <p className="text-sm text-muted-foreground uppercase leading-relaxed">
+          Ver os pontos inteiros, favoritar pontos e muito mais — grátis. É só fazer o login!
         </p>
         <button
           onClick={() => { setOpen(false); navigate("/login"); }}
-          className="w-full py-4 rounded-2xl bg-accent text-accent-foreground text-lg font-bold uppercase shadow-lg active:scale-95"
+          className="w-full py-3 rounded-2xl bg-accent text-accent-foreground text-base font-bold uppercase shadow-lg active:scale-95"
         >
-          Entrar grátis
+          Fazer login
         </button>
       </div>
     </div>

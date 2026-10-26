@@ -17,18 +17,10 @@ export function LockedLetra({
   return (
     <div>
       <pre className={className}>{r(visible)}</pre>
-      <div className="relative select-none" aria-hidden="true">
+      <div className="select-none" aria-hidden="true">
         <pre className={`${className} blur-[6px] pointer-events-none`}>{hidden}</pre>
-        <div className="absolute inset-0 flex items-center justify-center">
-          <Link
-            to="/login"
-            onClick={(e) => e.stopPropagation()}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-accent text-accent-foreground text-xs sm:text-sm font-bold uppercase shadow-lg"
-          >
-            <Lock size={14} /> Faça login grátis para ver o ponto inteiro
-          </Link>
-        </div>
       </div>
+    </div>
     </div>
   );
 }
