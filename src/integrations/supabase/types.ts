@@ -311,6 +311,7 @@ export type Database = {
           adsense_enabled: boolean
           id: boolean
           in_feed_interval: number
+          rotate_seconds: number
           updated_at: string
         }
         Insert: {
@@ -318,6 +319,7 @@ export type Database = {
           adsense_enabled?: boolean
           id?: boolean
           in_feed_interval?: number
+          rotate_seconds?: number
           updated_at?: string
         }
         Update: {
@@ -325,6 +327,7 @@ export type Database = {
           adsense_enabled?: boolean
           id?: boolean
           in_feed_interval?: number
+          rotate_seconds?: number
           updated_at?: string
         }
         Relationships: []
@@ -611,6 +614,24 @@ export type Database = {
         }
         Relationships: []
       }
+      user_logins_daily: {
+        Row: {
+          created_at: string
+          day: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          day: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          day?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_notas: {
         Row: {
           content: string
@@ -704,6 +725,13 @@ export type Database = {
           target_url: string
         }[]
       }
+      get_login_stats: {
+        Args: { _from: string; _to: string }
+        Returns: {
+          day: string
+          logins: number
+        }[]
+      }
       get_my_role: {
         Args: never
         Returns: Database["public"]["Enums"]["app_role"]
@@ -743,6 +771,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      record_login: { Args: never; Returns: undefined }
       record_parceiro_event: {
         Args: {
           _campaign_id: string
