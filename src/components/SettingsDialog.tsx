@@ -8,6 +8,7 @@ import { CategoriasManagerDialog } from "@/components/CategoriasManagerDialog";
 import { supabase } from "@/integrations/supabase/client";
 import { resolveIcon } from "@/lib/categoryIcons";
 import { toast } from "sonner";
+import { LoginReport } from "@/components/LoginReport";
 
 interface Props {
   open: boolean;
@@ -385,6 +386,9 @@ function AcessosPanel() {
 
   return (
     <div className="space-y-5">
+      <Section title="Relatório de logins por dia">
+        <LoginReport />
+      </Section>
       {/* Usuários */}
       <Section title={`Usuários cadastrados (${users.length})`}>
         <div className="relative">
