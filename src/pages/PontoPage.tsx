@@ -232,9 +232,7 @@ const PontoPage = () => {
           >
             <Copy size={18} />
           </button>
-          <pre className="text-xl sm:text-2xl md:text-3xl text-foreground whitespace-pre-wrap font-[inherit] leading-relaxed pl-6 pr-12 py-2 uppercase font-medium tracking-wide">
-            {ponto.letra}
-          </pre>
+          <LockedLetra letra={ponto.letra} className="text-xl sm:text-2xl md:text-3xl text-foreground whitespace-pre-wrap font-[inherit] leading-relaxed pl-6 pr-12 py-2 uppercase font-medium tracking-wide" />
         </div>
 
         <AdSlot placement="ponto-apos-letra" className="mt-10" />

@@ -177,9 +177,7 @@ export function PontoFullscreen({ ponto, isFavorite, onClose, onToggleFavorite, 
 
         <div className="relative">
           <div className="absolute left-0 top-0 bottom-0 w-1.5 rounded-full bg-accent/40" />
-          <pre className="text-xl sm:text-2xl md:text-3xl text-foreground whitespace-pre-wrap break-words font-[inherit] leading-relaxed pl-6 py-2 uppercase font-medium tracking-wide">
-            {ponto.letra}
-          </pre>
+          <LockedLetra letra={ponto.letra} className="text-xl sm:text-2xl md:text-3xl text-foreground whitespace-pre-wrap break-words font-[inherit] leading-relaxed pl-6 py-2 uppercase font-medium tracking-wide" />
         </div>
 
         <AdSlot placement="ponto-apos-letra" className="mt-10" />
