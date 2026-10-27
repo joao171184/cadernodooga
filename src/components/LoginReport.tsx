@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { FileDown, Loader2 } from "lucide-react";
+import { FileDown, RefreshCw } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { brDate, buildReportPdf, downloadBlob } from "@/lib/pdfReport";
 
@@ -46,11 +46,18 @@ export function LoginReport() {
           <input type="date" className={input} value={to} min={from} max={today} onChange={(e) => setTo(e.target.value)} /></label>
       </div>
       <div className="flex items-center justify-between gap-2">
-        <p className="text-sm font-bold uppercase">Total: {total} logins {loading && <Loader2 size={14} className="inline animate-spin" />}</p>
+        <p className="text-sm font-bold uppercase">Total: {total} logins</p>
+        <div className="flex items-center gap-2">
+        <button type="button" onClick={() => { setTo(iso(new Date())); void load(); }} disabled={loading}
+          aria-label="Recarregar relatório" title="Recarregar"
+          className="rounded-md border border-border p-2 text-muted-foreground hover:bg-muted disabled:opacity-50">
+          <RefreshCw size={14} className={loading ? "animate-spin" : ""} />
+        </button>
         <button type="button" onClick={exportPdf} disabled={loading}
           className="inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-2 text-xs font-bold uppercase text-primary-foreground disabled:opacity-50">
           <FileDown size={14} /> Baixar PDF
         </button>
+        </div>
       </div>
       {error && <p className="text-xs text-destructive">Não foi possível carregar o relatório.</p>}
       <div className="max-h-72 overflow-auto rounded-md border border-border">
