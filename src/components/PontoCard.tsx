@@ -1,5 +1,6 @@
 import { LockedLetra } from "@/components/LockedLetra";
-import { Heart, Pencil, Trash2, Mic2, ArrowUp, ArrowDown, Volume2, Pause, Drum, Share2, Copy } from "lucide-react";
+import { Heart, Pencil, Trash2, Mic2, ArrowUp, ArrowDown, Volume2, Pause, Drum, Share2, Copy, ArrowUpRight } from "lucide-react";
+import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import { getEmbedInfo, type EmbedKind } from "@/lib/embed";
@@ -245,6 +246,18 @@ const PontoCard = ({ ponto, isPlaying, isFavorite, visitorMode = false, showFavo
             className="text-sm sm:text-base text-card-foreground/80 whitespace-pre-wrap font-[inherit] leading-relaxed pl-4 pr-10 py-1 uppercase"
           />
         </div>
+        {ponto.slug && (
+          <div className="flex justify-end mt-2">
+            <Link
+              to={`/ponto/${ponto.slug}`}
+              className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[11px] font-semibold tracking-wider uppercase text-accent-strong hover:bg-accent/10 transition-all active:scale-95"
+              aria-label={`Abrir página do ponto ${ponto.nome}`}
+            >
+              Abrir ponto
+              <ArrowUpRight size={14} />
+            </Link>
+          </div>
+        )}
       </div>
     </div>
   );
