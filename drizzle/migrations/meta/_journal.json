@@ -78,6 +78,13 @@
       "when": 1793045949155,
       "tag": "0010_user_logins_daily",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1793099630914,
+      "tag": "0011_login_stats_sync",
+      "breakpoints": true
     }
   ]
 }
