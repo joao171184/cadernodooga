@@ -767,22 +767,13 @@ const Index = () => {
               <span>@cadernodo_oga</span>
             </a>
             <a
-              href="https://www.instagram.com/j_marques.a/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-accent/15 hover:bg-accent/25 text-accent-strong text-xs font-bold transition-all active:scale-95"
-            >
-              <Instagram size={14} />
-              <span>@j_marques.a</span>
-            </a>
-            <a
-              href="https://www.tiktok.com/@chicode_oxossi"
+              href="https://www.tiktok.com/@cadernodo_oga"
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-accent/15 hover:bg-accent/25 text-accent-strong text-xs font-bold transition-all active:scale-95"
             >
               <TikTokGlyph size={14} />
-              <span>@chicode_oxossi</span>
+              <span>@cadernodo_oga</span>
             </a>
           </div>
         </div>

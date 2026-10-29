@@ -227,23 +227,17 @@ const Login = () => {
           <p className="text-[10px] text-primary-foreground/50 uppercase tracking-widest">
             🙏 Que a gira seja firme
           </p>
-          <a
-            href="https://www.instagram.com/j_marques.a/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-1.5 text-[11px] text-primary-foreground/70 hover:text-primary-foreground transition-colors"
-          >
+          <span className="flex items-center gap-1.5 text-[11px] text-primary-foreground/70">
             Feito com <Heart size={11} className="fill-accent text-accent" /> por João Pedro Marques
-            <Instagram size={11} />
-          </a>
+          </span>
           <a
-            href="https://www.tiktok.com/@chicode_oxossi"
+            href="https://www.tiktok.com/@cadernodo_oga"
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-1.5 text-[11px] text-primary-foreground/70 hover:text-primary-foreground transition-colors"
           >
             <TikTokGlyph size={11} />
-            <span>@chicode_oxossi</span>
+            <span>@cadernodo_oga</span>
           </a>
         </div>
       </div>
