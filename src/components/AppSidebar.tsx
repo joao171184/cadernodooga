@@ -218,22 +218,13 @@ export function AppSidebar() {
           <span className="truncate">Anuncie conosco</span>
         </Link>
         <a
-          href="https://www.instagram.com/j_marques.a/"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex items-center gap-2 px-3 py-2 rounded-xl text-[11px] text-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent transition-all"
-        >
-          <Instagram size={12} />
-          <span className="truncate">por João Pedro Marques</span>
-        </a>
-        <a
-          href="https://www.tiktok.com/@chicode_oxossi"
+          href="https://www.tiktok.com/@cadernodo_oga"
           target="_blank"
           rel="noopener noreferrer"
           className="flex items-center gap-2 px-3 py-2 rounded-xl text-[11px] text-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent transition-all"
         >
           <TikTokGlyph size={12} />
-          <span className="truncate">@chicode_oxossi</span>
+          <span className="truncate">@cadernodo_oga</span>
         </a>
       </SidebarFooter>
     </Sidebar>
