@@ -92,6 +92,13 @@
       "when": 1793442922532,
       "tag": "0012_daily_signup_stats",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1793461778869,
+      "tag": "0013_point_versions",
+      "breakpoints": true
     }
   ]
 }
