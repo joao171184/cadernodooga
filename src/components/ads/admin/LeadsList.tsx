@@ -162,16 +162,16 @@ export function LeadsList() {
                 >
                   <button
                     type="button"
-                    className="flex w-full items-center gap-3 rounded-panel p-3 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    className="grid w-full grid-cols-[minmax(0,1fr)_auto] items-start gap-2 rounded-panel p-3 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:grid-cols-[auto_minmax(0,1fr)_auto] sm:gap-3"
                     onClick={() => toggle(l.id)}
                     aria-expanded={expanded}
                   >
-                    <span className={`shrink-0 rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide ${STATUS_SURFACE[l.status]}`}>
+                    <span className={`col-span-2 justify-self-start rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide sm:col-span-1 ${STATUS_SURFACE[l.status]}`}>
                       {LEAD_STATUS[l.status]}
                     </span>
                     <span className="min-w-0 flex-1">
-                      <span className="block truncate text-sm font-bold text-foreground">{l.name}{l.company && ` · ${l.company}`}</span>
-                      <span className="block truncate text-[11px] text-muted-foreground">
+                      <span className="block whitespace-pre-wrap [overflow-wrap:anywhere] text-sm font-bold leading-relaxed text-foreground">{l.name}{l.company && ` · ${l.company}`}</span>
+                      <span className="mt-1 block whitespace-normal [overflow-wrap:anywhere] text-[11px] text-muted-foreground">
                         {formatLocalDateTime(l.created_at)}{l.interest && ` · ${INTEREST_LABEL[l.interest] ?? l.interest}`}
                       </span>
                     </span>
@@ -181,16 +181,16 @@ export function LeadsList() {
                   {expanded && (
                     <div className="space-y-3 border-t border-panel-border p-3">
                       <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs">
-                        <a href={`mailto:${l.email}`} className="flex items-center gap-1 font-medium text-accent-strong hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm">
-                          <Mail size={12} aria-hidden /> {l.email}
+                        <a href={`mailto:${l.email}`} className="flex min-w-0 max-w-full items-start gap-1 font-medium text-accent-strong hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm">
+                          <Mail size={12} className="mt-0.5 shrink-0" aria-hidden /> <span className="min-w-0 [overflow-wrap:anywhere]">{l.email}</span>
                         </a>
                         {l.phone && (
-                          <span className="flex items-center gap-1 text-muted-foreground">
-                            <Phone size={12} aria-hidden /> {l.phone}
+                          <span className="flex min-w-0 max-w-full items-start gap-1 text-muted-foreground">
+                            <Phone size={12} className="mt-0.5 shrink-0" aria-hidden /> <span className="min-w-0 [overflow-wrap:anywhere]">{l.phone}</span>
                           </span>
                         )}
                       </div>
-                      <p className="whitespace-pre-wrap rounded-panel border border-panel-border/60 bg-panel-raised p-3 text-sm text-foreground">{l.message}</p>
+                      <p className="whitespace-pre-wrap [overflow-wrap:anywhere] rounded-panel border border-panel-border/60 bg-panel-raised p-3 text-sm leading-relaxed text-foreground">{l.message}</p>
                       <div className="grid grid-cols-2 gap-1.5 sm:flex sm:flex-wrap">
                         <a
                           className={btnGhost}
