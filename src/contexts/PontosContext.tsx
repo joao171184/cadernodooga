@@ -4,6 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { readCache, writeCache } from "@/lib/offlineCache";
 import { pontoSaveErrorMessage } from "@/lib/pontoValidation";
 import type { Database } from "@/integrations/supabase/types";
+import { publishedVersions, type PointVersion } from "@/lib/pointVersions";
 
 export type ToqueTipo = Database["public"]["Enums"]["toque_tipo"];
 export type PontoStatus = Database["public"]["Enums"]["ponto_status"];
@@ -24,6 +25,7 @@ export const CLASSIFICACAO_OPTIONS: { value: Classificacao; label: string }[] = 
 ];
 
 export interface Ponto {
+  versions?: PointVersion[];
   id: string;
   nome: string;
   slug: string;
@@ -40,6 +42,7 @@ export interface Ponto {
 }
 
 export type PontoInput = {
+  versions?: PointVersion[];
   id?: string;
   nome: string;
   categoria: string;
@@ -97,13 +100,14 @@ export function PontosProvider({ children }: { children: ReactNode }) {
           ? supabase.from("favoritos").select("ponto_id").eq("user_id", user.id)
           : Promise.resolve({ data: [] as { ponto_id: string }[] }),
         supabase.from("ponto_toque_ordem").select("*"),
+        supabase.from("ponto_versions").select("*").order("ordem"),
       ]);
     } catch {
       // Offline: mantém os dados em cache já carregados
       setLoading(false);
       return;
     }
-    const [{ data: rawPontos }, { data: subs }, { data: classes }, { data: favs }, { data: toqueOrds }] = result;
+    const [{ data: rawPontos }, { data: subs }, { data: classes }, { data: favs }, { data: toqueOrds }, { data: rawVersions }] = result;
 
     if (!rawPontos && hasLoadedRef.current) {
       setLoading(false);
@@ -138,6 +142,7 @@ export function PontosProvider({ children }: { children: ReactNode }) {
       status: p.status,
       ordem: p.ordem,
       created_by: p.created_by,
+      versions: (rawVersions ?? []).filter(v => v.point_id === p.id).map(v => ({ ...v, status: v.status as PointVersion["status"] })),
     }));
 
     const aprovados = all.filter((p) => p.status === "approved");
@@ -151,7 +156,7 @@ export function PontosProvider({ children }: { children: ReactNode }) {
       tMap.set(r.ponto_id, entry);
     });
     setToqueOrdens(tMap);
-    writeCache("pontos", { pontos: aprovados, toqueOrdens: Array.from(tMap.entries()) });
+    writeCache("pontos", { pontos: aprovados.map(p => ({ ...p, versions: publishedVersions(p.versions ?? []) })), toqueOrdens: Array.from(tMap.entries()) });
     hasLoadedRef.current = true;
     setLoading(false);
   }, [user, authLoading]);
@@ -177,6 +182,15 @@ export function PontosProvider({ children }: { children: ReactNode }) {
 
   const savePonto = useCallback<Ctx["savePonto"]>(async (data) => {
     if (!user) return { error: "Não autenticado", pending: false };
+    if (data.versions) {
+      const { error } = await supabase.rpc("save_ponto_with_versions", {
+        _point: { id: data.id ?? null, nome: data.nome, categoria: data.categoria, puxador: data.puxador, subcategorias: data.subcategorias },
+        _versions: data.versions.map(v => ({ ...v })),
+      });
+      if (error) return { error: pontoSaveErrorMessage(error), pending: false };
+      await refresh();
+      return { error: null, pending: !isAdmin };
+    }
 
     const goesPending = !isAdmin;
     const payload = {
