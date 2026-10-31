@@ -396,12 +396,6 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://cadernodooga.com.br/ponto/oh-que-noite-linda-para-uma-cacada</loc>
-    <lastmod>2026-10-04</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
     <loc>https://cadernodooga.com.br/ponto/meu-pai-nao-gosta-de-mim</loc>
     <lastmod>2026-10-04</lastmod>
     <changefreq>monthly</changefreq>
@@ -488,6 +482,12 @@
   <url>
     <loc>https://cadernodooga.com.br/ponto/vo-benedita</loc>
     <lastmod>2026-10-04</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://cadernodooga.com.br/ponto/oh-que-noite-linda-para-uma-cacada</loc>
+    <lastmod>2026-10-29</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -2040,6 +2040,12 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://cadernodooga.com.br/ponto/e-la-na-cidade-de-gomorra</loc>
+    <lastmod>2026-10-29</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://cadernodooga.com.br/ponto/e-devagar-e-devagarinho</loc>
     <lastmod>2026-10-04</lastmod>
     <changefreq>monthly</changefreq>
@@ -2132,6 +2138,12 @@
   <url>
     <loc>https://cadernodooga.com.br/ponto/papai-me-mande-um-balao-com-todas-criancas-que-tem-la-no-ceu</loc>
     <lastmod>2026-10-04</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://cadernodooga.com.br/ponto/se-a-coral-e-sua-cinta-a-jiboia-e-sua-laca</loc>
+    <lastmod>2026-10-29</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -2232,6 +2244,12 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://cadernodooga.com.br/ponto/baiano-e-mal-que-nem-surucucu</loc>
+    <lastmod>2026-10-29</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://cadernodooga.com.br/ponto/exu-mirim-6</loc>
     <lastmod>2026-10-04</lastmod>
     <changefreq>monthly</changefreq>
@@ -2318,6 +2336,12 @@
   <url>
     <loc>https://cadernodooga.com.br/ponto/subida-boiadeiro</loc>
     <lastmod>2026-10-04</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://cadernodooga.com.br/ponto/arrasta-cadeira-levanta-mulher</loc>
+    <lastmod>2026-10-29</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
