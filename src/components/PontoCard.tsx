@@ -250,7 +250,7 @@ const PontoCard = ({ ponto: originalPonto, isPlaying, isFavorite, visitorMode = 
             key={selection.index}
             letra={ponto.letra}
             render={(t) => renderHighlighted(t, highlight)}
-            className="text-sm sm:text-base text-card-foreground/80 whitespace-pre-wrap font-[inherit] leading-relaxed pl-4 pr-10 py-1 uppercase"
+            className="motion-safe:animate-in motion-safe:fade-in motion-safe:duration-200 text-sm sm:text-base text-card-foreground/80 whitespace-pre-wrap font-[inherit] leading-relaxed pl-4 pr-10 py-1 uppercase"
           />
         </div>
         {selection.version.observacoes && <p className="mt-2 text-xs whitespace-pre-wrap text-muted-foreground">{selection.version.observacoes}</p>}
