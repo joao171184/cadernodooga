@@ -12,6 +12,7 @@ vi.mock("@/lib/pdfReport", () => ({
 
 beforeEach(() => {
   vi.clearAllMocks();
+  mocks.pdf.mockReturnValue(new Blob(["report"], { type: "application/pdf" }));
   mocks.rpc.mockImplementation(async (name: string) => ({
     data: name === "get_login_stats"
       ? [{ day: "2026-10-30", logins: 4 }, { day: "2026-10-31", logins: 6 }]
