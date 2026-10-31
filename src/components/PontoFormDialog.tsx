@@ -6,6 +6,7 @@ import {
   type PontoInput,
 } from "@/contexts/PontosContext";
 import { Button } from "@/components/ui/button";
+import { supabase } from "@/integrations/supabase/client";
 import { PointVersionsEditor } from "@/components/PointVersionsEditor";
 import { initialVersion, validateVersions, publishedVersions, type PointVersion } from "@/lib/pointVersions";
 import { useAuth } from "@/contexts/AuthContext";
@@ -31,8 +32,21 @@ export function PontoFormDialog({ open, onClose, onSave, ponto, defaultCategoria
   const [subcategorias, setSubcategorias] = useState<string[]>([]);
   const [puxador, setPuxador] = useState("");
   const [saving, setSaving] = useState(false);
+  const [versionsLoading, setVersionsLoading] = useState(false);
+  const [versionsLoadFailed, setVersionsLoadFailed] = useState(false);
 
   useEffect(() => {
+    let cancelled = false;
+    setVersionsLoadFailed(false);
+    if (open && ponto) {
+      setVersionsLoading(true);
+      supabase.from("ponto_versions").select("*").eq("point_id", ponto.id).order("ordem").then(({ data, error }) => {
+        if (cancelled) return;
+        if (error || !data?.length) { setVersionsLoadFailed(true); toast.error("Não foi possível carregar as versões. Feche e tente novamente."); }
+        else setVersions(data.map(v => ({ ...v, status: v.status as PointVersion["status"] })));
+        setVersionsLoading(false);
+      });
+    } else setVersionsLoading(false);
     setVersions(ponto ? (ponto.versions?.length ? ponto.versions.map(v => ({ ...v })) : [initialVersion(ponto)]) : [initialVersion({ letra: "", audio: "", toque: null, classificacoes: [] })]);
     if (ponto) {
       setNome(ponto.nome);
@@ -45,6 +59,7 @@ export function PontoFormDialog({ open, onClose, onSave, ponto, defaultCategoria
       setSubcategorias(defaultSubcategoria ? [defaultSubcategoria] : []);
       setPuxador("");
     }
+    return () => { cancelled = true; };
   }, [ponto, open, defaultCategoria, defaultSubcategoria]);
 
   const subOptions = categorias.find((c) => c.nome === categoria)?.filhos ?? [];
@@ -57,7 +72,7 @@ export function PontoFormDialog({ open, onClose, onSave, ponto, defaultCategoria
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!nome.trim() || !categoria || saving) return;
+    if (!nome.trim() || !categoria || saving || versionsLoading || versionsLoadFailed) return;
     const versionError = validateVersions(versions, isAdmin);
     if (versionError) { toast.error(versionError); return; }
     for (const version of versions) {
@@ -161,7 +176,7 @@ export function PontoFormDialog({ open, onClose, onSave, ponto, defaultCategoria
             </div>
           )}
 
-          <PointVersionsEditor versions={versions} onChange={setVersions} />
+          {versionsLoading ? <p role="status" className="text-sm text-muted-foreground">Carregando versões…</p> : !versionsLoadFailed && <PointVersionsEditor versions={versions} onChange={setVersions} />}
 
           <div>
             <label className="block text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1.5">
@@ -187,7 +202,7 @@ export function PontoFormDialog({ open, onClose, onSave, ponto, defaultCategoria
             </Button>
             <Button
               type="submit"
-              disabled={saving}
+              disabled={saving || versionsLoading || versionsLoadFailed}
               className="flex-1 py-3 rounded-xl text-sm font-bold text-primary-foreground bg-primary hover:bg-primary/90 transition-all active:scale-[0.98] shadow-sm flex items-center justify-center gap-2 disabled:opacity-60"
             >
               <Check size={16} /> {ponto ? "SALVAR" : "ADICIONAR"}
