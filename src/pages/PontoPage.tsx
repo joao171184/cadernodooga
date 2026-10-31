@@ -1,3 +1,4 @@
+import { PointVersionNavigation, usePointVersion } from "@/components/PointVersionNavigation";
 import { LockedLetra } from "@/components/LockedLetra";
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
@@ -15,6 +16,7 @@ import { AdSlot } from "@/components/ads/AdSlot";
 const SITE_URL = "https://cadernodooga.com.br";
 
 interface PontoView {
+  versions?: import("@/lib/pointVersions").PointVersion[];
   id: string;
   slug: string;
   nome: string;
@@ -35,9 +37,11 @@ function buildDescription(letra: string): string {
 
 const PontoPage = () => {
   const { slug } = useParams<{ slug: string }>();
-  const [ponto, setPonto] = useState<PontoView | null>(null);
+  const [originalPonto, setPonto] = useState<PontoView | null>(null);
   const [status, setStatus] = useState<"loading" | "found" | "missing">("loading");
 
+  const selection = usePointVersion(originalPonto ?? { letra: "", audio: "", toque: null, classificacoes: [] });
+  const ponto = originalPonto ? { ...originalPonto, ...selection.point } : null;
   useEffect(() => {
     let cancelled = false;
     if (!slug) return;
@@ -57,13 +61,15 @@ const PontoPage = () => {
         return;
       }
 
-      const [{ data: subs }, { data: classifs }] = await Promise.all([
+      const [{ data: subs }, { data: classifs }, { data: versions }] = await Promise.all([
         supabase.from("ponto_subcategorias").select("subcategoria").eq("ponto_id", p.id),
         supabase.from("ponto_classificacoes").select("classificacao").eq("ponto_id", p.id),
+        supabase.from("ponto_versions").select("*").eq("point_id", p.id).eq("status", "published").order("ordem"),
       ]);
 
       if (cancelled) return;
       setPonto({
+        versions: (versions ?? []).map(v => ({ ...v, status: v.status as "published" | "draft" })),
         id: p.id,
         slug: p.slug,
         nome: p.nome,
@@ -197,7 +203,8 @@ const PontoPage = () => {
       </div>
 
 
-      <main className="max-w-3xl mx-auto px-4 sm:px-6 py-6 sm:py-10 pb-32">
+      <main {...selection.swipe} className="max-w-3xl mx-auto px-4 sm:px-6 py-6 sm:py-10 pb-32">
+        {selection.version.title && <h2 className="mb-3 text-sm font-bold text-accent-strong">{selection.version.title}</h2>}
         <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mb-6">
           {toqueLabel && (
             <div className="flex items-center gap-1.5 text-sm">
@@ -233,13 +240,13 @@ const PontoPage = () => {
           >
             <Copy size={18} />
           </button>
-          <LockedLetra letra={ponto.letra} className="text-xl sm:text-2xl md:text-3xl text-foreground whitespace-pre-wrap font-[inherit] leading-relaxed pl-6 pr-12 py-2 uppercase font-medium tracking-wide" />
+          <LockedLetra key={selection.index} letra={ponto.letra} className="text-xl sm:text-2xl md:text-3xl text-foreground whitespace-pre-wrap font-[inherit] leading-relaxed pl-6 pr-12 py-2 uppercase font-medium tracking-wide" />
         </div>
 
         <AdSlot placement="ponto-apos-letra" className="mt-10" />
 
         {embed.kind !== "none" && (
-          <div className="mt-10">
+          <div key={selection.version.id ?? selection.index} className="mt-10">
             {embed.kind === "youtube" && (
               <div className="aspect-video rounded-2xl overflow-hidden bg-black">
                 <iframe src={embed.src} title={ponto.nome} className="w-full h-full" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" />
@@ -267,6 +274,9 @@ const PontoPage = () => {
             )}
           </div>
         )}
+
+        {selection.version.observacoes && <p className="mt-3 whitespace-pre-wrap text-sm text-muted-foreground">{selection.version.observacoes}</p>}
+        <PointVersionNavigation versions={selection.versions} index={selection.index} change={selection.change} />
 
         <p className="mt-12 text-center text-xs text-muted-foreground">
           Quer divulgar seu terreiro, loja ou evento?{" "}

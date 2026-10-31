@@ -506,6 +506,62 @@ export type Database = {
           },
         ]
       }
+      ponto_versions: {
+        Row: {
+          classificacoes: Database["public"]["Enums"]["classificacao_tipo"][]
+          created_at: string
+          id: string
+          is_principal: boolean
+          letra: string
+          observacoes: string
+          ordem: number
+          point_id: string
+          status: string
+          title: string
+          toque: Database["public"]["Enums"]["toque_tipo"] | null
+          updated_at: string
+          video_url: string
+        }
+        Insert: {
+          classificacoes?: Database["public"]["Enums"]["classificacao_tipo"][]
+          created_at?: string
+          id?: string
+          is_principal?: boolean
+          letra?: string
+          observacoes?: string
+          ordem?: number
+          point_id: string
+          status?: string
+          title?: string
+          toque?: Database["public"]["Enums"]["toque_tipo"] | null
+          updated_at?: string
+          video_url?: string
+        }
+        Update: {
+          classificacoes?: Database["public"]["Enums"]["classificacao_tipo"][]
+          created_at?: string
+          id?: string
+          is_principal?: boolean
+          letra?: string
+          observacoes?: string
+          ordem?: number
+          point_id?: string
+          status?: string
+          title?: string
+          toque?: Database["public"]["Enums"]["toque_tipo"] | null
+          updated_at?: string
+          video_url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ponto_versions_point_id_fkey"
+            columns: ["point_id"]
+            isOneToOne: false
+            referencedRelation: "pontos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pontos: {
         Row: {
           approved_at: string | null
@@ -787,6 +843,10 @@ export type Database = {
           _session: string
         }
         Returns: boolean
+      }
+      save_ponto_with_versions: {
+        Args: { _point: Json; _versions: Json }
+        Returns: string
       }
       slugify: { Args: { _text: string }; Returns: string }
       submit_ad_lead: {
