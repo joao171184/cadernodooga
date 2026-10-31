@@ -6,6 +6,10 @@
 - Filtro Logins/Cadastros no relatório de Acessos com datas, recarga e PDF; testes e fluxo autenticado verificados, total de cadastros conferido.
 
 ## Em aberto
-- Preservar pontos existentes e adicionar versões com publicação, rascunhos e versão principal.
-- Gerenciar, ordenar e excluir versões com confirmação no formulário.
-- Navegação acessível por setas, bolinhas e toque; conferir dados, testes e telas.
+- (nenhuma)
+
+## Versões concluídas
+- 535 pontos preservados como primeira versão; salvamento conjunto, rascunhos privados e principal.
+- Formulário com criação, edição, exclusão confirmada e ordenação de versões.
+- Cards, página individual e leitura em tela cheia com setas, bolinhas à direita e gesto lateral.
+- 30 testes passaram; fluxo autenticado de criação/salvamento, principal, ordem, edição e exclusão conferido; navegação com 2 e 3 versões e acesso público sem rascunhos verificados. Gesto simulado, não testado em aparelho físico.

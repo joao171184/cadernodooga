@@ -60,6 +60,7 @@ const Index = () => {
   const [toqueFilter, setToqueFilter] = useState<ToqueFilter>("all");
   const [mediaFilter, setMediaFilter] = useState<MediaFilter>("all");
   const [playingId, setPlayingId] = useState<string | null>(null);
+  const [playingVersion, setPlayingVersion] = useState<Ponto | null>(null);
   const [formOpen, setFormOpen] = useState(false);
   const [editingPonto, setEditingPonto] = useState<Ponto | null>(null);
   const [adminOpen, setAdminOpen] = useState(false);
@@ -257,7 +258,7 @@ const Index = () => {
     if (list) await reorderPontosInList(list, { toque: toqueFilter === "all" ? null : toqueFilter });
   }, [dragList, reorderPontosInList, toqueFilter]);
 
-  const playingPonto = playingId ? pontos.find((p) => p.id === playingId) : null;
+  const playingPonto = playingId ? (playingVersion?.id === playingId ? playingVersion : pontos.find((p) => p.id === playingId)) : null;
 
   const pageTitle = isFavoritosRoute ? "Favoritos" : (subcategoria || categoria || "Todos os Pontos");
   const pageSubtitle = isFavoritosRoute ? "Seus pontos favoritos" : (subcategoria ? categoria : "Caderno do Ogã");
@@ -673,6 +674,7 @@ const Index = () => {
                   categoryColor={color}
                   index={i}
                   onTogglePlay={togglePlay}
+                  onPlayVersion={(version) => { setPlayingVersion(version); togglePlay(version.id); }}
                   onToggleFavorite={handleToggleFavorito}
                   onEdit={handleEditPonto}
                   onDelete={handleDeletePonto}
@@ -709,6 +711,7 @@ const Index = () => {
       {/* Media Player */}
       {playingPonto && (
         <MediaPlayer
+          key={playingPonto.audio}
           url={playingPonto.audio}
           title={playingPonto.nome}
           onClose={() => setPlayingId(null)}

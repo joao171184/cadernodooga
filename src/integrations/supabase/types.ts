@@ -769,6 +769,10 @@ export type Database = {
         Returns: string
       }
       ads_send_test_notification: { Args: never; Returns: string }
+      can_read_point_version: {
+        Args: { _point_id: string; _status: string }
+        Returns: boolean
+      }
       get_ads_for_placement: {
         Args: { _count?: number; _placement: string }
         Returns: {
