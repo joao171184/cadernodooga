@@ -386,7 +386,7 @@ function AcessosPanel() {
 
   return (
     <div className="space-y-5">
-      <Section title="Relatório de logins por dia">
+      <Section title="Relatórios por dia">
         <LoginReport />
       </Section>
       {/* Usuários */}
