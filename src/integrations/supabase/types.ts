@@ -749,6 +749,13 @@ export type Database = {
           target_url: string
         }[]
       }
+      get_signup_stats: {
+        Args: { _from: string; _to: string }
+        Returns: {
+          day: string
+          signups: number
+        }[]
+      }
       has_permission: {
         Args: { _permission: string; _user_id: string }
         Returns: boolean
