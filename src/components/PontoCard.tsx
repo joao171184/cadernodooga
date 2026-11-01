@@ -131,6 +131,12 @@ const PontoCard = ({ ponto: originalPonto, isPlaying, isFavorite, visitorMode = 
               {ponto.categoria}{subs.length > 0 ? ` › ${subs.join(" • ")}` : ""}
             </p>
             <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-2">
+              {ponto.autor && (
+                <p className="min-w-0 max-w-full text-xs [overflow-wrap:anywhere]">
+                  <span className="text-muted-foreground uppercase font-semibold">Autor: </span>
+                  <span className="text-card-foreground font-medium">{ponto.autor}</span>
+                </p>
+              )}
               {toqueLabel && (
                 <div className="flex items-center gap-1.5 text-xs">
                   <Drum size={12} className="text-accent shrink-0" />

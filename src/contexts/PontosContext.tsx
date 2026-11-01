@@ -25,6 +25,7 @@ export const CLASSIFICACAO_OPTIONS: { value: Classificacao; label: string }[] = 
 ];
 
 export interface Ponto {
+  autor?: string;
   versions?: PointVersion[];
   id: string;
   nome: string;
@@ -42,6 +43,7 @@ export interface Ponto {
 }
 
 export type PontoInput = {
+  autor?: string;
   versions?: PointVersion[];
   id?: string;
   nome: string;
@@ -138,6 +140,7 @@ export function PontosProvider({ children }: { children: ReactNode }) {
       letra: p.letra,
       audio: p.audio,
       puxador: p.puxador,
+      autor: p.autor,
       toque: p.toque,
       status: p.status,
       ordem: p.ordem,
@@ -184,7 +187,7 @@ export function PontosProvider({ children }: { children: ReactNode }) {
     if (!user) return { error: "Não autenticado", pending: false };
     if (data.versions) {
       const { error } = await supabase.rpc("save_ponto_with_versions", {
-        _point: { id: data.id ?? null, nome: data.nome, categoria: data.categoria, puxador: data.puxador, subcategorias: data.subcategorias },
+        _point: { id: data.id ?? null, nome: data.nome, categoria: data.categoria, puxador: data.puxador, subcategorias: data.subcategorias, ...(data.autor !== undefined ? { autor: data.autor.trim() } : {}) },
         _versions: data.versions.map(v => ({ ...v })),
       });
       if (error) return { error: pontoSaveErrorMessage(error), pending: false };
@@ -199,6 +202,7 @@ export function PontosProvider({ children }: { children: ReactNode }) {
       letra: data.letra,
       audio: data.audio,
       puxador: data.puxador,
+      ...(data.autor !== undefined ? { autor: data.autor.trim() } : {}),
       toque: data.toque,
       created_by: user.id,
       status: (isAdmin ? "approved" : "pending") as PontoStatus,

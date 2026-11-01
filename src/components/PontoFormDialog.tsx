@@ -31,6 +31,7 @@ export function PontoFormDialog({ open, onClose, onSave, ponto, defaultCategoria
   const [categoria, setCategoria] = useState("");
   const [subcategorias, setSubcategorias] = useState<string[]>([]);
   const [puxador, setPuxador] = useState("");
+  const [autor, setAutor] = useState("");
   const [saving, setSaving] = useState(false);
   const [versionsLoading, setVersionsLoading] = useState(false);
   const [versionsLoadFailed, setVersionsLoadFailed] = useState(false);
@@ -53,11 +54,13 @@ export function PontoFormDialog({ open, onClose, onSave, ponto, defaultCategoria
       setCategoria(ponto.categoria);
       setSubcategorias(ponto.subcategorias);
       setPuxador(ponto.puxador);
+      setAutor(ponto.autor ?? "");
     } else {
       setNome("");
       setCategoria(defaultCategoria || "");
       setSubcategorias(defaultSubcategoria ? [defaultSubcategoria] : []);
       setPuxador("");
+      setAutor("");
     }
     return () => { cancelled = true; };
   }, [ponto, open, defaultCategoria, defaultSubcategoria]);
@@ -94,6 +97,7 @@ export function PontoFormDialog({ open, onClose, onSave, ponto, defaultCategoria
       letra: main.letra.toUpperCase(),
       audio: main.video_url.trim(),
       puxador: puxador.trim(),
+      autor: autor.trim(),
       toque: main.toque,
     })).catch(() => {
       toast.error("Não foi possível salvar o ponto. Tente novamente.");
@@ -175,6 +179,20 @@ export function PontoFormDialog({ open, onClose, onSave, ponto, defaultCategoria
               </div>
             </div>
           )}
+
+          <div>
+            <label htmlFor="ponto-autor" className="block text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1.5">
+              Autor do ponto (opcional)
+            </label>
+            <input
+              id="ponto-autor"
+              type="text"
+              value={autor}
+              onChange={(e) => setAutor(e.target.value)}
+              className="w-full px-4 py-3 rounded-xl bg-muted text-foreground text-sm outline-none focus:ring-2 focus:ring-accent/50 border border-border"
+              placeholder="Nome do autor"
+            />
+          </div>
 
           {versionsLoading ? <p role="status" className="text-sm text-muted-foreground">Carregando versões…</p> : !versionsLoadFailed && <PointVersionsEditor versions={versions} onChange={setVersions} />}
 
