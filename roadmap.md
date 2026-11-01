@@ -6,7 +6,8 @@
 - Filtro Logins/Cadastros no relatório de Acessos com datas, recarga e PDF; testes e fluxo autenticado verificados, total de cadastros conferido.
 
 ## Em aberto
-- (nenhuma)
+- Conferir leitura integral dos pedidos de publicidade em computador e celular.
+- Adicionar autoria opcional por ponto no cadastro, edição e leitura.
 
 ## Versões concluídas
 - 535 pontos preservados como primeira versão; salvamento conjunto, rascunhos privados e principal.
