@@ -4,10 +4,11 @@
 - Renomear "Meu Terreiro" para "Favoritos" no menu lateral e no título da página.
 - Nova paleta do modo claro ("Areia e Âmbar"): fundo areia, cartões quase brancos, destaque dourado, tinta marrom.
 - Filtro Logins/Cadastros no relatório de Acessos com datas, recarga e PDF; testes e fluxo autenticado verificados, total de cadastros conferido.
+- Pedidos de publicidade sem cortes de texto, com quebras de linha; conferidos em computador e celulares simulados.
+- Autoria opcional por ponto no cadastro, edição e leitura; salvamento, edição e leitura após recarga conferidos com conta administradora; ponto temporário apagado.
 
 ## Em aberto
-- Conferir leitura integral dos pedidos de publicidade em computador e celular.
-- Adicionar autoria opcional por ponto no cadastro, edição e leitura.
+- (nenhuma)
 
 ## Versões concluídas
 - 535 pontos preservados como primeira versão; salvamento conjunto, rascunhos privados e principal.
