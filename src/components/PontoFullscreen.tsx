@@ -156,6 +156,12 @@ export function PontoFullscreen({ ponto: originalPonto, isFavorite, onClose, onT
       <div {...selection.swipe} className="w-full max-w-3xl mx-auto px-4 sm:px-6 py-6 sm:py-10 pb-40">
         {selection.version.title && <h3 className="mb-3 text-sm font-bold text-accent-strong">{selection.version.title}</h3>}
         <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mb-6">
+          {ponto.autor && (
+            <p className="min-w-0 max-w-full text-sm [overflow-wrap:anywhere]">
+              <span className="text-muted-foreground uppercase font-semibold text-xs">Autor: </span>
+              <span className="text-foreground font-medium">{ponto.autor}</span>
+            </p>
+          )}
           {toqueLabel && (
             <div className="flex items-center gap-1.5 text-sm">
               <Drum size={14} className="text-accent" />

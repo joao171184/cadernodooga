@@ -12,10 +12,12 @@ import { PublicHeader } from "@/components/PublicHeader";
 import { TikTokPlayer } from "@/components/TikTokPlayer";
 import { AutoScrollControl } from "@/components/AutoScrollControl";
 import { AdSlot } from "@/components/ads/AdSlot";
+import { authorCredit } from "@/lib/pointAuthor";
 
 const SITE_URL = "https://cadernodooga.com.br";
 
 interface PontoView {
+  autor?: string;
   versions?: import("@/lib/pointVersions").PointVersion[];
   id: string;
   slug: string;
@@ -50,7 +52,7 @@ const PontoPage = () => {
       setStatus("loading");
       const { data: p, error } = await supabase
         .from("pontos")
-        .select("id, slug, nome, categoria, letra, audio, puxador, toque")
+        .select("id, slug, nome, categoria, letra, audio, puxador, autor, toque")
         .eq("slug", slug)
         .eq("status", "approved")
         .maybeSingle();
@@ -77,6 +79,7 @@ const PontoPage = () => {
         letra: p.letra,
         audio: p.audio ?? "",
         puxador: p.puxador ?? "",
+        autor: p.autor,
         toque: p.toque,
         subcategorias: (subs ?? []).map((s) => s.subcategoria),
         classificacoes: (classifs ?? []).map((c) => c.classificacao),
@@ -137,7 +140,7 @@ const PontoPage = () => {
     genre: ponto.categoria,
     url,
     lyrics: { "@type": "CreativeWork", text: ponto.letra },
-    ...(ponto.puxador ? { composer: { "@type": "Person", name: ponto.puxador } } : {}),
+    ...(authorCredit(ponto.autor) ? { composer: authorCredit(ponto.autor) } : {}),
   };
 
   const handleCopyLetra = async () => {
@@ -206,6 +209,12 @@ const PontoPage = () => {
       <main {...selection.swipe} className="max-w-3xl mx-auto px-4 sm:px-6 py-6 sm:py-10 pb-32">
         {selection.version.title && <h2 className="mb-3 text-sm font-bold text-accent-strong">{selection.version.title}</h2>}
         <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mb-6">
+          {ponto.autor && (
+            <p className="min-w-0 max-w-full text-sm [overflow-wrap:anywhere]">
+              <span className="text-muted-foreground uppercase font-semibold text-xs">Autor: </span>
+              <span className="text-foreground font-medium">{ponto.autor}</span>
+            </p>
+          )}
           {toqueLabel && (
             <div className="flex items-center gap-1.5 text-sm">
               <Drum size={14} className="text-accent" />

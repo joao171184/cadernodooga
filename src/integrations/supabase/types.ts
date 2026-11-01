@@ -567,6 +567,7 @@ export type Database = {
           approved_at: string | null
           approved_by: string | null
           audio: string
+          autor: string
           categoria: string
           created_at: string
           created_by: string
@@ -584,6 +585,7 @@ export type Database = {
           approved_at?: string | null
           approved_by?: string | null
           audio?: string
+          autor?: string
           categoria: string
           created_at?: string
           created_by: string
@@ -601,6 +603,7 @@ export type Database = {
           approved_at?: string | null
           approved_by?: string | null
           audio?: string
+          autor?: string
           categoria?: string
           created_at?: string
           created_by?: string
