@@ -1,4 +1,5 @@
-import { createContext, useContext, useEffect, useRef, useState, useCallback, type ReactNode } from "react";
+import { useContext, useEffect, useRef, useState, useCallback, type ReactNode } from "react";
+import { PontosContext } from "./pontosStore";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { readCache, writeCache } from "@/lib/offlineCache";
@@ -56,7 +57,7 @@ export type PontoInput = {
   toque: ToqueTipo | null;
 };
 
-interface Ctx {
+export interface PontosStore {
   pontos: Ponto[];
   pendentes: Ponto[];
   favoritos: Set<string>;
@@ -71,8 +72,6 @@ interface Ctx {
   movePontoInList: (id: string, dir: -1 | 1, scopedList: Ponto[], scope?: { toque?: ToqueTipo | null }) => Promise<void>;
   reorderPontosInList: (orderedList: Ponto[], scope?: { toque?: ToqueTipo | null }) => Promise<void>;
 }
-
-const PontosContext = createContext<Ctx | null>(null);
 
 export function PontosProvider({ children }: { children: ReactNode }) {
   const { user, isAdmin, loading: authLoading } = useAuth();
@@ -183,7 +182,7 @@ export function PontosProvider({ children }: { children: ReactNode }) {
     return () => { supabase.removeChannel(ch); };
   }, [user, refresh]);
 
-  const savePonto = useCallback<Ctx["savePonto"]>(async (data) => {
+  const savePonto = useCallback<PontosStore["savePonto"]>(async (data) => {
     if (!user) return { error: "Não autenticado", pending: false };
     if (data.versions) {
       const { error } = await supabase.rpc("save_ponto_with_versions", {
@@ -274,7 +273,7 @@ export function PontosProvider({ children }: { children: ReactNode }) {
     }
   }, [user, favoritos]);
 
-  const reorderPontosInList = useCallback<Ctx["reorderPontosInList"]>(async (orderedList, scope) => {
+  const reorderPontosInList = useCallback<PontosStore["reorderPontosInList"]>(async (orderedList, scope) => {
     const toque = scope?.toque ?? null;
     suppressRefreshUntilRef.current = Date.now() + 2000;
 
@@ -313,7 +312,7 @@ export function PontosProvider({ children }: { children: ReactNode }) {
     suppressRefreshUntilRef.current = Date.now() + 1500;
   }, []);
 
-  const movePontoInList = useCallback<Ctx["movePontoInList"]>(async (id, dir, scopedList, scope) => {
+  const movePontoInList = useCallback<PontosStore["movePontoInList"]>(async (id, dir, scopedList, scope) => {
     const idx = scopedList.findIndex((p) => p.id === id);
     if (idx < 0) return;
     const target = idx + dir;
