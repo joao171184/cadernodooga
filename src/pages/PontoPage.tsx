@@ -13,6 +13,7 @@ import { TikTokPlayer } from "@/components/TikTokPlayer";
 import { AutoScrollControl } from "@/components/AutoScrollControl";
 import { AdSlot } from "@/components/ads/AdSlot";
 import { authorCredit } from "@/lib/pointAuthor";
+import { PointAuthorship } from "@/components/PointAuthorship";
 
 const SITE_URL = "https://cadernodooga.com.br";
 
@@ -209,12 +210,7 @@ const PontoPage = () => {
       <main {...selection.swipe} className="max-w-3xl mx-auto px-4 sm:px-6 py-6 sm:py-10 pb-32">
         {selection.version.title && <h2 className="mb-3 text-sm font-bold text-accent-strong">{selection.version.title}</h2>}
         <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mb-6">
-          {ponto.autor && (
-            <p className="min-w-0 max-w-full text-sm [overflow-wrap:anywhere]">
-              <span className="text-muted-foreground uppercase font-semibold text-xs">Autor: </span>
-              <span className="text-foreground font-medium">{ponto.autor}</span>
-            </p>
-          )}
+          <PointAuthorship autor={ponto.autor} />
           {toqueLabel && (
             <div className="flex items-center gap-1.5 text-sm">
               <Drum size={14} className="text-accent" />

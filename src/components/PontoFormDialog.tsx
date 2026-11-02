@@ -182,7 +182,7 @@ export function PontoFormDialog({ open, onClose, onSave, ponto, defaultCategoria
 
           <div>
             <label htmlFor="ponto-autor" className="block text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1.5">
-              Autor do ponto (opcional)
+              Autoria do Ponto (Opcional)
             </label>
             <input
               id="ponto-autor"
@@ -190,7 +190,7 @@ export function PontoFormDialog({ open, onClose, onSave, ponto, defaultCategoria
               value={autor}
               onChange={(e) => setAutor(e.target.value)}
               className="w-full px-4 py-3 rounded-xl bg-muted text-foreground text-sm outline-none focus:ring-2 focus:ring-accent/50 border border-border"
-              placeholder="Nome do autor"
+              placeholder="Ex: Ogan Lucas Menino"
             />
           </div>
 
