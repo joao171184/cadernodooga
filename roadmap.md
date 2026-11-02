@@ -8,7 +8,7 @@
 - Autoria opcional por ponto no cadastro, edição e leitura; salvamento, edição e leitura após recarga conferidos com conta administradora; ponto temporário apagado.
 
 ## Em aberto
-- (nenhuma)
+- Atualizar créditos de autoria, fallback sem autor e aviso global de direitos autorais; preservar pontos, visual e players e conferir no celular.
 
 ## Versões concluídas
 - 535 pontos preservados como primeira versão; salvamento conjunto, rascunhos privados e principal.
