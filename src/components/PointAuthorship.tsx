@@ -13,7 +13,10 @@ export function PointAuthorship({ autor, footerId = "direitos-autorais" }: { aut
           const footer = document.getElementById(footerId);
           if (!footer) return;
           event.preventDefault();
-          footer.scrollIntoView({ behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" });
+          window.dispatchEvent(new Event("copyright-scroll-request"));
+          requestAnimationFrame(() => requestAnimationFrame(() => {
+            footer.scrollIntoView({ behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" });
+          }));
         }}
       >(Sabe quem é o autor? Avise-nos)</a></>}
     </p>

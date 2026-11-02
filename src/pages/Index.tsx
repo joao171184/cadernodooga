@@ -218,6 +218,11 @@ const Index = () => {
   const sentinelRef = useRef<HTMLDivElement>(null);
   const hasMoreToRender = visibleList.length > renderLimit;
   useEffect(() => {
+    const revealBeforeFooter = () => setRenderLimit(visibleList.length);
+    window.addEventListener("copyright-scroll-request", revealBeforeFooter);
+    return () => window.removeEventListener("copyright-scroll-request", revealBeforeFooter);
+  }, [visibleList.length]);
+  useEffect(() => {
     setRenderLimit(RENDER_STEP);
   }, [search, categoria, subcategoria, showFavorites, classifFilter, toqueFilter, mediaFilter]);
   useEffect(() => {
