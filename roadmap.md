@@ -6,9 +6,10 @@
 - Filtro Logins/Cadastros no relatório de Acessos com datas, recarga e PDF; testes e fluxo autenticado verificados, total de cadastros conferido.
 - Pedidos de publicidade sem cortes de texto, com quebras de linha; conferidos em computador e celulares simulados.
 - Autoria opcional por ponto no cadastro, edição e leitura; salvamento, edição e leitura após recarga conferidos com conta administradora; ponto temporário apagado.
+- Créditos de autoria com fallback sem autor e aviso global de direitos autorais com contato; 551 pontos preservados, 16 testes passaram e links conferidos nas páginas e leitura ampliada em computador e celular simulados.
 
 ## Em aberto
-- Atualizar créditos de autoria, fallback sem autor e aviso global de direitos autorais; preservar pontos, visual e players e conferir no celular.
+- (nenhuma)
 
 ## Versões concluídas
 - 535 pontos preservados como primeira versão; salvamento conjunto, rascunhos privados e principal.
