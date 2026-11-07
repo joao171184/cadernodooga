@@ -17,6 +17,7 @@ Vite ^5.4 + React ^18.3 + TypeScript ^5.8 + shadcn/Radix + Tailwind + TanStack Q
 
 ## Config
 `vite.config.ts`, `vitest.config.ts`, `tsconfig*.json`, `tailwind.config.ts`, `drizzle.config.ts`, `components.json`.
+Banco: Supabase próprio (conta joao.pedro, projeto `uzqewyfsjeuzuibkecem`, sa-east-1) — migrado do Lovable Cloud em 07/11/2026; o Lovable não controla mais o banco (a prévia dele mostra o banco antigo). Alterações de banco: migrations em `supabase/migrations`, aplicadas no Supabase novo.
 Variáveis (`.env.example`, só nomes): VITE_SUPABASE_PROJECT_ID, VITE_SUPABASE_URL, VITE_SUPABASE_PUBLISHABLE_KEY, VITE_PUBLIC_SITE_URL, BREVO_API_KEY, BREVO_SENDER_EMAIL, BREVO_SENDER_NAME, PUBLIC_SITE_URL, SEND_EMAIL_HOOK_SECRET, ALLOWED_ORIGINS
 
 ## Não ler

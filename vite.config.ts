@@ -16,7 +16,7 @@ export default defineConfig(({ mode }) => ({
     // Proxy neutro: browser vê /media/destaques (sem /ads/), arquivo fica no Storage.
     proxy: {
       "/media/destaques": {
-        target: "https://mqfrmyndqcyosnipjzrg.supabase.co",
+        target: "https://uzqewyfsjeuzuibkecem.supabase.co",
         changeOrigin: true,
         rewrite: (p) =>
           p.replace(/^\/media\/destaques/, "/storage/v1/object/public/ads/campaigns"),
