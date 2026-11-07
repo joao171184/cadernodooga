@@ -64,6 +64,62 @@
       "when": 1792168987820,
       "tag": "0008_parceiros_policies_functions",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1792240583882,
+      "tag": "0009_ad_rotate_seconds",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1793045949155,
+      "tag": "0010_user_logins_daily",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1793099630914,
+      "tag": "0011_login_stats_sync",
+      "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1793442922532,
+      "tag": "0012_daily_signup_stats",
+      "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1793461778869,
+      "tag": "0013_point_versions",
+      "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1793462590488,
+      "tag": "0014_point_versions_public_policy",
+      "breakpoints": true
+    },
+    {
+      "idx": 15,
+      "version": "7",
+      "when": 1793462678353,
+      "tag": "0015_point_versions_visibility",
+      "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "7",
+      "when": 1793536182566,
+      "tag": "0016_point_author",
+      "breakpoints": true
     }
   ]
 }

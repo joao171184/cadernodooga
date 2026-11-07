@@ -15,6 +15,7 @@ import { MediaPlayer } from "@/components/MediaPlayer";
 import { PontoFullscreen } from "@/components/PontoFullscreen";
 import { AutoScrollControl } from "@/components/AutoScrollControl";
 import { Skeleton } from "@/components/ui/skeleton";
+import { TikTokGlyph } from "@/components/MediaIcons";
 
 import {
   DropdownMenu,
@@ -59,6 +60,7 @@ const Index = () => {
   const [toqueFilter, setToqueFilter] = useState<ToqueFilter>("all");
   const [mediaFilter, setMediaFilter] = useState<MediaFilter>("all");
   const [playingId, setPlayingId] = useState<string | null>(null);
+  const [playingVersion, setPlayingVersion] = useState<Ponto | null>(null);
   const [formOpen, setFormOpen] = useState(false);
   const [editingPonto, setEditingPonto] = useState<Ponto | null>(null);
   const [adminOpen, setAdminOpen] = useState(false);
@@ -216,6 +218,11 @@ const Index = () => {
   const sentinelRef = useRef<HTMLDivElement>(null);
   const hasMoreToRender = visibleList.length > renderLimit;
   useEffect(() => {
+    const revealBeforeFooter = () => setRenderLimit(visibleList.length);
+    window.addEventListener("copyright-scroll-request", revealBeforeFooter);
+    return () => window.removeEventListener("copyright-scroll-request", revealBeforeFooter);
+  }, [visibleList.length]);
+  useEffect(() => {
     setRenderLimit(RENDER_STEP);
   }, [search, categoria, subcategoria, showFavorites, classifFilter, toqueFilter, mediaFilter]);
   useEffect(() => {
@@ -256,7 +263,7 @@ const Index = () => {
     if (list) await reorderPontosInList(list, { toque: toqueFilter === "all" ? null : toqueFilter });
   }, [dragList, reorderPontosInList, toqueFilter]);
 
-  const playingPonto = playingId ? pontos.find((p) => p.id === playingId) : null;
+  const playingPonto = playingId ? (playingVersion?.id === playingId ? playingVersion : pontos.find((p) => p.id === playingId)) : null;
 
   const pageTitle = isFavoritosRoute ? "Favoritos" : (subcategoria || categoria || "Todos os Pontos");
   const pageSubtitle = isFavoritosRoute ? "Seus pontos favoritos" : (subcategoria ? categoria : "Caderno do Ogã");
@@ -672,6 +679,7 @@ const Index = () => {
                   categoryColor={color}
                   index={i}
                   onTogglePlay={togglePlay}
+                  onPlayVersion={(version) => { setPlayingVersion(version); togglePlay(version.id); }}
                   onToggleFavorite={handleToggleFavorito}
                   onEdit={handleEditPonto}
                   onDelete={handleDeletePonto}
@@ -708,6 +716,7 @@ const Index = () => {
       {/* Media Player */}
       {playingPonto && (
         <MediaPlayer
+          key={playingPonto.audio}
           url={playingPonto.audio}
           title={playingPonto.nome}
           onClose={() => setPlayingId(null)}
@@ -755,15 +764,26 @@ const Index = () => {
             </Link>
             <AdConsentReset className="text-muted-foreground hover:text-foreground hover:underline" />
           </div>
-          <a
-            href="https://www.instagram.com/j_marques.a/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-accent/15 hover:bg-accent/25 text-accent-strong text-xs font-bold transition-all active:scale-95"
-          >
-            <Instagram size={14} />
-            <span>@j_marques.a</span>
-          </a>
+          <div className="flex flex-wrap items-center justify-center gap-2">
+            <a
+              href="https://www.instagram.com/cadernodo_oga/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-accent/15 hover:bg-accent/25 text-accent-strong text-xs font-bold transition-all active:scale-95"
+            >
+              <Instagram size={14} />
+              <span>@cadernodo_oga</span>
+            </a>
+            <a
+              href="https://www.tiktok.com/@cadernodo_oga"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-accent/15 hover:bg-accent/25 text-accent-strong text-xs font-bold transition-all active:scale-95"
+            >
+              <TikTokGlyph size={14} />
+              <span>@cadernodo_oga</span>
+            </a>
+          </div>
         </div>
       </footer>
     </div>

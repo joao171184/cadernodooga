@@ -33,6 +33,7 @@ export type AdSettingsRow = {
   adsense_enabled: boolean;
   adsense_client: string | null;
   in_feed_interval: number;
+  rotate_seconds?: number;
   updated_at: string;
 }
 

@@ -1,3 +1,5 @@
+import { LoginGateAd } from "@/components/LoginGateAd";
+import { CopyrightFooter } from "@/components/CopyrightFooter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -73,6 +75,7 @@ const App = () => (
           <AuthProvider>
             <CategoriasProvider>
               <PontosProvider>
+                <LoginGateAd />
                 <Suspense fallback={<PageSpinner />}>
                 <Routes>
                   <Route path="/login" element={<Login />} />
@@ -90,6 +93,7 @@ const App = () => (
                   <Route path="*" element={<NotFound />} />
                 </Routes>
                 </Suspense>
+                <CopyrightFooter />
                 <AdConsentBanner />
               </PontosProvider>
             </CategoriasProvider>

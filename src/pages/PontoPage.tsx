@@ -1,3 +1,5 @@
+import { PointVersionNavigation, usePointVersion } from "@/components/PointVersionNavigation";
+import { LockedLetra } from "@/components/LockedLetra";
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
@@ -10,10 +12,14 @@ import { PublicHeader } from "@/components/PublicHeader";
 import { TikTokPlayer } from "@/components/TikTokPlayer";
 import { AutoScrollControl } from "@/components/AutoScrollControl";
 import { AdSlot } from "@/components/ads/AdSlot";
+import { authorCredit } from "@/lib/pointAuthor";
+import { PointAuthorship } from "@/components/PointAuthorship";
 
 const SITE_URL = "https://cadernodooga.com.br";
 
 interface PontoView {
+  autor?: string;
+  versions?: import("@/lib/pointVersions").PointVersion[];
   id: string;
   slug: string;
   nome: string;
@@ -34,9 +40,11 @@ function buildDescription(letra: string): string {
 
 const PontoPage = () => {
   const { slug } = useParams<{ slug: string }>();
-  const [ponto, setPonto] = useState<PontoView | null>(null);
+  const [originalPonto, setPonto] = useState<PontoView | null>(null);
   const [status, setStatus] = useState<"loading" | "found" | "missing">("loading");
 
+  const selection = usePointVersion(originalPonto ?? { letra: "", audio: "", toque: null, classificacoes: [] });
+  const ponto = originalPonto ? { ...originalPonto, ...selection.point } : null;
   useEffect(() => {
     let cancelled = false;
     if (!slug) return;
@@ -45,7 +53,7 @@ const PontoPage = () => {
       setStatus("loading");
       const { data: p, error } = await supabase
         .from("pontos")
-        .select("id, slug, nome, categoria, letra, audio, puxador, toque")
+        .select("id, slug, nome, categoria, letra, audio, puxador, autor, toque")
         .eq("slug", slug)
         .eq("status", "approved")
         .maybeSingle();
@@ -56,13 +64,15 @@ const PontoPage = () => {
         return;
       }
 
-      const [{ data: subs }, { data: classifs }] = await Promise.all([
+      const [{ data: subs }, { data: classifs }, { data: versions }] = await Promise.all([
         supabase.from("ponto_subcategorias").select("subcategoria").eq("ponto_id", p.id),
         supabase.from("ponto_classificacoes").select("classificacao").eq("ponto_id", p.id),
+        supabase.from("ponto_versions").select("*").eq("point_id", p.id).eq("status", "published").order("ordem"),
       ]);
 
       if (cancelled) return;
       setPonto({
+        versions: (versions ?? []).map(v => ({ ...v, status: v.status as "published" | "draft" })),
         id: p.id,
         slug: p.slug,
         nome: p.nome,
@@ -70,6 +80,7 @@ const PontoPage = () => {
         letra: p.letra,
         audio: p.audio ?? "",
         puxador: p.puxador ?? "",
+        autor: p.autor,
         toque: p.toque,
         subcategorias: (subs ?? []).map((s) => s.subcategoria),
         classificacoes: (classifs ?? []).map((c) => c.classificacao),
@@ -130,7 +141,7 @@ const PontoPage = () => {
     genre: ponto.categoria,
     url,
     lyrics: { "@type": "CreativeWork", text: ponto.letra },
-    ...(ponto.puxador ? { composer: { "@type": "Person", name: ponto.puxador } } : {}),
+    ...(authorCredit(ponto.autor) ? { composer: authorCredit(ponto.autor) } : {}),
   };
 
   const handleCopyLetra = async () => {
@@ -196,8 +207,10 @@ const PontoPage = () => {
       </div>
 
 
-      <main className="max-w-3xl mx-auto px-4 sm:px-6 py-6 sm:py-10 pb-32">
+      <main {...selection.swipe} className="max-w-3xl mx-auto px-4 sm:px-6 py-6 sm:py-10 pb-32">
+        {selection.version.title && <h2 className="mb-3 text-sm font-bold text-accent-strong">{selection.version.title}</h2>}
         <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mb-6">
+          <PointAuthorship autor={ponto.autor} />
           {toqueLabel && (
             <div className="flex items-center gap-1.5 text-sm">
               <Drum size={14} className="text-accent" />
@@ -232,15 +245,13 @@ const PontoPage = () => {
           >
             <Copy size={18} />
           </button>
-          <pre className="text-xl sm:text-2xl md:text-3xl text-foreground whitespace-pre-wrap font-[inherit] leading-relaxed pl-6 pr-12 py-2 uppercase font-medium tracking-wide">
-            {ponto.letra}
-          </pre>
+          <LockedLetra key={selection.index} letra={ponto.letra} className="motion-safe:animate-in motion-safe:fade-in motion-safe:duration-200 text-xl sm:text-2xl md:text-3xl text-foreground whitespace-pre-wrap font-[inherit] leading-relaxed pl-6 pr-12 py-2 uppercase font-medium tracking-wide" />
         </div>
 
         <AdSlot placement="ponto-apos-letra" className="mt-10" />
 
         {embed.kind !== "none" && (
-          <div className="mt-10">
+          <div key={selection.version.id ?? selection.index} className="mt-10">
             {embed.kind === "youtube" && (
               <div className="aspect-video rounded-2xl overflow-hidden bg-black">
                 <iframe src={embed.src} title={ponto.nome} className="w-full h-full" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" />
@@ -268,6 +279,9 @@ const PontoPage = () => {
             )}
           </div>
         )}
+
+        {selection.version.observacoes && <p className="mt-3 whitespace-pre-wrap text-sm text-muted-foreground">{selection.version.observacoes}</p>}
+        <PointVersionNavigation versions={selection.versions} index={selection.index} change={selection.change} />
 
         <p className="mt-12 text-center text-xs text-muted-foreground">
           Quer divulgar seu terreiro, loja ou evento?{" "}

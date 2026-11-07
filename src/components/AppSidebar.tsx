@@ -18,6 +18,7 @@ import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCategorias } from "@/contexts/CategoriasContext";
 import { resolveIcon } from "@/lib/categoryIcons";
+import { TikTokGlyph } from "@/components/MediaIcons";
 import logoImg from "@/assets/logo.png";
 
 export function AppSidebar() {
@@ -217,13 +218,13 @@ export function AppSidebar() {
           <span className="truncate">Anuncie conosco</span>
         </Link>
         <a
-          href="https://www.instagram.com/j_marques.a/"
+          href="https://www.tiktok.com/@cadernodo_oga"
           target="_blank"
           rel="noopener noreferrer"
           className="flex items-center gap-2 px-3 py-2 rounded-xl text-[11px] text-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent transition-all"
         >
-          <Instagram size={12} />
-          <span className="truncate">por João Pedro Marques</span>
+          <TikTokGlyph size={12} />
+          <span className="truncate">@cadernodo_oga</span>
         </a>
       </SidebarFooter>
     </Sidebar>

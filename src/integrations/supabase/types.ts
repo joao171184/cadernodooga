@@ -311,6 +311,7 @@ export type Database = {
           adsense_enabled: boolean
           id: boolean
           in_feed_interval: number
+          rotate_seconds: number
           updated_at: string
         }
         Insert: {
@@ -318,6 +319,7 @@ export type Database = {
           adsense_enabled?: boolean
           id?: boolean
           in_feed_interval?: number
+          rotate_seconds?: number
           updated_at?: string
         }
         Update: {
@@ -325,6 +327,7 @@ export type Database = {
           adsense_enabled?: boolean
           id?: boolean
           in_feed_interval?: number
+          rotate_seconds?: number
           updated_at?: string
         }
         Relationships: []
@@ -503,11 +506,68 @@ export type Database = {
           },
         ]
       }
+      ponto_versions: {
+        Row: {
+          classificacoes: Database["public"]["Enums"]["classificacao_tipo"][]
+          created_at: string
+          id: string
+          is_principal: boolean
+          letra: string
+          observacoes: string
+          ordem: number
+          point_id: string
+          status: string
+          title: string
+          toque: Database["public"]["Enums"]["toque_tipo"] | null
+          updated_at: string
+          video_url: string
+        }
+        Insert: {
+          classificacoes?: Database["public"]["Enums"]["classificacao_tipo"][]
+          created_at?: string
+          id?: string
+          is_principal?: boolean
+          letra?: string
+          observacoes?: string
+          ordem?: number
+          point_id: string
+          status?: string
+          title?: string
+          toque?: Database["public"]["Enums"]["toque_tipo"] | null
+          updated_at?: string
+          video_url?: string
+        }
+        Update: {
+          classificacoes?: Database["public"]["Enums"]["classificacao_tipo"][]
+          created_at?: string
+          id?: string
+          is_principal?: boolean
+          letra?: string
+          observacoes?: string
+          ordem?: number
+          point_id?: string
+          status?: string
+          title?: string
+          toque?: Database["public"]["Enums"]["toque_tipo"] | null
+          updated_at?: string
+          video_url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ponto_versions_point_id_fkey"
+            columns: ["point_id"]
+            isOneToOne: false
+            referencedRelation: "pontos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pontos: {
         Row: {
           approved_at: string | null
           approved_by: string | null
           audio: string
+          autor: string
           categoria: string
           created_at: string
           created_by: string
@@ -525,6 +585,7 @@ export type Database = {
           approved_at?: string | null
           approved_by?: string | null
           audio?: string
+          autor?: string
           categoria: string
           created_at?: string
           created_by: string
@@ -542,6 +603,7 @@ export type Database = {
           approved_at?: string | null
           approved_by?: string | null
           audio?: string
+          autor?: string
           categoria?: string
           created_at?: string
           created_by?: string
@@ -607,6 +669,24 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_logins_daily: {
+        Row: {
+          created_at: string
+          day: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          day: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          day?: string
           user_id?: string
         }
         Relationships: []
@@ -692,6 +772,10 @@ export type Database = {
         Returns: string
       }
       ads_send_test_notification: { Args: never; Returns: string }
+      can_read_point_version: {
+        Args: { _point_id: string; _status: string }
+        Returns: boolean
+      }
       get_ads_for_placement: {
         Args: { _count?: number; _placement: string }
         Returns: {
@@ -702,6 +786,13 @@ export type Database = {
           image_path: string
           revenue_type: string
           target_url: string
+        }[]
+      }
+      get_login_stats: {
+        Args: { _from: string; _to: string }
+        Returns: {
+          day: string
+          logins: number
         }[]
       }
       get_my_role: {
@@ -719,6 +810,13 @@ export type Database = {
           image_path: string
           revenue_type: string
           target_url: string
+        }[]
+      }
+      get_signup_stats: {
+        Args: { _from: string; _to: string }
+        Returns: {
+          day: string
+          signups: number
         }[]
       }
       has_permission: {
@@ -743,6 +841,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      record_login: { Args: never; Returns: undefined }
       record_parceiro_event: {
         Args: {
           _campaign_id: string
@@ -751,6 +850,10 @@ export type Database = {
           _session: string
         }
         Returns: boolean
+      }
+      save_ponto_with_versions: {
+        Args: { _point: Json; _versions: Json }
+        Returns: string
       }
       slugify: { Args: { _text: string }; Returns: string }
       submit_ad_lead: {

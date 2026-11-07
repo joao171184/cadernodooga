@@ -129,12 +129,12 @@ describe("AdSlot", () => {
     expect(screen.queryByRole("link")).toBeNull();
   });
 
-  it("com vários anúncios próprios mostra o primeiro sem setas nem contador", () => {
+  it("com vários anúncios no topo da lista mostra setas e a seta troca o anúncio", async () => {
     state.ads = [ad, ad2];
     render(<AdSlot placement="topo-lista" />);
     expect(screen.getByAltText("Loja de velas")).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "Anúncio anterior" })).toBeNull();
-    expect(screen.queryByRole("button", { name: "Próximo anúncio" })).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "Próximo anúncio" }));
+    expect(await screen.findByAltText("Ateliê")).toBeInTheDocument();
     expect(screen.queryByText(/^\d+\s*\/\s*\d+$/)).toBeNull();
   });
 

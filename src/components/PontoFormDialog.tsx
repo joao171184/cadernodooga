@@ -2,13 +2,14 @@ import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useCategorias } from "@/contexts/CategoriasContext";
 import {
-  TOQUE_OPTIONS,
-  CLASSIFICACAO_OPTIONS,
   type Ponto,
   type PontoInput,
-  type ToqueTipo,
-  type Classificacao,
 } from "@/contexts/PontosContext";
+import { Button } from "@/components/ui/button";
+import { supabase } from "@/integrations/supabase/client";
+import { PointVersionsEditor } from "@/components/PointVersionsEditor";
+import { initialVersion, validateVersions, publishedVersions, type PointVersion } from "@/lib/pointVersions";
+import { useAuth } from "@/contexts/AuthContext";
 import { X, Check } from "lucide-react";
 import { toast } from "sonner";
 import { PONTO_LIMITS, validatePontoFields } from "@/lib/pontoValidation";
@@ -24,36 +25,44 @@ interface PontoFormDialogProps {
 
 export function PontoFormDialog({ open, onClose, onSave, ponto, defaultCategoria, defaultSubcategoria }: PontoFormDialogProps) {
   const { categorias } = useCategorias();
+  const { isAdmin } = useAuth();
+  const [versions, setVersions] = useState<PointVersion[]>([]);
   const [nome, setNome] = useState("");
   const [categoria, setCategoria] = useState("");
   const [subcategorias, setSubcategorias] = useState<string[]>([]);
-  const [classificacoes, setClassificacoes] = useState<Classificacao[]>([]);
-  const [letra, setLetra] = useState("");
-  const [audio, setAudio] = useState("");
   const [puxador, setPuxador] = useState("");
-  const [toque, setToque] = useState<ToqueTipo | "">("");
+  const [autor, setAutor] = useState("");
   const [saving, setSaving] = useState(false);
+  const [versionsLoading, setVersionsLoading] = useState(false);
+  const [versionsLoadFailed, setVersionsLoadFailed] = useState(false);
 
   useEffect(() => {
+    let cancelled = false;
+    setVersionsLoadFailed(false);
+    if (open && ponto) {
+      setVersionsLoading(true);
+      supabase.from("ponto_versions").select("*").eq("point_id", ponto.id).order("ordem").then(({ data, error }) => {
+        if (cancelled) return;
+        if (error || !data?.length) { setVersionsLoadFailed(true); toast.error("Não foi possível carregar as versões. Feche e tente novamente."); }
+        else setVersions(data.map(v => ({ ...v, status: v.status as PointVersion["status"] })));
+        setVersionsLoading(false);
+      });
+    } else setVersionsLoading(false);
+    setVersions(ponto ? (ponto.versions?.length ? ponto.versions.map(v => ({ ...v })) : [initialVersion(ponto)]) : [initialVersion({ letra: "", audio: "", toque: null, classificacoes: [] })]);
     if (ponto) {
       setNome(ponto.nome);
       setCategoria(ponto.categoria);
       setSubcategorias(ponto.subcategorias);
-      setClassificacoes(ponto.classificacoes);
-      setLetra(ponto.letra);
-      setAudio(ponto.audio);
       setPuxador(ponto.puxador);
-      setToque(ponto.toque ?? "");
+      setAutor(ponto.autor ?? "");
     } else {
       setNome("");
       setCategoria(defaultCategoria || "");
       setSubcategorias(defaultSubcategoria ? [defaultSubcategoria] : []);
-      setClassificacoes([]);
-      setLetra("");
-      setAudio("");
       setPuxador("");
-      setToque("");
+      setAutor("");
     }
+    return () => { cancelled = true; };
   }, [ponto, open, defaultCategoria, defaultSubcategoria]);
 
   const subOptions = categorias.find((c) => c.nome === categoria)?.filhos ?? [];
@@ -64,16 +73,18 @@ export function PontoFormDialog({ open, onClose, onSave, ponto, defaultCategoria
     );
   };
 
-  const toggleClassif = (c: Classificacao) => {
-    setClassificacoes((prev) =>
-      prev.includes(c) ? prev.filter((x) => x !== c) : [...prev, c]
-    );
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!nome.trim() || !letra.trim() || !categoria || saving) return;
-    const invalid = validatePontoFields({ nome: nome.trim(), letra, puxador: puxador.trim(), audio });
+    if (!nome.trim() || !categoria || saving || versionsLoading || versionsLoadFailed) return;
+    const versionError = validateVersions(versions, isAdmin);
+    if (versionError) { toast.error(versionError); return; }
+    for (const version of versions) {
+      const error = validatePontoFields({ nome: nome.trim(), letra: version.letra, puxador: puxador.trim(), audio: version.video_url.startsWith("audio/") ? "" : version.video_url });
+      if (error) { toast.error(error); return; }
+    }
+    const main = publishedVersions(versions)[0] ?? versions[0];
+    if (!main) return;
+    const invalid = validatePontoFields({ nome: nome.trim(), letra: main.letra, puxador: puxador.trim(), audio: main.video_url.startsWith("audio/") ? "" : main.video_url });
     if (invalid) { toast.error(invalid); return; }
     setSaving(true);
     const ok = await Promise.resolve(onSave({
@@ -81,11 +92,13 @@ export function PontoFormDialog({ open, onClose, onSave, ponto, defaultCategoria
       nome: nome.trim(),
       categoria,
       subcategorias,
-      classificacoes,
-      letra: letra.toUpperCase(),
-      audio: audio.trim(),
+      versions,
+      classificacoes: main.classificacoes,
+      letra: main.letra.toUpperCase(),
+      audio: main.video_url.trim(),
       puxador: puxador.trim(),
-      toque: toque || null,
+      autor: autor.trim(),
+      toque: main.toque,
     })).catch(() => {
       toast.error("Não foi possível salvar o ponto. Tente novamente.");
       return false;
@@ -95,7 +108,7 @@ export function PontoFormDialog({ open, onClose, onSave, ponto, defaultCategoria
 
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
-      <DialogContent className="max-w-lg mx-4 max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-lg w-[calc(100%-2rem)] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="font-display text-lg">
             {ponto ? "Editar Ponto" : "Novo Ponto"}
@@ -148,7 +161,7 @@ export function PontoFormDialog({ open, onClose, onSave, ponto, defaultCategoria
                 {subOptions.map((s) => {
                   const active = subcategorias.includes(s.nome);
                   return (
-                    <button
+                    <Button
                       key={s.id}
                       type="button"
                       onClick={() => toggleSub(s.nome)}
@@ -160,7 +173,7 @@ export function PontoFormDialog({ open, onClose, onSave, ponto, defaultCategoria
                     >
                       {active ? <Check size={12} /> : null}
                       <span>{s.nome}</span>
-                    </button>
+                    </Button>
                   );
                 })}
               </div>
@@ -168,86 +181,20 @@ export function PontoFormDialog({ open, onClose, onSave, ponto, defaultCategoria
           )}
 
           <div>
-            <label className="block text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1.5">
-              Classificação <span className="normal-case text-muted-foreground/70 font-normal">(opcional, pode escolher mais de uma)</span>
+            <label htmlFor="ponto-autor" className="block text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1.5">
+              Autoria do Ponto (Opcional)
             </label>
-            <div className="flex flex-wrap gap-2 p-2 rounded-xl bg-muted/40 border border-border">
-              {CLASSIFICACAO_OPTIONS.map((c) => {
-                const active = classificacoes.includes(c.value);
-                return (
-                  <button
-                    key={c.value}
-                    type="button"
-                    onClick={() => toggleClassif(c.value)}
-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all active:scale-95 ${
-                      active
-                        ? "bg-accent text-accent-foreground shadow-sm"
-                        : "bg-background text-foreground/70 border border-border hover:border-accent/50"
-                    }`}
-                  >
-                    {active && <Check size={12} />}
-                    <span>{c.label}</span>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1.5">
-              Tipo de Toque
-            </label>
-            <div className="flex flex-wrap gap-2 p-2 rounded-xl bg-muted/40 border border-border">
-              <button
-                type="button"
-                onClick={() => setToque("")}
-                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all active:scale-95 ${
-                  toque === ""
-                    ? "bg-accent text-accent-foreground shadow-sm"
-                    : "bg-background text-foreground/70 border border-border hover:border-accent/50"
-                }`}
-              >
-                — Não definido
-              </button>
-              {TOQUE_OPTIONS.map((t) => {
-                const active = toque === t.value;
-                return (
-                  <button
-                    key={t.value}
-                    type="button"
-                    onClick={() => setToque(t.value)}
-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all active:scale-95 ${
-                      active
-                        ? "bg-accent text-accent-foreground shadow-sm"
-                        : "bg-background text-foreground/70 border border-border hover:border-accent/50"
-                    }`}
-                  >
-                    {active && <Check size={12} />}
-                    <span>{t.label}</span>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1.5">
-              Letra do Ponto
-            </label>
-            <textarea
-              value={letra}
-              onChange={(e) => setLetra(e.target.value.toUpperCase())}
-              rows={8}
-              maxLength={PONTO_LIMITS.letra}
-              autoComplete="off"
-              autoCorrect="off"
-              autoCapitalize="characters"
-              spellCheck={false}
-              className="w-full px-4 py-3 rounded-xl bg-muted text-foreground text-sm outline-none focus:ring-2 focus:ring-accent/50 border border-border font-mono leading-relaxed uppercase"
-              placeholder="DIGITE A LETRA DO PONTO AQUI..."
-              required
+            <input
+              id="ponto-autor"
+              type="text"
+              value={autor}
+              onChange={(e) => setAutor(e.target.value)}
+              className="w-full px-4 py-3 rounded-xl bg-muted text-foreground text-sm outline-none focus:ring-2 focus:ring-accent/50 border border-border"
+              placeholder="Ex: Ogan Lucas Menino"
             />
           </div>
+
+          {versionsLoading ? <p role="status" className="text-sm text-muted-foreground">Carregando versões…</p> : !versionsLoadFailed && <PointVersionsEditor versions={versions} onChange={setVersions} />}
 
           <div>
             <label className="block text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1.5">
@@ -263,36 +210,21 @@ export function PontoFormDialog({ open, onClose, onSave, ponto, defaultCategoria
             />
           </div>
 
-          <div>
-            <label className="block text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1.5">
-              Link do YouTube, Spotify ou TikTok (opcional)
-            </label>
-            <input
-              type="text"
-              value={audio}
-              onChange={(e) => setAudio(e.target.value)}
-              maxLength={PONTO_LIMITS.audio}
-              inputMode="url"
-              className="w-full px-4 py-3 rounded-xl bg-muted text-foreground text-sm outline-none focus:ring-2 focus:ring-accent/50 border border-border"
-              placeholder="https://youtu.be/... · https://open.spotify.com/track/... · https://www.tiktok.com/@user/video/..."
-            />
-          </div>
-
           <div className="flex gap-3 pt-2">
-            <button
+            <Button
               type="button"
               onClick={onClose}
               className="flex-1 py-3 rounded-xl text-sm font-bold text-muted-foreground bg-muted hover:bg-muted/80 transition-all active:scale-[0.98] flex items-center justify-center gap-2"
             >
               <X size={16} /> CANCELAR
-            </button>
-            <button
+            </Button>
+            <Button
               type="submit"
-              disabled={saving}
+              disabled={saving || versionsLoading || versionsLoadFailed}
               className="flex-1 py-3 rounded-xl text-sm font-bold text-primary-foreground bg-primary hover:bg-primary/90 transition-all active:scale-[0.98] shadow-sm flex items-center justify-center gap-2 disabled:opacity-60"
             >
               <Check size={16} /> {ponto ? "SALVAR" : "ADICIONAR"}
-            </button>
+            </Button>
           </div>
         </form>
       </DialogContent>

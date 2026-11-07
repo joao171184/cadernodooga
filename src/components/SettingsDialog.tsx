@@ -8,6 +8,7 @@ import { CategoriasManagerDialog } from "@/components/CategoriasManagerDialog";
 import { supabase } from "@/integrations/supabase/client";
 import { resolveIcon } from "@/lib/categoryIcons";
 import { toast } from "sonner";
+import { LoginReport } from "@/components/LoginReport";
 
 interface Props {
   open: boolean;
@@ -247,15 +248,26 @@ function AcessosPanel() {
     setLoading(true);
     setLoadError(null);
     try {
-      const [profilesRes, rolesRes, permsRes] = await Promise.all([
-        supabase.from("profiles").select("id, email").order("created_at", { ascending: true }),
-        supabase.from("user_roles").select("user_id, role"),
+      const fetchAll = async <T,>(build: (from: number, to: number) => PromiseLike<{ data: T[] | null; error: unknown }>) => {
+        const out: T[] = [];
+        const PAGE = 1000;
+        for (let from = 0; ; from += PAGE) {
+          const { data, error } = await build(from, from + PAGE - 1);
+          if (error) throw error;
+          out.push(...(data ?? []));
+          if (!data || data.length < PAGE) break;
+        }
+        return out;
+      };
+      const [profiles, roles, permsRes] = await Promise.all([
+        fetchAll<{ id: string; email: string }>((a, b) =>
+          supabase.from("profiles").select("id, email").order("created_at", { ascending: true }).order("id").range(a, b)),
+        fetchAll<{ user_id: string; role: string }>((a, b) =>
+          supabase.from("user_roles").select("user_id, role").order("id").range(a, b)),
         supabase.from("role_permissions").select("role, permission, allowed"),
       ]);
 
       if (permsRes.error) throw permsRes.error;
-      const profiles = profilesRes.data ?? [];
-      const roles = rolesRes.data ?? [];
       const rolePerms = permsRes.data ?? [];
 
       const roleMap = new Map(roles.map((r) => [r.user_id, r.role as AppRole]));
@@ -374,6 +386,9 @@ function AcessosPanel() {
 
   return (
     <div className="space-y-5">
+      <Section title="Relatórios por dia">
+        <LoginReport />
+      </Section>
       {/* Usuários */}
       <Section title={`Usuários cadastrados (${users.length})`}>
         <div className="relative">

@@ -14,6 +14,7 @@ export function SettingsTab({ settings, placements, reload }: AdsAdminData & { r
   const [adsenseEnabled, setAdsenseEnabled] = useState(false);
   const [client, setClient] = useState("");
   const [interval, setIntervalValue] = useState(12);
+  const [rotate, setRotate] = useState(6);
   const [rows, setRows] = useState<AdPlacementRow[]>([]);
   const [saving, setSaving] = useState(false);
 
@@ -21,6 +22,7 @@ export function SettingsTab({ settings, placements, reload }: AdsAdminData & { r
     setAdsenseEnabled(settings?.adsense_enabled ?? false);
     setClient(settings?.adsense_client ?? "");
     setIntervalValue(settings?.in_feed_interval ?? 12);
+    setRotate(settings?.rotate_seconds ?? 6);
     setRows(placements.map((p) => ({ ...p })));
   }, [settings, placements]);
 
@@ -51,12 +53,14 @@ export function SettingsTab({ settings, placements, reload }: AdsAdminData & { r
     if (clientError || rows.some(slotError)) return toast.error("Confira os campos destacados.");
     if (adsenseEnabled && !client.trim()) return toast.error("Informe o ID de editor para ligar o AdSense.");
     if (!Number.isInteger(interval) || interval < 4 || interval > 50) return toast.error("Intervalo entre 4 e 50 cards.");
+    if (!Number.isInteger(rotate) || rotate < 2 || rotate > 60) return toast.error("Troca do carrossel entre 2 e 60 segundos.");
     setSaving(true);
     const results = await Promise.all([
       adsDb.from("ad_settings").update({
         adsense_enabled: adsenseEnabled,
         adsense_client: client.trim() || null,
         in_feed_interval: interval,
+        rotate_seconds: rotate,
       }).eq("id", true),
       ...rows.map((r) =>
         adsDb.from("ad_placements").update({
@@ -102,6 +106,22 @@ export function SettingsTab({ settings, placements, reload }: AdsAdminData & { r
             className={`${inputClass} w-28`}
             value={interval}
             onChange={(e) => setIntervalValue(Number(e.target.value))}
+          />
+        </Field>
+
+        <Field
+          label="Tempo de troca do carrossel (segundos)"
+          htmlFor="cfg-rotate"
+          hint="Quando há mais de um anúncio no mesmo espaço, eles trocam a cada N segundos (2 a 60)."
+        >
+          <input
+            id="cfg-rotate"
+            type="number"
+            min={2}
+            max={60}
+            className={`${inputClass} w-28`}
+            value={rotate}
+            onChange={(e) => setRotate(Number(e.target.value))}
           />
         </Field>
 

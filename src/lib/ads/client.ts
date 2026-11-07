@@ -30,7 +30,7 @@ function parseParceiroConfig(raw: unknown): AdConfig | null {
 /** Configuração pública via RPC neutra (fallback para tabelas se a migração ainda não rodou). */
 export function loadAdConfig(): Promise<AdConfig | null> {
   if (!configPromise) {
-    configPromise = adsDb
+    configPromise = Promise.resolve(adsDb
       .rpc("get_parceiro_config")
       .then(({ data, error }) => {
         if (!error && data) return parseParceiroConfig(data);
@@ -42,7 +42,7 @@ export function loadAdConfig(): Promise<AdConfig | null> {
           return { settings: s.data, placements: new Map((p.data ?? []).map((row) => [row.key, row])) };
         });
       })
-      .catch(() => null);
+      ).catch(() => null);
   }
   return configPromise;
 }

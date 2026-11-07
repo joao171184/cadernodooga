@@ -1,4 +1,8 @@
-import { Heart, Pencil, Trash2, Mic2, ArrowUp, ArrowDown, Volume2, Pause, Drum, Share2, Copy } from "lucide-react";
+import { LockedLetra } from "@/components/LockedLetra";
+import { PointAuthorship } from "@/components/PointAuthorship";
+import { PointVersionNavigation, usePointVersion } from "@/components/PointVersionNavigation";
+import { Heart, Pencil, Trash2, Mic2, ArrowUp, ArrowDown, Volume2, Pause, Drum, Share2, Copy, ArrowUpRight } from "lucide-react";
+import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import { getEmbedInfo, type EmbedKind } from "@/lib/embed";
@@ -15,6 +19,7 @@ interface PontoCardProps {
   categoryColor?: string | null;
   index?: number;
   onTogglePlay: (id: string) => void;
+  onPlayVersion?: (ponto: Ponto) => void;
   onToggleFavorite: (id: string) => void;
   onEdit?: (ponto: Ponto) => void;
   onDelete?: (id: string) => void;
@@ -55,7 +60,10 @@ function renderHighlighted(text: string, query?: string) {
   return parts;
 }
 
-const PontoCard = ({ ponto, isPlaying, isFavorite, visitorMode = false, showFavorite = false, highlight, categoryColor, index = 0, onTogglePlay, onToggleFavorite, onEdit, onDelete, onMoveUp, onMoveDown, onDragStart, onDragOver, onDrop, onOpenFullscreen, canMoveUp, canMoveDown }: PontoCardProps) => {
+const PontoCard = ({ ponto: originalPonto, isPlaying, isFavorite, visitorMode = false, showFavorite = false, highlight, categoryColor, index = 0, onTogglePlay, onPlayVersion, onToggleFavorite, onEdit, onDelete, onMoveUp, onMoveDown, onDragStart, onDragOver, onDrop, onOpenFullscreen, canMoveUp, canMoveDown }: PontoCardProps) => {
+  const selection = usePointVersion(originalPonto);
+  const ponto = selection.point;
+  const changeVersion = (next: number) => { if (isPlaying) onTogglePlay(ponto.id); selection.change(next); };
   const handleShare = async () => {
     const url = `${window.location.origin}/ponto/${ponto.slug}`;
     try {
@@ -114,7 +122,7 @@ const PontoCard = ({ ponto, isPlaying, isFavorite, visitorMode = false, showFavo
       className={`bg-card/60 backdrop-blur-xl supports-[backdrop-filter]:bg-card/50 rounded-2xl border border-border shadow-sm overflow-hidden transition-all duration-300 animate-fade-in opacity-0 [animation-fill-mode:forwards] ${onDragStart ? "cursor-grab active:cursor-grabbing" : ""} ${isPlaying ? "ring-2 ring-accent/40" : "hover:shadow-md"}`}
     >
 
-      <div className="p-4 sm:p-5">
+      <div {...selection.swipe} className="p-4 sm:p-5">
         <div className="flex flex-wrap items-start justify-between gap-2 mb-3">
           <div className="flex-1 min-w-[11rem]">
             <h3 className="font-display text-base sm:text-lg font-bold text-card-foreground leading-tight uppercase">
@@ -124,6 +132,7 @@ const PontoCard = ({ ponto, isPlaying, isFavorite, visitorMode = false, showFavo
               {ponto.categoria}{subs.length > 0 ? ` › ${subs.join(" • ")}` : ""}
             </p>
             <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-2">
+              <PointAuthorship autor={ponto.autor} />
               {toqueLabel && (
                 <div className="flex items-center gap-1.5 text-xs">
                   <Drum size={12} className="text-accent shrink-0" />
@@ -175,7 +184,7 @@ const PontoCard = ({ ponto, isPlaying, isFavorite, visitorMode = false, showFavo
             )}
             {canEdit && (
               <button
-                onClick={() => onEdit!(ponto)}
+                onClick={() => onEdit?.(originalPonto)}
                 className="p-2 rounded-lg hover:bg-muted transition-all active:scale-90"
                 aria-label="Editar ponto"
               >
@@ -184,7 +193,7 @@ const PontoCard = ({ ponto, isPlaying, isFavorite, visitorMode = false, showFavo
             )}
             {canDelete && (
               <button
-                onClick={() => onDelete!(ponto.id)}
+                onClick={() => onDelete?.(ponto.id)}
                 className="p-2 rounded-lg hover:bg-destructive/10 transition-all active:scale-90"
                 aria-label="Excluir ponto"
               >
@@ -217,15 +226,16 @@ const PontoCard = ({ ponto, isPlaying, isFavorite, visitorMode = false, showFavo
               <MediaIconButton
                 kind={embed.kind}
                 isPlaying={isPlaying}
-                onClick={() => onTogglePlay(ponto.id)}
+                onClick={() => onPlayVersion ? onPlayVersion(ponto) : onTogglePlay(ponto.id)}
               />
             )}
           </div>
         </div>
 
+        {selection.version.title && <p className="mb-2 text-xs font-bold text-accent-strong">{selection.version.title}</p>}
         <div
           className={`relative ${onOpenFullscreen ? "cursor-zoom-in" : ""}`}
-          onClick={onOpenFullscreen ? () => onOpenFullscreen(ponto) : undefined}
+          onClick={onOpenFullscreen ? () => onOpenFullscreen(originalPonto) : undefined}
           role={onOpenFullscreen ? "button" : undefined}
           title={onOpenFullscreen ? "Abrir em tela cheia" : undefined}
         >
@@ -238,10 +248,27 @@ const PontoCard = ({ ponto, isPlaying, isFavorite, visitorMode = false, showFavo
           >
             <Copy size={14} />
           </button>
-          <pre className="text-sm sm:text-base text-card-foreground/80 whitespace-pre-wrap font-[inherit] leading-relaxed pl-4 pr-10 py-1 uppercase">
-            {renderHighlighted(ponto.letra, highlight)}
-          </pre>
+          <LockedLetra
+            key={selection.index}
+            letra={ponto.letra}
+            render={(t) => renderHighlighted(t, highlight)}
+            className="motion-safe:animate-in motion-safe:fade-in motion-safe:duration-200 text-sm sm:text-base text-card-foreground/80 whitespace-pre-wrap font-[inherit] leading-relaxed pl-4 pr-10 py-1 uppercase"
+          />
         </div>
+        {selection.version.observacoes && <p className="mt-2 text-xs whitespace-pre-wrap text-muted-foreground">{selection.version.observacoes}</p>}
+        <PointVersionNavigation versions={selection.versions} index={selection.index} change={changeVersion} />
+        {ponto.slug && (
+          <div className="flex justify-end mt-2">
+            <Link
+              to={`/ponto/${ponto.slug}`}
+              className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[11px] font-semibold tracking-wider uppercase text-accent-strong hover:bg-accent/10 transition-all active:scale-95"
+              aria-label={`Abrir página do ponto ${ponto.nome}`}
+            >
+              Abrir ponto
+              <ArrowUpRight size={14} />
+            </Link>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -1,9 +1,14 @@
+import { PointVersionNavigation, usePointVersion } from "@/components/PointVersionNavigation";
+import { LockedLetra } from "@/components/LockedLetra";
+import { PointAuthorship } from "@/components/PointAuthorship";
+import { CopyrightFooter } from "@/components/CopyrightFooter";
 import { X, Heart, Share2, Drum, Mic2, Copy, Sun, SunDim, ChevronsDown, Pause } from "lucide-react";
 import { toast } from "sonner";
 import { NotasWidget } from "@/components/NotasWidget";
 import { type Ponto, TOQUE_OPTIONS, CLASSIFICACAO_OPTIONS } from "@/contexts/PontosContext";
 import { getEmbedInfo } from "@/lib/embed";
 import { TikTokPlayer } from "@/components/TikTokPlayer";
+import { AdSlot } from "@/components/ads/AdSlot";
 import { useEffect, useRef, useState } from "react";
 
 interface Props {
@@ -14,7 +19,9 @@ interface Props {
   canFavorite: boolean;
 }
 
-export function PontoFullscreen({ ponto, isFavorite, onClose, onToggleFavorite, canFavorite }: Props) {
+export function PontoFullscreen({ ponto: originalPonto, isFavorite, onClose, onToggleFavorite, canFavorite }: Props) {
+  const selection = usePointVersion(originalPonto);
+  const ponto = selection.point;
   useEffect(() => {
     const prev = document.body.style.overflow;
     document.body.style.overflow = "hidden";
@@ -148,8 +155,10 @@ export function PontoFullscreen({ ponto, isFavorite, onClose, onToggleFavorite, 
         </div>
       </div>
 
-      <div className="w-full max-w-3xl mx-auto px-4 sm:px-6 py-6 sm:py-10 pb-40">
+      <div {...selection.swipe} className="w-full max-w-3xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
+        {selection.version.title && <h3 className="mb-3 text-sm font-bold text-accent-strong">{selection.version.title}</h3>}
         <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mb-6">
+          <PointAuthorship autor={ponto.autor} footerId="direitos-autorais-leitura" />
           {toqueLabel && (
             <div className="flex items-center gap-1.5 text-sm">
               <Drum size={14} className="text-accent" />
@@ -176,13 +185,15 @@ export function PontoFullscreen({ ponto, isFavorite, onClose, onToggleFavorite, 
 
         <div className="relative">
           <div className="absolute left-0 top-0 bottom-0 w-1.5 rounded-full bg-accent/40" />
-          <pre className="text-xl sm:text-2xl md:text-3xl text-foreground whitespace-pre-wrap break-words font-[inherit] leading-relaxed pl-6 py-2 uppercase font-medium tracking-wide">
-            {ponto.letra}
-          </pre>
+          <LockedLetra key={selection.index} letra={ponto.letra} className="motion-safe:animate-in motion-safe:fade-in motion-safe:duration-200 text-xl sm:text-2xl md:text-3xl text-foreground whitespace-pre-wrap break-words font-[inherit] leading-relaxed pl-6 py-2 uppercase font-medium tracking-wide" />
         </div>
 
+        <AdSlot placement="ponto-apos-letra" className="mt-10" />
+
+
+
         {embed.kind !== "none" && (
-          <div className="mt-10">
+          <div key={selection.version.id ?? selection.index} className="mt-10">
             {embed.kind === "youtube" && (
               <div className="aspect-video rounded-2xl overflow-hidden bg-black">
                 <iframe src={embed.src} title={ponto.nome} className="w-full h-full" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" />
@@ -210,7 +221,10 @@ export function PontoFullscreen({ ponto, isFavorite, onClose, onToggleFavorite, 
             )}
           </div>
         )}
+        {selection.version.observacoes && <p className="mt-3 whitespace-pre-wrap text-sm text-muted-foreground">{selection.version.observacoes}</p>}
+        <PointVersionNavigation versions={selection.versions} index={selection.index} change={selection.change} />
       </div>
+      <div className="pb-40"><CopyrightFooter id="direitos-autorais-leitura" /></div>
       <div
         className="fixed right-3 sm:right-4 z-[110] flex flex-col items-end gap-2"
         style={{ bottom: "calc(env(safe-area-inset-bottom, 0px) + 20px)" }}
