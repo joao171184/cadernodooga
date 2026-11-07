@@ -33,3 +33,9 @@ Variáveis (`.env.example`, só nomes): VITE_SUPABASE_PROJECT_ID, VITE_SUPABASE_
 - Nunca leia nem exiba `.env*` (só nomes de variáveis), chaves, tokens ou `serviceAccountKey.json`.
 - Sem push, deploy ou produção sem pedido explícito do Marcos.
 - Depois de editar, rode lint/testes/build que existirem. Mantenha este arquivo atualizado se a estrutura mudar.
+
+## Automações do banco (GitHub Actions)
+- `.github/workflows/backup-supabase.yml`: backup diário (03:00 BRT) do banco (public + usuários + lista/imagens do bucket `ads`), **criptografado** (repo é público), guardado 30 dias como artefato. Também roda à mão em Actions.
+- `.github/workflows/apply-migrations.yml`: push na `main` com arquivo novo em `supabase/migrations/` → faz backup e roda `scripts/db-migrate.sh` (aplica só as pendentes, controle em `supabase_migrations.schema_migrations`). Migration com DROP TABLE/SCHEMA/COLUMN ou TRUNCATE é bloqueada, salvo `[allow-destructive]` na mensagem do commit.
+- Segredos do repositório (Settings > Secrets > Actions): `SUPABASE_DB_URL` (Session pooler com senha) e `BACKUP_PASSPHRASE` (senha do backup; sem ela o backup não abre). Se trocar a senha do banco, atualize `SUPABASE_DB_URL`.
+- Para abrir um backup: `gpg -d backup-AAAA-MM-DD.tar.gz.gpg | tar -xz`, depois `pg_restore` nos `.dump`.

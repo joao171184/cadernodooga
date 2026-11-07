@@ -1,0 +1,53 @@
+name: Aplicar migrations no Supabase
+
+# Quando chega um arquivo novo em supabase/migrations na branch main (ex.: vindo do Lovable),
+# faz um backup e aplica as migrations pendentes no Supabase. Se falhar, o GitHub avisa por e-mail.
+#
+# Proteção: migration com DROP TABLE/SCHEMA/COLUMN ou TRUNCATE é BLOQUEADA, a menos que a mensagem
+# do commit contenha [allow-destructive] ou o workflow seja rodado à mão com a opção marcada.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "supabase/migrations/**"
+  workflow_dispatch:
+    inputs:
+      allow_destructive:
+        description: "Permitir DROP TABLE/COLUMN/TRUNCATE"
+        type: boolean
+        default: false
+
+concurrency:
+  group: supabase-db
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  backup:
+    uses: ./.github/workflows/backup-supabase.yml
+    secrets: inherit
+
+  migrate:
+    needs: backup
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Instalar cliente PostgreSQL 17
+        run: |
+          sudo install -d /usr/share/postgresql-common/pgdg
+          sudo curl -fsSL -o /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc https://www.postgresql.org/media/keys/ACCC4CF8.asc
+          echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] https://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" | sudo tee /etc/apt/sources.list.d/pgdg.list
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq postgresql-client-17
+          echo "/usr/lib/postgresql/17/bin" >> "$GITHUB_PATH"
+
+      - name: Aplicar migrations pendentes
+        env:
+          DATABASE_URL: ${{ secrets.SUPABASE_DB_URL }}
+          ALLOW_DESTRUCTIVE: ${{ (github.event_name == 'workflow_dispatch' && inputs.allow_destructive) || contains(github.event.head_commit.message, '[allow-destructive]') }}
+        run: bash scripts/db-migrate.sh

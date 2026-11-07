@@ -1,0 +1,82 @@
+name: Backup do Supabase
+
+# Backup diário (03:00 de Brasília). Também pode ser rodado à mão (Actions > Backup do Supabase > Run workflow)
+# e é chamado antes de aplicar migrations.
+# O repositório é PÚBLICO: o backup é criptografado (AES-256) antes de virar artefato.
+#
+# Segredos necessários (Settings > Secrets and variables > Actions):
+#   SUPABASE_DB_URL     - conexão do "Session pooler" do Supabase, com a senha
+#   BACKUP_PASSPHRASE   - senha longa para criptografar o backup (guarde em lugar seguro: sem ela não abre)
+
+on:
+  schedule:
+    - cron: "0 6 * * *"
+  workflow_dispatch:
+  workflow_call:
+    secrets:
+      SUPABASE_DB_URL:
+        required: true
+      BACKUP_PASSPHRASE:
+        required: true
+
+permissions:
+  contents: read
+
+env:
+  PROJECT_URL: https://uzqewyfsjeuzuibkecem.supabase.co
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Instalar cliente PostgreSQL 17
+        run: |
+          sudo install -d /usr/share/postgresql-common/pgdg
+          sudo curl -fsSL -o /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc https://www.postgresql.org/media/keys/ACCC4CF8.asc
+          echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] https://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" | sudo tee /etc/apt/sources.list.d/pgdg.list
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq postgresql-client-17
+
+      - name: Gerar dumps
+        env:
+          DATABASE_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: |
+          set -euo pipefail
+          mkdir -p backup/ads
+          # Estrutura + dados do schema public
+          /usr/lib/postgresql/17/bin/pg_dump "$DATABASE_URL" -Fc --no-owner --no-privileges -n public -f backup/public.dump
+          # Usuários (com hash de senha), identidades e lista de arquivos do storage
+          /usr/lib/postgresql/17/bin/pg_dump "$DATABASE_URL" -Fc --no-owner --no-privileges -a \
+            -t auth.users -t auth.identities -t storage.buckets -t storage.objects -f backup/auth_storage.dump
+          # Imagens do bucket público "ads"
+          /usr/lib/postgresql/17/bin/psql "$DATABASE_URL" -tA -c "select name from storage.objects where bucket_id='ads' and name not like '%.emptyFolderPlaceholder'" | tr -d '\r' > backup/ads_files.txt
+          while IFS= read -r name; do
+            [ -n "$name" ] || continue
+            mkdir -p "backup/ads/$(dirname "$name")"
+            curl -fsS -o "backup/ads/$name" "$PROJECT_URL/storage/v1/object/public/ads/$name"
+          done < backup/ads_files.txt
+          # Sanidade: dumps com conteúdo
+          test "$(stat -c %s backup/public.dump)" -gt 100000
+          test "$(/usr/lib/postgresql/17/bin/pg_restore -l backup/public.dump | grep -c 'TABLE DATA')" -ge 15
+          echo "Arquivos de imagem: $(wc -l < backup/ads_files.txt)"
+
+      - name: Criptografar
+        env:
+          BACKUP_PASSPHRASE: ${{ secrets.BACKUP_PASSPHRASE }}
+        run: |
+          set -euo pipefail
+          tar -czf backup.tar.gz backup
+          printf '%s' "$BACKUP_PASSPHRASE" > pass.txt
+          gpg --batch --yes --pinentry-mode loopback --passphrase-file pass.txt --symmetric --cipher-algo AES256 -o "backup-$(date -u +%F).tar.gz.gpg" backup.tar.gz
+          shred -u pass.txt backup.tar.gz
+          rm -rf backup
+          ls -la
+
+      - name: Guardar (30 dias)
+        uses: actions/upload-artifact@v4
+        with:
+          name: backup-supabase
+          path: backup-*.tar.gz.gpg
+          retention-days: 30
+          if-no-files-found: error
